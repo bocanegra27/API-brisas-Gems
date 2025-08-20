@@ -1,0 +1,22 @@
+package com.example.libreria_api.service;
+
+import com.example.libreria_api.model.EstadoPedido;
+import com.example.libreria_api.repository.EstadoPedidoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class EstadoPedidoService {
+
+    @Autowired
+    private EstadoPedidoRepository estadoPedidoRepository;
+
+    public List<EstadoPedido> obtenerTodos() {
+        return estadoPedidoRepository.findAll();
+    }
+
+    public EstadoPedido guardar(EstadoPedido estadoPedido) {
+        return estadoPedidoRepository.save(estadoPedido);
+    }
+}
