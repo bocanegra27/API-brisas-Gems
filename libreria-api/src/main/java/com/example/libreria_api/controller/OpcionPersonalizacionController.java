@@ -21,4 +21,9 @@ public class OpcionPersonalizacionController {
     public OpcionPersonalizacion crear(@RequestBody OpcionPersonalizacion opcionPersonalizacion) {
         return opcionPersonalizacionService.guardar(opcionPersonalizacion);
     }
+
+    @PutMapping("opciones-personalizacion/{id}")
+    public OpcionPersonalizacion actualizar(@PathVariable Integer id, @RequestBody OpcionPersonalizacion detalles) {
+        return opcionPersonalizacionService.actualizar(id, detalles);
+    }
 }

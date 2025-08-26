@@ -21,4 +21,9 @@ public class EstadoPedidoController {
     public EstadoPedido crear(@RequestBody EstadoPedido estadoPedido) {
         return estadoPedidoService.guardar(estadoPedido);
     }
+
+    @PutMapping("estados-pedido/{id}")
+    public EstadoPedido actualizar(@PathVariable Integer id, @RequestBody EstadoPedido detalles) {
+        return estadoPedidoService.actualizar(id, detalles);
+    }
 }

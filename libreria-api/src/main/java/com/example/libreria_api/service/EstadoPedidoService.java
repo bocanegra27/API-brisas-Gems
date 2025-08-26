@@ -19,4 +19,11 @@ public class EstadoPedidoService {
     public EstadoPedido guardar(EstadoPedido estadoPedido) {
         return estadoPedidoRepository.save(estadoPedido);
     }
+
+    public EstadoPedido actualizar(Integer id, EstadoPedido detalles) {
+        return estadoPedidoRepository.findById(id).map(estadoExistente -> {
+            estadoExistente.setEstNombre(detalles.getEstNombre());
+            return estadoPedidoRepository.save(estadoExistente);
+        }).orElse(null);
+    }
 }

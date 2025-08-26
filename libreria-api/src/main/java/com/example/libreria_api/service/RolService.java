@@ -1,5 +1,6 @@
 package com.example.libreria_api.service;
 
+import com.example.libreria_api.model.EstadoPedido;
 import com.example.libreria_api.model.Rol;
 import com.example.libreria_api.repository.RolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,14 @@ public class RolService {
 
     public Rol guardarRol(Rol rol) {
         return rolRepository.save(rol);
+    }
+
+    public Rol actualizar(Integer id, Rol detalles) {
+        return rolRepository.findById(id).map(rolExistente -> {
+            rolExistente.setRolNombre(detalles.getRolNombre());
+
+            return rolRepository.save(rolExistente);
+        }).orElse(null);
     }
 
 }

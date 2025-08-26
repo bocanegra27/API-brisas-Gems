@@ -21,4 +21,10 @@ public class TipoDeDocumentoController {
     public TipoDeDocumento crear(@RequestBody TipoDeDocumento tipoDeDocumento) {
         return tipoDeDocumentoService.guardar(tipoDeDocumento);
     }
+
+    @PutMapping("tipos-documento/{id}")
+    public TipoDeDocumento actualizar(@PathVariable Integer id, @RequestBody TipoDeDocumento detalles) {
+        return tipoDeDocumentoService.actualizar(id, detalles);
+    }
+
 }

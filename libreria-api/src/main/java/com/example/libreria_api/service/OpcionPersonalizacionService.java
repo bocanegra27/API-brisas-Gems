@@ -19,4 +19,11 @@ public class OpcionPersonalizacionService {
     public OpcionPersonalizacion guardar(OpcionPersonalizacion opcionPersonalizacion) {
         return opcionPersonalizacionRepository.save(opcionPersonalizacion);
     }
+
+    public OpcionPersonalizacion actualizar(Integer id, OpcionPersonalizacion detalles) {
+        return opcionPersonalizacionRepository.findById(id).map(opcionExistente -> {
+            opcionExistente.setOpcNombre(detalles.getOpcNombre());
+            return opcionPersonalizacionRepository.save(opcionExistente);
+        }).orElse(null);
+    }
 }

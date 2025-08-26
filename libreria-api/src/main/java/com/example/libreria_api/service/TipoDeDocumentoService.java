@@ -1,5 +1,6 @@
 package com.example.libreria_api.service;
 
+import com.example.libreria_api.model.Rol;
 import com.example.libreria_api.model.TipoDeDocumento;
 import com.example.libreria_api.repository.TipoDeDocumentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,5 +19,13 @@ public class TipoDeDocumentoService {
 
     public TipoDeDocumento guardar(TipoDeDocumento tipoDeDocumento) {
         return tipoDeDocumentoRepository.save(tipoDeDocumento);
+    }
+
+    public TipoDeDocumento actualizar(Integer id, TipoDeDocumento detalles) {
+        return tipoDeDocumentoRepository.findById(id).map(tipoDeDocExistente -> {
+            tipoDeDocExistente.setTipdocNombre(detalles.getTipdocNombre());
+
+            return tipoDeDocumentoRepository.save(tipoDeDocExistente);
+        }).orElse(null);
     }
 }

@@ -26,12 +26,10 @@ public class UsuarioService {
     }
 
     public Usuario actualizarUsuario(Integer id, Usuario usuarioDetalles) {
-        return usuarioRepository.findById(id).map(usuarioExistente -> {
+            return usuarioRepository.findById(id).map(usuarioExistente -> {
             usuarioExistente.setUsuNombre(usuarioDetalles.getUsuNombre());
             usuarioExistente.setUsuCorreo(usuarioDetalles.getUsuCorreo());
             usuarioExistente.setUsuTelefono(usuarioDetalles.getUsuTelefono());
-
-
 
             return usuarioRepository.save(usuarioExistente);
         }).orElse(null);
