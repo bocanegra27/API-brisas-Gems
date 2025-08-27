@@ -24,8 +24,10 @@ public class PedidoController {
         return pedidoService.guardarPedido(pedido);
     }
 
-    @PutMapping("pedidos/{id}")
+
+
+    /*@PutMapping("pedidos/{id}")
     public Pedido actualizar(@PathVariable Integer id, @RequestBody Pedido detalles) {
         return pedidoService.actualizar(id, detalles);
-    }
+    } */
 }
