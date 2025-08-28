@@ -26,4 +26,9 @@ public class OpcionPersonalizacionController {
     public OpcionPersonalizacion actualizar(@PathVariable Integer id, @RequestBody OpcionPersonalizacion detalles) {
         return opcionPersonalizacionService.actualizar(id, detalles);
     }
+
+    @DeleteMapping("/opciones-personalizacion/{id}")
+    public void eliminar(@PathVariable Integer id) {
+        opcionPersonalizacionService.eliminar(id);
+    }
 }
