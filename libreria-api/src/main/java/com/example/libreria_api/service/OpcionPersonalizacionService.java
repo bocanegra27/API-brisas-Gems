@@ -26,4 +26,8 @@ public class OpcionPersonalizacionService {
             return opcionPersonalizacionRepository.save(opcionExistente);
         }).orElse(null);
     }
+
+    public void eliminar(Integer id) {
+        opcionPersonalizacionRepository.deleteById(id);
+    }
 }
