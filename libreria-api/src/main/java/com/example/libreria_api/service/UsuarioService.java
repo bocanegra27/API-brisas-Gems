@@ -34,13 +34,13 @@ public class UsuarioService {
             return usuarioRepository.save(usuarioExistente);
         }).orElse(null);
     }
-
+ 
     public boolean eliminarUsuario(Integer id) {
         if (usuarioRepository.existsById(id)) {
-            usuarioRepository.deleteById(id); // borra físicamente de la BD
-            return true; // indica que se eliminó
+            usuarioRepository.deleteById(id); 
+            return true; 
         }
-        return false; // indica que no existía
+        return false; 
     }
 
 }

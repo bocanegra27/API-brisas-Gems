@@ -28,4 +28,9 @@ public class RolController {
     public Rol actualizar(@PathVariable Integer id, @RequestBody Rol rol) {
         return rolService.actualizar(id, rol);
     }
+
+    @DeleteMapping("roles/{id}")
+    public void eliminar(@PathVariable Integer id){
+        rolService.eliminarRol(id);
+    }
 }
