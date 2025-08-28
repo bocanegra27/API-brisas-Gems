@@ -20,20 +20,20 @@ public class PedidoController {
     }
 
     @PostMapping("/pedidos")
-
     public Pedido crearPedido(@RequestBody Pedido pedido) {
         return pedidoService.guardarPedido(pedido);
     }
 
+   
     @PutMapping("pedidos/{id}")
     public Pedido actualizar(@PathVariable Integer id, @RequestBody Pedido detalles) {
         return pedidoService.actualizar(id, detalles);
     }
 
-
+   
     @DeleteMapping("/pedidos/{id}")
     public ResponseEntity<Void> eliminarPedido(@PathVariable Integer id) {
-        boolean eliminado = pedidoService.eliminarUsuario(id);
+        boolean eliminado = pedidoService.eliminarPedido(id);
         if (eliminado) {
             return ResponseEntity.noContent().build();
         } else {
