@@ -35,4 +35,8 @@ public class UsuarioService {
         }).orElse(null);
     }
 
+    public void eliminarUsuario (Integer id) {
+        usuarioRepository.deleteById(id);
+    }
+
 }

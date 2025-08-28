@@ -27,4 +27,9 @@ public class TipoDeDocumentoController {
         return tipoDeDocumentoService.actualizar(id, detalles);
     }
 
+    @DeleteMapping ("tipos-documento/{id}")
+    public void eliminardocumento(@PathVariable Integer id) {
+        tipoDeDocumentoService.eliminardocumento(id);
+    }
+
 }
