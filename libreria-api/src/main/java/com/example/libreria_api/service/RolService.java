@@ -31,4 +31,8 @@ public class RolService {
         }).orElse(null);
     }
 
+    public void eliminarRol (Integer id){
+        rolRepository.deleteById(id);
+    }
+
 }

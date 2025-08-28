@@ -28,4 +28,8 @@ public class TipoDeDocumentoService {
             return tipoDeDocumentoRepository.save(tipoDeDocExistente);
         }).orElse(null);
     }
+
+    public void eliminardocumento(Integer id) {
+        tipoDeDocumentoRepository.deleteById(id);
+    }
 }
