@@ -32,4 +32,12 @@ public class PedidoService {
             return pedidoRepository.save(pedidoExistente);
         }).orElse(null);
     }
+
+    public boolean eliminarUsuario(Integer id) {
+        if (pedidoRepository.existsById(id)) {
+            pedidoRepository.deleteById(id); // borra físicamente de la BD
+            return true; // indica que se eliminó
+        }
+        return false; // indica que no existía
+    }
 }
