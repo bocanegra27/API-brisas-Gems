@@ -3,6 +3,7 @@ package com.example.libreria_api.controller;
 import com.example.libreria_api.model.Pedido;
 import com.example.libreria_api.service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,5 +28,16 @@ public class PedidoController {
     @PutMapping("pedidos/{id}")
     public Pedido actualizar(@PathVariable Integer id, @RequestBody Pedido detalles) {
         return pedidoService.actualizar(id, detalles);
+    }
+
+
+    @DeleteMapping("/pedidos/{id}")
+    public ResponseEntity<Void> eliminarPedido(@PathVariable Integer id) {
+        boolean eliminado = pedidoService.eliminarUsuario(id);
+        if (eliminado) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

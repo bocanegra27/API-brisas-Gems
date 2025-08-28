@@ -35,4 +35,12 @@ public class UsuarioService {
         }).orElse(null);
     }
 
+    public boolean eliminarUsuario(Integer id) {
+        if (usuarioRepository.existsById(id)) {
+            usuarioRepository.deleteById(id); // borra físicamente de la BD
+            return true; // indica que se eliminó
+        }
+        return false; // indica que no existía
+    }
+
 }
