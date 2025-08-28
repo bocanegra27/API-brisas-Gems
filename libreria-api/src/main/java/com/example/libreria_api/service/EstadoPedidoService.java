@@ -26,4 +26,8 @@ public class EstadoPedidoService {
             return estadoPedidoRepository.save(estadoExistente);
         }).orElse(null);
     }
+
+    public void eliminar(Integer id) {
+        estadoPedidoRepository.deleteById(id);
+    }
 }
