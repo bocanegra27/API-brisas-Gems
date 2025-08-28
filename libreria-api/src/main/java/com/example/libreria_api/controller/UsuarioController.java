@@ -3,6 +3,7 @@ package com.example.libreria_api.controller;
 import com.example.libreria_api.model.Usuario;
 import com.example.libreria_api.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -33,7 +34,12 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/usuarios/{id}")
-    public void eliminarUsuario(@PathVariable Integer id) {
-        usuarioService.eliminarUsuario(id);
+    public ResponseEntity<Void> eliminarUsuario(@PathVariable Integer id) {
+        boolean eliminado = usuarioService.eliminarUsuario(id);
+        if (eliminado) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

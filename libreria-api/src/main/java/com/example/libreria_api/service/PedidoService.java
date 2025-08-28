@@ -32,4 +32,12 @@ public class PedidoService {
             return pedidoRepository.save(pedidoExistente);
         }).orElse(null);
     }
+
+    public boolean eliminarPedido(Integer id) {
+        if (pedidoRepository.existsById(id)) {
+            pedidoRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }

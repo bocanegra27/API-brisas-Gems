@@ -34,9 +34,13 @@ public class UsuarioService {
             return usuarioRepository.save(usuarioExistente);
         }).orElse(null);
     }
-
-    public void eliminarUsuario (Integer id) {
-        usuarioRepository.deleteById(id);
+ 
+    public boolean eliminarUsuario(Integer id) {
+        if (usuarioRepository.existsById(id)) {
+            usuarioRepository.deleteById(id); 
+            return true; 
+        }
+        return false; 
     }
 
 }
