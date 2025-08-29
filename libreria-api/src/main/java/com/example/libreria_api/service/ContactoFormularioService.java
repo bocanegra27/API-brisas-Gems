@@ -13,17 +13,17 @@ public class ContactoFormularioService {
     @Autowired
     private ContactoFormularioRepository contactoFormularioRepository;
 
-    // Obtener todos los contactos
+
     public List<ContactoFormulario> obtenerTodos() {
         return contactoFormularioRepository.findAll();
     }
 
-    // Guardar nuevo contacto
+
     public ContactoFormulario guardar(ContactoFormulario contacto) {
         return contactoFormularioRepository.save(contacto);
     }
 
-    // Actualizar contacto existente
+
     public ContactoFormulario actualizar(Integer id, ContactoFormulario detalles) {
         return contactoFormularioRepository.findById(id).map(contactoExistente -> {
             contactoExistente.setConNombre(detalles.getConNombre());
@@ -37,7 +37,7 @@ public class ContactoFormularioService {
         }).orElse(null);
     }
 
-    // Eliminar contacto
+
     public void eliminar(Integer id) {
         contactoFormularioRepository.deleteById(id);
     }

@@ -36,11 +36,11 @@ public class ContactoFormulario {
     @JoinColumn(name = "usu_id", referencedColumnName = "usu_id")
     private Usuario usuario; // relación con usuarios
 
-    // Constructor vacío
+
     public ContactoFormulario() {
     }
 
-    // Constructor con campos
+
     public ContactoFormulario(String conNombre, String conEmail, String conTelefono,
                               String conMensaje, boolean conTerminos, Usuario usuario) {
         this.conNombre = conNombre;
