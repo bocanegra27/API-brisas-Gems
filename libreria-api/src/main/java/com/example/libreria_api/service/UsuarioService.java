@@ -18,7 +18,6 @@ public class UsuarioService {
     }
 
     public Usuario guardarUsuario(Usuario usuario) {
-        // En un futuro, aquí podrías encriptar la contraseña antes de guardarla
         return usuarioRepository.save(usuario);
     }
 
@@ -26,10 +25,7 @@ public class UsuarioService {
         return usuarioRepository.findById(id);
     }
 
-    /**
-     * Actualiza un usuario existente con los nuevos detalles.
-     * La contraseña no se actualiza aquí por seguridad.
-     */
+
     public Usuario actualizarUsuario(Integer id, Usuario usuarioDetalles) {
         return usuarioRepository.findById(id).map(usuarioExistente -> {
             // Actualizamos todos los campos excepto la contraseña
