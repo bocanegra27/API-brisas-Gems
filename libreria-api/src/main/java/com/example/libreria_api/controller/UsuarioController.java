@@ -3,43 +3,54 @@ package com.example.libreria_api.controller;
 import com.example.libreria_api.model.Usuario;
 import com.example.libreria_api.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/usuarios") // Buena práctica: definir una ruta base
 public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
 
-    @GetMapping("/usuarios")
-    public List<Usuario> obtenerTodosLosUsuarios() {
-        return usuarioService.obtenerTodosLosUsuarios();
+    @GetMapping
+    public ResponseEntity<List<Usuario>> obtenerTodosLosUsuarios() {
+        List<Usuario> usuarios = usuarioService.obtenerTodosLosUsuarios();
+        return new ResponseEntity<>(usuarios, HttpStatus.OK);
     }
 
-    @PostMapping("/usuarios")
-    public Usuario crearUsuario(@RequestBody Usuario usuario) {
-        return usuarioService.guardarUsuario(usuario);
+    @GetMapping("/{id}")
+    public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable Integer id) {
+        return usuarioService.obtenerUsuarioPorId(id)
+                .map(usuario -> new ResponseEntity<>(usuario, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/usuarios/{id}")
-    public Usuario obtenerUsuarioPorId(@PathVariable Integer id) {
-        return usuarioService.obtenerUsuarioPorId(id).orElse(null);
+    @PostMapping
+    public ResponseEntity<Usuario> crearUsuario(@RequestBody Usuario usuario) {
+        Usuario nuevoUsuario = usuarioService.guardarUsuario(usuario);
+        return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
     }
 
-    @PutMapping("/usuarios/{id}")
-    public Usuario actualizarUsuario(@PathVariable Integer id, @RequestBody Usuario usuarioDetalles) {
-        return usuarioService.actualizarUsuario(id, usuarioDetalles);
+    @PutMapping("/{id}")
+    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Integer id, @RequestBody Usuario usuarioDetalles) {
+        Usuario usuarioActualizado = usuarioService.actualizarUsuario(id, usuarioDetalles);
+        if (usuarioActualizado != null) {
+            return new ResponseEntity<>(usuarioActualizado, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @DeleteMapping("/usuarios/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarUsuario(@PathVariable Integer id) {
         boolean eliminado = usuarioService.eliminarUsuario(id);
         if (eliminado) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.noContent().build(); // 204 No Content
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build(); // 404 Not Found
         }
     }
 }

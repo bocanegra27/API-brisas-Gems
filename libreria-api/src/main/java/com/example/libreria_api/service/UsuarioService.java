@@ -18,6 +18,7 @@ public class UsuarioService {
     }
 
     public Usuario guardarUsuario(Usuario usuario) {
+        // En un futuro, aquí podrías encriptar la contraseña antes de guardarla
         return usuarioRepository.save(usuario);
     }
 
@@ -25,11 +26,21 @@ public class UsuarioService {
         return usuarioRepository.findById(id);
     }
 
+    /**
+     * Actualiza un usuario existente con los nuevos detalles.
+     * La contraseña no se actualiza aquí por seguridad.
+     */
     public Usuario actualizarUsuario(Integer id, Usuario usuarioDetalles) {
-            return usuarioRepository.findById(id).map(usuarioExistente -> {
+        return usuarioRepository.findById(id).map(usuarioExistente -> {
+            // Actualizamos todos los campos excepto la contraseña
             usuarioExistente.setUsuNombre(usuarioDetalles.getUsuNombre());
             usuarioExistente.setUsuCorreo(usuarioDetalles.getUsuCorreo());
             usuarioExistente.setUsuTelefono(usuarioDetalles.getUsuTelefono());
+            usuarioExistente.setUsuDocnum(usuarioDetalles.getUsuDocnum());
+            usuarioExistente.setUsuOrigen(usuarioDetalles.getUsuOrigen());
+            usuarioExistente.setUsuActivo(usuarioDetalles.isUsuActivo());
+            usuarioExistente.setTipoDeDocumento(usuarioDetalles.getTipoDeDocumento());
+            usuarioExistente.setRol(usuarioDetalles.getRol());
 
             return usuarioRepository.save(usuarioExistente);
         }).orElse(null);
@@ -37,10 +48,9 @@ public class UsuarioService {
 
     public boolean eliminarUsuario(Integer id) {
         if (usuarioRepository.existsById(id)) {
-            usuarioRepository.deleteById(id); // borra físicamente de la BD
-            return true; // indica que se eliminó
+            usuarioRepository.deleteById(id); 
+            return true; 
         }
-        return false; // indica que no existía
+        return false; 
     }
-
 }
