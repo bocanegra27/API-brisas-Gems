@@ -14,8 +14,7 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // 2. INYECCIÓN DE DEPENDENCIA:
-    // Spring ve esto y nos "inyecta" el Bean de PasswordEncoder que creamos en SecurityConfig.
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -23,20 +22,17 @@ public class UsuarioService {
         return usuarioRepository.findAll();
     }
 
-    /**
-     * Guarda un nuevo usuario y encripta su contraseña ANTES de almacenarla en la BD.
-     */
+
     public Usuario guardarUsuario(Usuario usuario) {
-        // 3. LÓGICA DE ENCRIPTACIÓN:
-        // Obtenemos la contraseña en texto plano que viene del JSON (ej: "contraseña123").
+
         String passwordPlano = usuario.getUsuPassword();
-        // La encriptamos usando nuestro PasswordEncoder. El resultado será algo como "$2a$10$..."
+
         String passwordEncriptado = passwordEncoder.encode(passwordPlano);
-        // Reemplazamos la contraseña en texto plano por la versión ya encriptada.
+
         usuario.setUsuPassword(passwordEncriptado);
 
-        // Finalmente, guardamos el objeto Usuario en la base de datos.
-        // La contraseña que se guarda ya es segura.
+
+
         return usuarioRepository.save(usuario);
     }
 

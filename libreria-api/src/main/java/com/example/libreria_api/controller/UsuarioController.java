@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/usuarios") // Buena práctica: definir una ruta base
+@RequestMapping("/usuarios")
 public class UsuarioController {
 
     @Autowired
@@ -48,9 +48,9 @@ public class UsuarioController {
     public ResponseEntity<Void> eliminarUsuario(@PathVariable Integer id) {
         boolean eliminado = usuarioService.eliminarUsuario(id);
         if (eliminado) {
-            return ResponseEntity.noContent().build(); // 204 No Content
+            return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.notFound().build(); // 404 Not Found
+            return ResponseEntity.notFound().build();
         }
     }
 }
