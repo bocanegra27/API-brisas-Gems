@@ -25,7 +25,7 @@ public class Usuario {
     @Column(name = "usu_docnum", length = 20)
     private String usuDocnum;
 
-    @Enumerated(EnumType.STRING) // Mapea el Enum por su nombre (ej. "formulario")
+    @Enumerated(EnumType.STRING)
     @Column(name = "usu_origen", nullable = false)
     private OrigenUsuario usuOrigen;
 
