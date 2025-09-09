@@ -27,7 +27,7 @@ public class EstadoPedidoController {
         return estadoPedidoService.actualizar(id, detalles);
     }
 
-    @DeleteMapping("-peidiestados-pedido/{id}")
+    @DeleteMapping("estados-pedido/{id}")
     public void eliminar(@PathVariable Integer id) {
         estadoPedidoService.eliminar(id);
     }

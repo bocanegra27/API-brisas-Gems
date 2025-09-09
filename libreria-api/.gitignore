@@ -34,3 +34,5 @@ build/
 
 # Ignorar archivo de configuración
 src/main/resources/application.properties
+**/src/main/resources/application.properties
+
