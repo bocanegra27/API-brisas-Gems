@@ -1,52 +1,86 @@
 package com.example.libreria_api.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.util.List;
 
 @Entity
-@Table (name= "personalizacion")
+@Table(name = "personalizacion")
 public class Personalizacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int per_id;
+    @Column(name = "per_id")
+    private int perId;
 
-    @Column(name = "per_fecha")
-    private String perFecha;
+    @Column(name = "per_fecha", nullable = false)
+    private LocalDate perFecha;
 
-    @Column(name = "usu_id")
-    private Integer usuId;
+    @ManyToOne
+    @JoinColumn(name = "usu_id", referencedColumnName = "usu_id")
+    private Usuario usuario;
+
+    /*@OneToMany(mappedBy = "personalizacion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<DetallePersonalizacion> detalles;*/
+
+
+    // 🚨 Parche temporal: relación sin mappedBy
+    @OneToMany //(mappedBy = "personalizacion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Pedido> pedidos;
 
     public Personalizacion() {
     }
 
-    public Personalizacion(int per_id, String perFecha, Integer usuId) {
-        this.per_id = per_id;
+    public Personalizacion(int perId) {
+        this.perId = perId;
+    }
+
+    public Personalizacion(int perId, LocalDate perFecha, Usuario usuario) {
         this.perFecha = perFecha;
-        this.usuId = usuId;
+        this.usuario = usuario;
     }
 
-    public int getPer_id() {
-        return per_id;
+    public int getPerId() {
+        return perId;
     }
 
-    public void setPer_id(int per_id) {
-        this.per_id = per_id;
-    }
-
-    public String getPerFecha() {
+    public LocalDate getPerFecha() {
         return perFecha;
     }
 
-    public void setPerFecha(String perFecha) {
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public List<Pedido> getPedidos() {
+        return pedidos;
+    }
+
+    /*public List<DetallePersonalizacion> getDetalles() {
+        return detalles;
+    }*/
+
+    public void setPerId(int perId) {
+        this.perId = perId;
+    }
+
+    public void setPerFecha(LocalDate perFecha) {
         this.perFecha = perFecha;
     }
 
-    public Integer getUsuId() {
-        return usuId;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
-    public void setUsuId(Integer usuId) {
-        this.usuId = usuId;
+    /*public void setDetalles(List<DetallePersonalizacion> detalles) {
+        this.detalles = detalles;
+    }*/
+
+    public void setPedidos(List<Pedido> pedidos) {
+        this.pedidos = pedidos;
     }
 }
 
