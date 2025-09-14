@@ -1,33 +1,102 @@
 package com.example.libreria_api.service;
 
 import com.example.libreria_api.model.OpcionPersonalizacion;
+import com.example.libreria_api.model.ValorPersonalizacion;
 import com.example.libreria_api.repository.OpcionPersonalizacionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OpcionPersonalizacionService {
 
-    @Autowired
-    private OpcionPersonalizacionRepository opcionPersonalizacionRepository;
+    private final OpcionPersonalizacionRepository opcionRepo;
 
-    public List<OpcionPersonalizacion> obtenerTodos() {
-        return opcionPersonalizacionRepository.findAll();
+    public OpcionPersonalizacionService(OpcionPersonalizacionRepository opcionRepo) {
+        this.opcionRepo = opcionRepo;
     }
 
-    public OpcionPersonalizacion guardar(OpcionPersonalizacion opcionPersonalizacion) {
-        return opcionPersonalizacionRepository.save(opcionPersonalizacion);
+    // ==============================
+    // CREAR
+    // ==============================
+    @Transactional
+    public OpcionPersonalizacionResponseDTO crear(OpcionPersonalizacionCreateDTO dto) {
+        if (opcionRepo.findByOpcNombre(dto.getNombre()).isPresent()) {
+            throw new DataIntegrityViolationException("Ya existe una opción con ese nombre");
+        }
+
+        OpcionPersonalizacion nueva = new OpcionPersonalizacion(dto.getNombre());
+        OpcionPersonalizacion guardada = opcionRepo.save(nueva);
+
+        return new OpcionPersonalizacionResponseDTO(guardada.getOpcId(), guardada.getOpcNombre());
     }
 
-    public OpcionPersonalizacion actualizar(Integer id, OpcionPersonalizacion detalles) {
-        return opcionPersonalizacionRepository.findById(id).map(opcionExistente -> {
-            opcionExistente.setOpcNombre(detalles.getOpcNombre());
-            return opcionPersonalizacionRepository.save(opcionExistente);
-        }).orElse(null);
+    // ==============================
+    // ACTUALIZAR
+    // ==============================
+    @Transactional
+    public OpcionPersonalizacionResponseDTO actualizar(int id, OpcionPersonalizacionUpdateDTO dto) {
+        OpcionPersonalizacion opcion = opcionRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con id: " + id));
+
+        Optional<OpcionPersonalizacion> existente = opcionRepo.findByOpcNombre(dto.getNombre());
+        if (existente.isPresent() && existente.get().getOpcId() != id) {
+            throw new DataIntegrityViolationException("Ya existe otra opción con ese nombre");
+        }
+
+        opcion.setOpcNombre(dto.getNombre());
+        OpcionPersonalizacion actualizada = opcionRepo.save(opcion);
+
+        return new OpcionPersonalizacionResponseDTO(actualizada.getOpcId(), actualizada.getOpcNombre());
     }
 
-    public void eliminar(Integer id) {
-        opcionPersonalizacionRepository.deleteById(id);
+    // ==============================
+    // LISTAR (con búsqueda opcional)
+    // ==============================
+    @Transactional(readOnly = true)
+    public List<OpcionPersonalizacionResponseDTO> listar(String filtro) {
+        List<OpcionPersonalizacion> entidades;
+
+        if (filtro == null || filtro.isBlank()) {
+            entidades = opcionRepo.findAll();
+        } else {
+            entidades = opcionRepo.findByOpcNombreContainingIgnoreCase(filtro);
+        }
+
+        return entidades.stream()
+                .map(op -> new OpcionPersonalizacionResponseDTO(op.getOpcId(), op.getOpcNombre()))
+                .collect(Collectors.toList());
+    }
+
+    // ==============================
+    // OBTENER POR ID
+    // ==============================
+    @Transactional(readOnly = true)
+    public OpcionPersonalizacionResponseDTO obtenerPorId(int id) {
+        OpcionPersonalizacion opcion = opcionRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con id: " + id));
+
+        return new OpcionPersonalizacionResponseDTO(opcion.getOpcId(), opcion.getOpcNombre());
+    }
+
+    // ==============================
+    // ELIMINAR
+    // ==============================
+    @Transactional
+    public void eliminar(int id) {
+        OpcionPersonalizacion opcion = opcionRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con id: " + id));
+
+        List<ValorPersonalizacion> valores = opcion.getValores();
+        if (valores != null && !valores.isEmpty()) {
+            throw new DataIntegrityViolationException("No se puede eliminar: tiene valores asociados");
+        }
+
+        opcionRepo.delete(opcion);
     }
 }
