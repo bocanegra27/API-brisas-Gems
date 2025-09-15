@@ -1,8 +1,11 @@
 package com.example.libreria_api.controller;
 
-import com.example.libreria_api.model.ValorPersonalizacion;
+import com.example.libreria_api.service.ValorPersonalizacionCreateDTO;
+import com.example.libreria_api.service.ValorPersonalizacionUpdateDTO;
+import com.example.libreria_api.service.ValorPersonalizacionResponseDTO;
 import com.example.libreria_api.service.ValorPersonalizacionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,53 +13,81 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/valores-personalizacion")
+@RequestMapping("/api/valores-personalizacion")
 public class ValorPersonalizacionController {
 
-    @Autowired
-    private ValorPersonalizacionService valorPersonalizacionService;
+    private final ValorPersonalizacionService valorService;
 
-    // --- GET: Obtener todos ---
+    public ValorPersonalizacionController(ValorPersonalizacionService valorService) {
+        this.valorService = valorService;
+    }
+
+    // ==============================
+    // LISTAR (con filtros opcionales)
+    // ==============================
     @GetMapping
-    public ResponseEntity<List<ValorPersonalizacion>> obtenerTodos() {
-        List<ValorPersonalizacion> lista = valorPersonalizacionService.obtenerTodos();
-        return new ResponseEntity<>(lista, HttpStatus.OK);
+    public List<ValorPersonalizacionResponseDTO> listarValores(
+            @RequestParam(required = false) Integer opcId,
+            @RequestParam(required = false) String search) {
+        return valorService.listar(opcId, search);
     }
 
-    // --- GET: Obtener por ID ---
+    // ==============================
+    // OBTENER POR ID
+    // ==============================
     @GetMapping("/{id}")
-    public ResponseEntity<ValorPersonalizacion> obtenerPorId(@PathVariable Integer id) {
-        return valorPersonalizacionService.obtenerPorId(id)
-                .map(valor -> new ResponseEntity<>(valor, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    // --- POST: Crear ---
-    @PostMapping
-    public ResponseEntity<ValorPersonalizacion> crear(@RequestBody ValorPersonalizacion valorPersonalizacion) {
-        ValorPersonalizacion nuevo = valorPersonalizacionService.guardar(valorPersonalizacion);
-        return new ResponseEntity<>(nuevo, HttpStatus.CREATED);
-    }
-
-    // --- PUT: Actualizar ---
-    @PutMapping("/{id}")
-    public ResponseEntity<ValorPersonalizacion> actualizar(@PathVariable Integer id, @RequestBody ValorPersonalizacion detalles) {
-        ValorPersonalizacion actualizado = valorPersonalizacionService.actualizar(id, detalles);
-        if (actualizado != null) {
-            return new ResponseEntity<>(actualizado, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> obtenerPorId(@PathVariable int id) {
+        try {
+            return ResponseEntity.ok(valorService.obtenerPorId(id));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
-    // --- DELETE: Eliminar ---
+    // ==============================
+    // CREAR
+    // ==============================
+    @PostMapping
+    public ResponseEntity<?> crearValor(@RequestBody ValorPersonalizacionCreateDTO dto) {
+        try {
+            ValorPersonalizacionResponseDTO creado = valorService.crear(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    // ==============================
+    // ACTUALIZAR
+    // ==============================
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarValor(@PathVariable int id,
+                                             @RequestBody ValorPersonalizacionUpdateDTO dto) {
+        try {
+            return ResponseEntity.ok(valorService.actualizar(id, dto));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    // ==============================
+    // ELIMINAR
+    // ==============================
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-        boolean eliminado = valorPersonalizacionService.eliminar(id);
-        if (eliminado) {
+    public ResponseEntity<?> eliminarValor(@PathVariable int id) {
+        try {
+            valorService.eliminar(id);
             return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

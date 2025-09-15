@@ -1,5 +1,6 @@
 package com.example.libreria_api.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,7 +10,7 @@ public class ValorPersonalizacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "val_id")
-    private int valId;
+    private Integer valId;
 
     @Column(name = "val_nombre", nullable = false, length = 100)
     private String valNombre;
@@ -18,8 +19,9 @@ public class ValorPersonalizacion {
     private String valImagen;
 
     // Relación con opcion_personalizacion
-    @ManyToOne
-    @JoinColumn(name = "opc_id", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false) // Mejor poner obligatorio
+    @JoinColumn(name = "opc_id", nullable = false)       // reflejamos la FK como NOT NULL
+    @JsonBackReference  // evita bucle en JSON (opción -> valores -> opción -> ...)
     private OpcionPersonalizacion opcionPersonalizacion;
 
     // --- Constructores ---
@@ -33,11 +35,11 @@ public class ValorPersonalizacion {
     }
 
     // --- Getters y Setters ---
-    public int getValId() {
+    public Integer getValId() {
         return valId;
     }
 
-    public void setValId(int valId) {
+    public void setValId(Integer valId) {
         this.valId = valId;
     }
 
