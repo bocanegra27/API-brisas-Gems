@@ -1,13 +1,13 @@
-package com.example.libreria_api.service;
+package com.example.libreria_api.dto.personalizacionproductos;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public class PersonalizacionUpdateDTO {
+public class PersonalizacionCreateDTO {
 
     private LocalDate fecha;
-    private Integer usuarioClienteId;
-    private List<Integer> valoresSeleccionados;
+    private int usuarioClienteId;
+    private List<Integer> valoresSeleccionados; // IDs de valor_personalizacion
 
     public LocalDate getFecha() {
         return fecha;
@@ -17,11 +17,11 @@ public class PersonalizacionUpdateDTO {
         this.fecha = fecha;
     }
 
-    public Integer getUsuarioClienteId() {
+    public int getUsuarioClienteId() {
         return usuarioClienteId;
     }
 
-    public void setUsuarioClienteId(Integer usuarioClienteId) {
+    public void setUsuarioClienteId(int usuarioClienteId) {
         this.usuarioClienteId = usuarioClienteId;
     }
 
@@ -33,4 +33,3 @@ public class PersonalizacionUpdateDTO {
         this.valoresSeleccionados = valoresSeleccionados;
     }
 }
-

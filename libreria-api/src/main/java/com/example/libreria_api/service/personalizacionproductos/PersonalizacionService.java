@@ -1,11 +1,12 @@
-package com.example.libreria_api.service;
+package com.example.libreria_api.service.personalizacionproductos;
 
-import com.example.libreria_api.service.PersonalizacionCreateDTO;
-import com.example.libreria_api.service.PersonalizacionUpdateDTO;
-import com.example.libreria_api.service.PersonalizacionResponseDTO;
-import com.example.libreria_api.model.Personalizacion;
-import com.example.libreria_api.model.Usuario;
-import com.example.libreria_api.repository.PersonalizacionRepository;
+import com.example.libreria_api.dto.personalizacionproductos.PersonalizacionCreateDTO;
+import com.example.libreria_api.dto.personalizacionproductos.PersonalizacionResponseDTO;
+import com.example.libreria_api.dto.personalizacionproductos.PersonalizacionUpdateDTO;
+
+import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
+import com.example.libreria_api.model.sistemausuarios.Usuario;
+import com.example.libreria_api.repository.personalizacionproductos.PersonalizacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

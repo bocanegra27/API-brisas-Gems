@@ -1,5 +1,6 @@
-package com.example.libreria_api.model;
+package com.example.libreria_api.model.personalizacionproductos;
 
+import com.example.libreria_api.model.personalizacionproductos.OpcionPersonalizacion;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 

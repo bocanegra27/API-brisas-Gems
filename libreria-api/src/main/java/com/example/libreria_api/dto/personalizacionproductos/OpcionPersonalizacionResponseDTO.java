@@ -1,4 +1,4 @@
-package com.example.libreria_api.service;
+package com.example.libreria_api.dto.personalizacionproductos;
 
 public class OpcionPersonalizacionResponseDTO {
 

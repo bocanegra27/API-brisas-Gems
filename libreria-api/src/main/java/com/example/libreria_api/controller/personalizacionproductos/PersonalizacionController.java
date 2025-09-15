@@ -1,10 +1,10 @@
-package com.example.libreria_api.controller;
+package com.example.libreria_api.controller.personalizacionproductos;
 
-import com.example.libreria_api.service.PersonalizacionCreateDTO;
-import com.example.libreria_api.service.PersonalizacionUpdateDTO;
-import com.example.libreria_api.service.PersonalizacionResponseDTO;
-import com.example.libreria_api.model.Personalizacion;
-import com.example.libreria_api.service.PersonalizacionService;
+import com.example.libreria_api.dto.personalizacionproductos.PersonalizacionCreateDTO;
+import com.example.libreria_api.dto.personalizacionproductos.PersonalizacionUpdateDTO;
+import com.example.libreria_api.dto.personalizacionproductos.PersonalizacionResponseDTO;
+
+import com.example.libreria_api.service.personalizacionproductos.PersonalizacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;

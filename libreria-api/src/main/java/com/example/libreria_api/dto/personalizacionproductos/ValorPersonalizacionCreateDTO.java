@@ -1,4 +1,4 @@
-package com.example.libreria_api.service;
+package com.example.libreria_api.dto.personalizacionproductos;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

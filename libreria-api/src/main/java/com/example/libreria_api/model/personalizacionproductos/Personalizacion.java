@@ -1,5 +1,7 @@
 package com.example.libreria_api.model.personalizacionproductos;
 
+import com.example.libreria_api.model.gestionpedidos.Pedido;
+import com.example.libreria_api.model.sistemausuarios.Usuario;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;

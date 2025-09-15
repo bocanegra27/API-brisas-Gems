@@ -1,4 +1,4 @@
-package com.example.libreria_api.service;
+package com.example.libreria_api.dto.personalizacionproductos;
 
 import java.time.LocalDate;
 import java.util.List;

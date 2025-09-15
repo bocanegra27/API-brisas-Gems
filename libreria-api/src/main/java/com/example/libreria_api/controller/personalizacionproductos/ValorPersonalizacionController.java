@@ -1,9 +1,9 @@
-package com.example.libreria_api.controller;
+package com.example.libreria_api.controller.personalizacionproductos;
 
-import com.example.libreria_api.service.ValorPersonalizacionCreateDTO;
-import com.example.libreria_api.service.ValorPersonalizacionUpdateDTO;
-import com.example.libreria_api.service.ValorPersonalizacionResponseDTO;
-import com.example.libreria_api.service.ValorPersonalizacionService;
+import com.example.libreria_api.dto.personalizacionproductos.ValorPersonalizacionCreateDTO;
+import com.example.libreria_api.dto.personalizacionproductos.ValorPersonalizacionUpdateDTO;
+import com.example.libreria_api.dto.personalizacionproductos.ValorPersonalizacionResponseDTO;
+import com.example.libreria_api.service.personalizacionproductos.ValorPersonalizacionService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
