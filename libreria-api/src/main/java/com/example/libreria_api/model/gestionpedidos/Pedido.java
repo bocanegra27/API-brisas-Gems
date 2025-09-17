@@ -32,7 +32,6 @@ public class Pedido {
     public Pedido() {
     }
 
-    // Getters y Setters
     public int getPed_id() { return ped_id; }
     public void setPed_id(int ped_id) { this.ped_id = ped_id; }
     public String getPedCodigo() { return pedCodigo; }

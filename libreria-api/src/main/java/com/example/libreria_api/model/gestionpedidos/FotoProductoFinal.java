@@ -22,7 +22,6 @@ public class FotoProductoFinal {
     @JoinColumn(name = "ped_id")
     private Pedido pedido;
 
-    // --- Constructores ---
 
     public FotoProductoFinal() {
     }
@@ -32,8 +31,6 @@ public class FotoProductoFinal {
         this.fotFechaSubida = fotFechaSubida;
         this.pedido = pedido;
     }
-
-    // --- Getters y Setters ---
 
     public int getFot_id() {
         return fot_id;

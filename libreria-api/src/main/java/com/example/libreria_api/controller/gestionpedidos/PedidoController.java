@@ -1,37 +1,48 @@
 package com.example.libreria_api.controller.gestionpedidos;
 
-import com.example.libreria_api.model.gestionpedidos.Pedido;
+import com.example.libreria_api.dto.gestionpedidos.PedidoRequestDTO;
+import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
 import com.example.libreria_api.service.gestionpedidos.PedidoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/pedidos")
 public class PedidoController {
 
-    @Autowired
-    private PedidoService pedidoService;
+    private final PedidoService pedidoService;
 
-    @GetMapping("/pedidos")
-    public List<Pedido> obtenerTodosLosPedidos() {
-        return pedidoService.obtenerTodosLosPedidos();
+
+    public PedidoController(PedidoService pedidoService) {
+        this.pedidoService = pedidoService;
     }
 
-    @PostMapping("/pedidos")
-    public Pedido crearPedido(@RequestBody Pedido pedido) {
-        return pedidoService.guardarPedido(pedido);
+    @GetMapping
+    public ResponseEntity<List<PedidoResponseDTO>> obtenerTodosLosPedidos() {
+        List<PedidoResponseDTO> pedidos = pedidoService.obtenerTodosLosPedidos();
+        return ResponseEntity.ok(pedidos); // HTTP 200 OK
     }
 
-   
-    @PutMapping("pedidos/{id}")
-    public Pedido actualizar(@PathVariable Integer id, @RequestBody Pedido detalles) {
-        return pedidoService.actualizar(id, detalles);
+    @PostMapping
+    public ResponseEntity<PedidoResponseDTO> crearPedido(@RequestBody PedidoRequestDTO requestDTO) {
+        PedidoResponseDTO nuevoPedido = pedidoService.guardarPedido(requestDTO);
+        return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
     }
 
-   
-    @DeleteMapping("/pedidos/{id}")
+    @PutMapping("/{id}")
+    public ResponseEntity<PedidoResponseDTO> actualizar(@PathVariable Integer id, @RequestBody PedidoRequestDTO requestDTO) {
+        PedidoResponseDTO pedidoActualizado = pedidoService.actualizar(id, requestDTO);
+        if (pedidoActualizado != null) {
+            return ResponseEntity.ok(pedidoActualizado);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarPedido(@PathVariable Integer id) {
         boolean eliminado = pedidoService.eliminarPedido(id);
         if (eliminado) {

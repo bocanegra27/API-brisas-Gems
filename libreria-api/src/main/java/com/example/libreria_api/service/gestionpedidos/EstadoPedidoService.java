@@ -1,29 +1,43 @@
 package com.example.libreria_api.service.gestionpedidos;
 
+import com.example.libreria_api.dto.gestionpedidos.EstadoPedidoMapper;
+import com.example.libreria_api.dto.gestionpedidos.EstadoPedidoRequestDTO;
+import com.example.libreria_api.dto.gestionpedidos.EstadoPedidoResponseDTO;
 import com.example.libreria_api.model.gestionpedidos.EstadoPedido;
 import com.example.libreria_api.repository.gestionpedidos.EstadoPedidoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EstadoPedidoService {
 
-    @Autowired
-    private EstadoPedidoRepository estadoPedidoRepository;
+    private final EstadoPedidoRepository estadoPedidoRepository;
 
-    public List<EstadoPedido> obtenerTodos() {
-        return estadoPedidoRepository.findAll();
+    // Inyección de dependencias por constructor
+    public EstadoPedidoService(EstadoPedidoRepository estadoPedidoRepository) {
+        this.estadoPedidoRepository = estadoPedidoRepository;
     }
 
-    public EstadoPedido guardar(EstadoPedido estadoPedido) {
-        return estadoPedidoRepository.save(estadoPedido);
+    public List<EstadoPedidoResponseDTO> obtenerTodos() {
+        return estadoPedidoRepository.findAll()
+                .stream()
+                .map(EstadoPedidoMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public EstadoPedido actualizar(Integer id, EstadoPedido detalles) {
+    public EstadoPedidoResponseDTO guardar(EstadoPedidoRequestDTO requestDTO) {
+        EstadoPedido nuevoEstado = EstadoPedidoMapper.toEntity(requestDTO);
+        EstadoPedido estadoGuardado = estadoPedidoRepository.save(nuevoEstado);
+        return EstadoPedidoMapper.toResponseDTO(estadoGuardado);
+    }
+
+    public EstadoPedidoResponseDTO actualizar(Integer id, EstadoPedidoRequestDTO requestDTO) {
         return estadoPedidoRepository.findById(id).map(estadoExistente -> {
-            estadoExistente.setEstNombre(detalles.getEstNombre());
-            return estadoPedidoRepository.save(estadoExistente);
+            estadoExistente.setEstNombre(requestDTO.getEstNombre());
+            EstadoPedido estadoActualizado = estadoPedidoRepository.save(estadoExistente);
+            return EstadoPedidoMapper.toResponseDTO(estadoActualizado);
         }).orElse(null);
     }
 

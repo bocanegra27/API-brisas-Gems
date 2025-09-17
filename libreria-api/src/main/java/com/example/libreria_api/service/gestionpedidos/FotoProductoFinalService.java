@@ -1,44 +1,67 @@
 package com.example.libreria_api.service.gestionpedidos;
 
+import com.example.libreria_api.dto.gestionpedidos.FotoProductoFinalMapper;
+import com.example.libreria_api.dto.gestionpedidos.FotoProductoFinalRequestDTO;
+import com.example.libreria_api.dto.gestionpedidos.FotoProductoFinalResponseDTO;
 import com.example.libreria_api.model.gestionpedidos.FotoProductoFinal;
+import com.example.libreria_api.model.gestionpedidos.Pedido;
 import com.example.libreria_api.repository.gestionpedidos.FotoProductoFinalRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.libreria_api.repository.gestionpedidos.PedidoRepository;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FotoProductoFinalService {
 
-    @Autowired
-    private FotoProductoFinalRepository fotoProductoFinalRepository;
+    private final FotoProductoFinalRepository fotoProductoFinalRepository;
+    private final PedidoRepository pedidoRepository;
 
-    /**
-     * Obtiene todas las fotos de la base de datos.
-     * @return una lista de fotos.
-     */
-    public List<FotoProductoFinal> obtenerTodasLasFotos() {
-        return fotoProductoFinalRepository.findAll();
+     public FotoProductoFinalService(FotoProductoFinalRepository fotoProductoFinalRepository, PedidoRepository pedidoRepository) {
+        this.fotoProductoFinalRepository = fotoProductoFinalRepository;
+        this.pedidoRepository = pedidoRepository;
     }
 
-    public FotoProductoFinal guardarFoto(FotoProductoFinal foto) {
-        return fotoProductoFinalRepository.save(foto);
+    public List<FotoProductoFinalResponseDTO> obtenerTodasLasFotos() {
+        return fotoProductoFinalRepository.findAll()
+                .stream()
+                .map(FotoProductoFinalMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<FotoProductoFinal> obtenerFotoPorId(Integer id) {
-        return fotoProductoFinalRepository.findById(id);
+    public Optional<FotoProductoFinalResponseDTO> obtenerFotoPorId(Integer id) {
+        return fotoProductoFinalRepository.findById(id)
+                .map(FotoProductoFinalMapper::toResponseDTO);
     }
 
-    public FotoProductoFinal actualizarFoto(Integer id, FotoProductoFinal fotoDetalles) {
-        // Busca la foto existente por ID.
-        return fotoProductoFinalRepository.findById(id).map(fotoExistente -> {
-            // Actualiza los campos necesarios.
-            fotoExistente.setFotImagenFinal(fotoDetalles.getFotImagenFinal());
-            fotoExistente.setFotFechaSubida(fotoDetalles.getFotFechaSubida());
-            fotoExistente.setPedido(fotoDetalles.getPedido());
-            // Guarda y devuelve la foto actualizada.
-            return fotoProductoFinalRepository.save(fotoExistente);
-        }).orElse(null); // Devuelve null si no se encuentra la foto con ese ID.
+    public FotoProductoFinalResponseDTO guardarFoto(FotoProductoFinalRequestDTO requestDTO) {
+         Pedido pedido = pedidoRepository.findById(requestDTO.getPed_id())
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + requestDTO.getPed_id()));
+
+         FotoProductoFinal nuevaFoto = new FotoProductoFinal();
+        nuevaFoto.setFotImagenFinal(requestDTO.getFotImagenFinal());
+        nuevaFoto.setFotFechaSubida(LocalDate.now());
+        nuevaFoto.setPedido(pedido); //
+
+         FotoProductoFinal fotoGuardada = fotoProductoFinalRepository.save(nuevaFoto);
+        return FotoProductoFinalMapper.toResponseDTO(fotoGuardada);
+    }
+
+    public FotoProductoFinalResponseDTO actualizarFoto(Integer id, FotoProductoFinalRequestDTO requestDTO) {
+         FotoProductoFinal fotoExistente = fotoProductoFinalRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Foto no encontrada con id: " + id));
+
+         Pedido pedido = pedidoRepository.findById(requestDTO.getPed_id())
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + requestDTO.getPed_id()));
+
+         fotoExistente.setFotImagenFinal(requestDTO.getFotImagenFinal());
+        fotoExistente.setPedido(pedido);
+
+        FotoProductoFinal fotoActualizada = fotoProductoFinalRepository.save(fotoExistente);
+        return FotoProductoFinalMapper.toResponseDTO(fotoActualizada);
     }
 
     public boolean eliminarFoto(Integer id) {
