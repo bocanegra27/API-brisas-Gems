@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/valores-personalizacion")
+@RequestMapping("/api/valores")
 public class ValorPersonalizacionController {
 
     private final ValorPersonalizacionService valorService;

@@ -23,15 +23,11 @@ public class Personalizacion {
     @JoinColumn(name = "usu_id", referencedColumnName = "usu_id")
     private Usuario usuario;
 
-    /*@OneToMany(mappedBy = "personalizacion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "personalizacion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<DetallePersonalizacion> detalles;*/
+    @OrderBy("detId ASC")
+    private List<DetallePersonalizacion> detalles;
 
-
-    // 🚨 Parche temporal: relación sin mappedBy
-    @OneToMany //(mappedBy = "personalizacion", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Pedido> pedidos;
 
     public Personalizacion() {
     }
@@ -57,13 +53,9 @@ public class Personalizacion {
         return usuario;
     }
 
-    public List<Pedido> getPedidos() {
-        return pedidos;
-    }
-
-    /*public List<DetallePersonalizacion> getDetalles() {
+    public List<DetallePersonalizacion> getDetalles() {
         return detalles;
-    }*/
+    }
 
     public void setPerId(int perId) {
         this.perId = perId;
@@ -77,13 +69,10 @@ public class Personalizacion {
         this.usuario = usuario;
     }
 
-    /*public void setDetalles(List<DetallePersonalizacion> detalles) {
+    public void setDetalles(List<DetallePersonalizacion> detalles) {
         this.detalles = detalles;
-    }*/
-
-    public void setPedidos(List<Pedido> pedidos) {
-        this.pedidos = pedidos;
     }
+
 }
 
 

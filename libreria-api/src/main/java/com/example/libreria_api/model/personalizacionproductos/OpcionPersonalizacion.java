@@ -17,8 +17,9 @@ public class OpcionPersonalizacion {
     private String opcNombre;
 
     // Relación con valor_personalizacion
-    @OneToMany(mappedBy = "opcionPersonalizacion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "opcionPersonalizacion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
+    @OrderBy("valNombre ASC")
     private List<ValorPersonalizacion> valores;
 
     // Constructor vacío
