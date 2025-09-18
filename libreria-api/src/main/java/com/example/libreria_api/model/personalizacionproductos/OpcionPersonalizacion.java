@@ -1,6 +1,8 @@
 package com.example.libreria_api.model.personalizacionproductos;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "opcion_personalizacion")
@@ -8,21 +10,33 @@ public class OpcionPersonalizacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int opc_id;
+    @Column(name = "opc_id")
+    private int opcId;
 
-    @Column(name = "opc_nombre")
+    @Column(name = "opc_nombre", nullable = false, unique = true, length = 100)
     private String opcNombre;
 
-    public OpcionPersonalizacion() {
+    // Relación con valor_personalizacion
+    @OneToMany(mappedBy = "opcionPersonalizacion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @OrderBy("valNombre ASC")
+    private List<ValorPersonalizacion> valores;
+
+    // Constructor vacío
+    public OpcionPersonalizacion() {}
+
+    // Constructor útil
+    public OpcionPersonalizacion(String opcNombre) {
+        this.opcNombre = opcNombre;
     }
 
     // Getters y Setters
-    public int getOpc_id() {
-        return opc_id;
+    public int getOpcId() {
+        return opcId;
     }
 
-    public void setOpc_id(int opc_id) {
-        this.opc_id = opc_id;
+    public void setOpcId(int opcId) {
+        this.opcId = opcId;
     }
 
     public String getOpcNombre() {
@@ -31,5 +45,13 @@ public class OpcionPersonalizacion {
 
     public void setOpcNombre(String opcNombre) {
         this.opcNombre = opcNombre;
+    }
+
+    public List<ValorPersonalizacion> getValores() {
+        return valores;
+    }
+
+    public void setValores(List<ValorPersonalizacion> valores) {
+        this.valores = valores;
     }
 }
