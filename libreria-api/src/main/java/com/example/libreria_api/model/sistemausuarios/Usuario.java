@@ -8,7 +8,8 @@ public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int usu_id;
+    @Column(name = "usu_id")
+    private int usuId;
 
     @Column(name = "usu_nombre", nullable = false, length = 150)
     private String usuNombre;
@@ -59,12 +60,12 @@ public class Usuario {
 
     // --- Getters y Setters para TODOS los campos ---
 
-    public int getUsu_id() {
-        return usu_id;
+    public int getUsuId() {
+        return usuId;
     }
 
-    public void setUsu_id(int usu_id) {
-        this.usu_id = usu_id;
+    public void setUsuId(int usu_id) {
+        this.usuId = usu_id;
     }
 
     public String getUsuNombre() {
