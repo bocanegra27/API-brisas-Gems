@@ -15,6 +15,7 @@ target/
 
 ### IntelliJ IDEA ###
 .idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -37,3 +38,4 @@ src/main/resources/application.properties
 **/src/main/resources/application.properties
 
 .gitignore3.
+
