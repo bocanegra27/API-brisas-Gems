@@ -9,27 +9,28 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/portafolio")
 public class PortafolioInspiracionController {
 
     @Autowired
     private PortafolioInspiracionService portafolioInspiracionService;
 
-    @GetMapping("/portafolio")
+    @GetMapping
     public List<PortafolioInspiracion> obtenerPortafolio() {
         return portafolioInspiracionService.obtenerPortafolio();
     }
 
-    @PostMapping("/portafolio")
+    @PostMapping
     public PortafolioInspiracion guardarPortafolio(@RequestBody PortafolioInspiracion portafolioInspiracion) {
         return portafolioInspiracionService.guardarPortafolio(portafolioInspiracion);
     }
 
-    @PutMapping("/portafolio/{id}")
+    @PutMapping("/{id}")
     public PortafolioInspiracion actualizarPortafolio(@PathVariable Integer id, @RequestBody PortafolioInspiracion portafolioInspiracion) {
         return portafolioInspiracionService.actualizar(id, portafolioInspiracion);
     }
 
-    @DeleteMapping("/portafolio/{id}")
+    @DeleteMapping("/{id}")
     public void eliminarPortafolio(@PathVariable Integer id){
         portafolioInspiracionService.eliminarPortafolio(id);
     }
