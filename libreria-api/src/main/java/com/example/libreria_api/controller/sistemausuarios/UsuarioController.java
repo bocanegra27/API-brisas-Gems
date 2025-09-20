@@ -1,56 +1,88 @@
 package com.example.libreria_api.controller.sistemausuarios;
 
-import com.example.libreria_api.model.sistemausuarios.Usuario;
+import com.example.libreria_api.dto.sistemausuarios.*;
 import com.example.libreria_api.service.sistemausuarios.UsuarioService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("/api/usuarios")
 public class UsuarioController {
 
-    @Autowired
-    private UsuarioService usuarioService;
+    private final UsuarioService service;
 
+    public UsuarioController(UsuarioService service) {
+        this.service = service;
+    }
+
+    // ==============================
+    // LISTAR con filtros y paginación
+    // ==============================
     @GetMapping
-    public ResponseEntity<List<Usuario>> obtenerTodosLosUsuarios() {
-        List<Usuario> usuarios = usuarioService.obtenerTodosLosUsuarios();
-        return new ResponseEntity<>(usuarios, HttpStatus.OK);
+    public Page<UsuarioResponseDTO> listarUsuarios(
+            @RequestParam(required = false) Integer rolId,
+            @RequestParam(required = false) Boolean activo,
+            Pageable pageable) {
+        return service.listarUsuarios(rolId, activo, pageable);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable Integer id) {
-        return usuarioService.obtenerUsuarioPorId(id)
-                .map(usuario -> new ResponseEntity<>(usuario, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    // ==============================
+    // OBTENER POR ID
+    // ==============================
+    @GetMapping("/{usuId}")
+    public UsuarioResponseDTO obtenerPorId(@PathVariable Integer usuId) {
+        return service.obtenerPorId(usuId);
     }
 
+    // ==============================
+    // CREAR
+    // ==============================
     @PostMapping
-    public ResponseEntity<Usuario> crearUsuario(@RequestBody Usuario usuario) {
-        Usuario nuevoUsuario = usuarioService.guardarUsuario(usuario);
-        return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
+    public ResponseEntity<UsuarioResponseDTO> crear(@Valid @RequestBody UsuarioCreateDTO dto) {
+        UsuarioResponseDTO creado = service.crear(dto);
+        return ResponseEntity.status(201).body(creado);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Integer id, @RequestBody Usuario usuarioDetalles) {
-        Usuario usuarioActualizado = usuarioService.actualizarUsuario(id, usuarioDetalles);
-        if (usuarioActualizado != null) {
-            return new ResponseEntity<>(usuarioActualizado, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    // ==============================
+    // ACTUALIZAR
+    // ==============================
+    @PutMapping("/{usuId}")
+    public UsuarioResponseDTO actualizar(@PathVariable Integer usuId,
+                                         @Valid @RequestBody UsuarioUpdateDTO dto) {
+        return service.actualizar(usuId, dto);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarUsuario(@PathVariable Integer id) {
-        boolean eliminado = usuarioService.eliminarUsuario(id);
-        if (eliminado) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    // ==============================
+    // PATCH - Activar / Desactivar
+    // ==============================
+    @PatchMapping("/{usuId}/activo")
+    public UsuarioResponseDTO actualizarActivo(@PathVariable Integer usuId,
+                                               @RequestParam boolean activo) {
+        UsuarioUpdateDTO dto = new UsuarioUpdateDTO();
+        dto.setActivo(activo);
+        return service.actualizar(usuId, dto);
+    }
+
+    // ==============================
+    // PATCH - Cambiar Password
+    // ==============================
+    @PatchMapping("/{usuId}/password")
+    public ResponseEntity<Void> actualizarPassword(@PathVariable Integer usuId,
+                                                   @Valid @RequestBody PasswordUpdateDTO dto) {
+        service.actualizarPassword(usuId, dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ==============================
+    // ELIMINAR
+    // ==============================
+    @DeleteMapping("/{usuId}")
+    public ResponseEntity<Void> eliminar(@PathVariable Integer usuId) {
+        service.eliminar(usuId);
+        return ResponseEntity.noContent().build();
     }
 }

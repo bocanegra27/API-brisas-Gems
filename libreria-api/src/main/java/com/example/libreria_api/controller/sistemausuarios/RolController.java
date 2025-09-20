@@ -8,27 +8,28 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/roles")
 public class RolController {
 
     @Autowired
     private RolService rolService;
 
-    @GetMapping("/roles")
+    @GetMapping
     public List<Rol> obtenerTodosLosRoles() {
         return rolService.obtenerTodosLosRoles();
     }
 
-    @PostMapping("/roles")
+    @PostMapping
     public Rol crearRol(@RequestBody Rol rol) {
         return rolService.guardarRol(rol);
     }
 
-    @PutMapping("roles/{id}")
+    @PutMapping("/{id}")
     public Rol actualizar(@PathVariable Integer id, @RequestBody Rol rol) {
         return rolService.actualizar(id, rol);
     }
 
-    @DeleteMapping("roles/{id}")
+    @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Integer id){
         rolService.eliminarRol(id);
     }
