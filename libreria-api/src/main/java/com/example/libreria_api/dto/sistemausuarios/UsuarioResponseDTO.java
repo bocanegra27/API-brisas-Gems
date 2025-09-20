@@ -1,89 +1,79 @@
 package com.example.libreria_api.dto.sistemausuarios;
 
+
 import com.example.libreria_api.model.sistemausuarios.OrigenUsuario;
 
 public class UsuarioResponseDTO {
 
-    private int usu_id;
-    private String usuNombre;
-    private String usuCorreo;
-    private String usuTelefono;
-    private String usuDocnum;
-    private OrigenUsuario usuOrigen;
-    private boolean usuActivo;
-    private Integer tipoDeDocumentoId;
+    private Integer id;
+    private String nombre;
+    private String correo;
+    private String telefono;
+    private Boolean activo;
+    private String docnum;
+    private String origen;
+
     private Integer rolId;
+    private String rolNombre;
+
+    private Integer tipdocId;
+    private String tipdocNombre;
+
+    // Constructor vacío
+    public UsuarioResponseDTO() {
+    }
+
+    // Constructor completo
+    public UsuarioResponseDTO(Integer id, String nombre, String correo, String telefono,
+                              Boolean activo, String docnum, String origen,
+                              Integer rolId, String rolNombre,
+                              Integer tipdocId, String tipdocNombre) {
+        this.id = id;
+        this.nombre = nombre;
+        this.correo = correo;
+        this.telefono = telefono;
+        this.activo = activo;
+        this.docnum = docnum;
+        this.origen = origen;
+        this.rolId = rolId;
+        this.rolNombre = rolNombre;
+        this.tipdocId = tipdocId;
+        this.tipdocNombre = tipdocNombre;
+    }
 
     // Getters y Setters
-    public int getUsu_id() {
-        return usu_id;
-    }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    public void setUsu_id(int usu_id) {
-        this.usu_id = usu_id;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getUsuNombre() {
-        return usuNombre;
-    }
+    public String getCorreo() { return correo; }
+    public void setCorreo(String correo) { this.correo = correo; }
 
-    public void setUsuNombre(String usuNombre) {
-        this.usuNombre = usuNombre;
-    }
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
 
-    public String getUsuCorreo() {
-        return usuCorreo;
-    }
+    public Boolean getActivo() { return activo; }
+    public void setActivo(Boolean activo) { this.activo = activo; }
 
-    public void setUsuCorreo(String usuCorreo) {
-        this.usuCorreo = usuCorreo;
-    }
+    public String getDocnum() { return docnum; }
+    public void setDocnum(String docnum) { this.docnum = docnum; }
 
-    public String getUsuTelefono() {
-        return usuTelefono;
-    }
+    public String getOrigen() { return origen; }
+    public void setOrigen(String origen) { this.origen = origen; }
 
-    public void setUsuTelefono(String usuTelefono) {
-        this.usuTelefono = usuTelefono;
-    }
+    public Integer getRolId() { return rolId; }
+    public void setRolId(Integer rolId) { this.rolId = rolId; }
 
-    public String getUsuDocnum() {
-        return usuDocnum;
-    }
+    public String getRolNombre() { return rolNombre; }
+    public void setRolNombre(String rolNombre) { this.rolNombre = rolNombre; }
 
-    public void setUsuDocnum(String usuDocnum) {
-        this.usuDocnum = usuDocnum;
-    }
+    public Integer getTipdocId() { return tipdocId; }
+    public void setTipdocId(Integer tipdocId) { this.tipdocId = tipdocId; }
 
-    public OrigenUsuario getUsuOrigen() {
-        return usuOrigen;
-    }
-
-    public void setUsuOrigen(OrigenUsuario usuOrigen) {
-        this.usuOrigen = usuOrigen;
-    }
-
-    public boolean isUsuActivo() {
-        return usuActivo;
-    }
-
-    public void setUsuActivo(boolean usuActivo) {
-        this.usuActivo = usuActivo;
-    }
-
-    public Integer getTipoDeDocumentoId() {
-        return tipoDeDocumentoId;
-    }
-
-    public void setTipoDeDocumentoId(Integer tipoDeDocumentoId) {
-        this.tipoDeDocumentoId = tipoDeDocumentoId;
-    }
-
-    public Integer getRolId() {
-        return rolId;
-    }
-
-    public void setRolId(Integer rolId) {
-        this.rolId = rolId;
-    }
+    public String getTipdocNombre() { return tipdocNombre; }
+    public void setTipdocNombre(String tipdocNombre) { this.tipdocNombre = tipdocNombre; }
 }
+
+

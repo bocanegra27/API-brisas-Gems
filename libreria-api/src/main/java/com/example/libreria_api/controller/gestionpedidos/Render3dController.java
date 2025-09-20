@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/renders")
+@RequestMapping("/api/renders")
 public class Render3dController {
 
     private final Render3dService render3dService;

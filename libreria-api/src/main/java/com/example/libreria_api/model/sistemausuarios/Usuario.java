@@ -3,18 +3,22 @@ package com.example.libreria_api.model.sistemausuarios;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "usuarios",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_usuarios_correo", columnNames = "usu_correo"),
+                @UniqueConstraint(name = "uk_usuarios_docnum", columnNames = "usu_docnum")
+        })
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "usu_id")
-    private int usuId;
+    private Integer usuId;
 
     @Column(name = "usu_nombre", nullable = false, length = 150)
     private String usuNombre;
 
-    @Column(name = "usu_correo", nullable = false, unique = true, length = 100)
+    @Column(name = "usu_correo", nullable = false, length = 100, unique = true)
     private String usuCorreo;
 
     @Column(name = "usu_telefono", length = 20)
@@ -28,25 +32,31 @@ public class Usuario {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "usu_origen", nullable = false)
-    private OrigenUsuario usuOrigen;
+    private OrigenUsuario usuOrigen = OrigenUsuario.formulario;
 
     @Column(name = "usu_activo", nullable = false)
-    private boolean usuActivo;
+    private Boolean usuActivo = false;
 
-    @ManyToOne
-    @JoinColumn(name = "tipdoc_id")
-    private TipoDeDocumento tipoDeDocumento;
+    // ===== Relaciones =====
 
-    @ManyToOne
-    @JoinColumn(name = "rol_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "rol_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_usuarios_rol"))
     private Rol rol;
 
-    // --- Constructores ---
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "tipdoc_id",
+            foreignKey = @ForeignKey(name = "fk_usuarios_tipodoc"))
+    private TipoDeDocumento tipoDocumento;
+
+    // ===== Constructores =====
     public Usuario() {
     }
 
-    // Constructor actualizado con todos los campos
-    public Usuario(String usuNombre, String usuCorreo, String usuTelefono, String usuPassword, String usuDocnum, OrigenUsuario usuOrigen, boolean usuActivo, TipoDeDocumento tipoDeDocumento, Rol rol) {
+    public Usuario(String usuNombre, String usuCorreo, String usuTelefono, String usuPassword,
+                   String usuDocnum, OrigenUsuario usuOrigen, Boolean usuActivo,
+                   Rol rol, TipoDeDocumento tipoDocumento) {
         this.usuNombre = usuNombre;
         this.usuCorreo = usuCorreo;
         this.usuTelefono = usuTelefono;
@@ -54,89 +64,38 @@ public class Usuario {
         this.usuDocnum = usuDocnum;
         this.usuOrigen = usuOrigen;
         this.usuActivo = usuActivo;
-        this.tipoDeDocumento = tipoDeDocumento;
         this.rol = rol;
+        this.tipoDocumento = tipoDocumento;
     }
 
-    // --- Getters y Setters para TODOS los campos ---
+    // ===== Getters y Setters =====
+    public Integer getUsuId() { return usuId; }
+    public void setUsuId(Integer usuId) { this.usuId = usuId; }
 
-    public int getUsuId() {
-        return usuId;
-    }
+    public String getUsuNombre() { return usuNombre; }
+    public void setUsuNombre(String usuNombre) { this.usuNombre = usuNombre; }
 
-    public void setUsuId(int usu_id) {
-        this.usuId = usu_id;
-    }
+    public String getUsuCorreo() { return usuCorreo; }
+    public void setUsuCorreo(String usuCorreo) { this.usuCorreo = usuCorreo; }
 
-    public String getUsuNombre() {
-        return usuNombre;
-    }
+    public String getUsuTelefono() { return usuTelefono; }
+    public void setUsuTelefono(String usuTelefono) { this.usuTelefono = usuTelefono; }
 
-    public void setUsuNombre(String usuNombre) {
-        this.usuNombre = usuNombre;
-    }
+    public String getUsuPassword() { return usuPassword; }
+    public void setUsuPassword(String usuPassword) { this.usuPassword = usuPassword; }
 
-    public String getUsuCorreo() {
-        return usuCorreo;
-    }
+    public String getUsuDocnum() { return usuDocnum; }
+    public void setUsuDocnum(String usuDocnum) { this.usuDocnum = usuDocnum; }
 
-    public void setUsuCorreo(String usuCorreo) {
-        this.usuCorreo = usuCorreo;
-    }
+    public OrigenUsuario getUsuOrigen() { return usuOrigen; }
+    public void setUsuOrigen(OrigenUsuario usuOrigen) { this.usuOrigen = usuOrigen; }
 
-    public String getUsuTelefono() {
-        return usuTelefono;
-    }
+    public Boolean getUsuActivo() { return usuActivo; }
+    public void setUsuActivo(Boolean usuActivo) { this.usuActivo = usuActivo; }
 
-    public void setUsuTelefono(String usuTelefono) {
-        this.usuTelefono = usuTelefono;
-    }
+    public Rol getRol() { return rol; }
+    public void setRol(Rol rol) { this.rol = rol; }
 
-    public String getUsuPassword() {
-        return usuPassword;
-    }
-
-    public void setUsuPassword(String usuPassword) {
-        this.usuPassword = usuPassword;
-    }
-
-    public String getUsuDocnum() {
-        return usuDocnum;
-    }
-
-    public void setUsuDocnum(String usuDocnum) {
-        this.usuDocnum = usuDocnum;
-    }
-
-    public OrigenUsuario getUsuOrigen() {
-        return usuOrigen;
-    }
-
-    public void setUsuOrigen(OrigenUsuario usuOrigen) {
-        this.usuOrigen = usuOrigen;
-    }
-
-    public boolean isUsuActivo() {
-        return usuActivo;
-    }
-
-    public void setUsuActivo(boolean usuActivo) {
-        this.usuActivo = usuActivo;
-    }
-
-    public TipoDeDocumento getTipoDeDocumento() {
-        return tipoDeDocumento;
-    }
-
-    public void setTipoDeDocumento(TipoDeDocumento tipoDeDocumento) {
-        this.tipoDeDocumento = tipoDeDocumento;
-    }
-
-    public Rol getRol() {
-        return rol;
-    }
-
-    public void setRol(Rol rol) {
-        this.rol = rol;
-    }
+    public TipoDeDocumento getTipoDocumento() { return tipoDocumento; }
+    public void setTipoDocumento(TipoDeDocumento tipoDocumento) { this.tipoDocumento = tipoDocumento; }
 }
