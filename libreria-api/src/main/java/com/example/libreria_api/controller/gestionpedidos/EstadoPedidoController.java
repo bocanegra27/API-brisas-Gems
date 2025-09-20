@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/estados-pedido") // Ruta base a nivel de clase
+@RequestMapping("/api/estados-pedido") // Ruta base a nivel de clase
 public class EstadoPedidoController {
 
     private final EstadoPedidoService estadoPedidoService;
