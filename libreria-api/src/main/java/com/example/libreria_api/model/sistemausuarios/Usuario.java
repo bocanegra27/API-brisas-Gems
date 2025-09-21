@@ -1,6 +1,12 @@
 package com.example.libreria_api.model.sistemausuarios;
 
 import jakarta.persistence.*;
+// --- IMPORTS PARA SPRING SECURITY ---
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "usuarios",
@@ -8,7 +14,7 @@ import jakarta.persistence.*;
                 @UniqueConstraint(name = "uk_usuarios_correo", columnNames = "usu_correo"),
                 @UniqueConstraint(name = "uk_usuarios_docnum", columnNames = "usu_docnum")
         })
-public class Usuario {
+public class Usuario implements UserDetails { // <-- Se implementa UserDetails
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +45,7 @@ public class Usuario {
 
     // ===== Relaciones =====
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER) // <-- CAMBIADO A EAGER
     @JoinColumn(name = "rol_id",
             nullable = false,
             foreignKey = @ForeignKey(name = "fk_usuarios_rol"))
@@ -50,7 +56,7 @@ public class Usuario {
             foreignKey = @ForeignKey(name = "fk_usuarios_tipodoc"))
     private TipoDeDocumento tipoDocumento;
 
-    // ===== Constructores =====
+    // ===== Constructores (sin cambios) =====
     public Usuario() {
     }
 
@@ -68,7 +74,7 @@ public class Usuario {
         this.tipoDocumento = tipoDocumento;
     }
 
-    // ===== Getters y Setters =====
+    // ===== Getters y Setters (sin cambios) =====
     public Integer getUsuId() { return usuId; }
     public void setUsuId(Integer usuId) { this.usuId = usuId; }
 
@@ -98,4 +104,42 @@ public class Usuario {
 
     public TipoDeDocumento getTipoDocumento() { return tipoDocumento; }
     public void setTipoDocumento(TipoDeDocumento tipoDocumento) { this.tipoDocumento = tipoDocumento; }
+
+
+    // ===== MÉTODOS DE USERDETAILS AÑADIDOS =====
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(rol.getRolNombre()));
+    }
+
+    @Override
+    public String getPassword() {
+        return this.usuPassword;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.usuCorreo;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // O puedes manejarlo con un campo si lo necesitas
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // O puedes manejarlo con un campo si lo necesitas
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // O puedes manejarlo con un campo si lo necesitas
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.usuActivo;
+    }
 }
