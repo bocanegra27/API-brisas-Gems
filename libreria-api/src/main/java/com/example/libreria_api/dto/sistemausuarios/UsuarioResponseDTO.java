@@ -1,5 +1,8 @@
 package com.example.libreria_api.dto.sistemausuarios;
 
+
+import com.example.libreria_api.model.sistemausuarios.OrigenUsuario;
+
 public class UsuarioResponseDTO {
 
     private Integer id;
@@ -72,4 +75,3 @@ public class UsuarioResponseDTO {
     public String getTipdocNombre() { return tipdocNombre; }
     public void setTipdocNombre(String tipdocNombre) { this.tipdocNombre = tipdocNombre; }
 }
-
