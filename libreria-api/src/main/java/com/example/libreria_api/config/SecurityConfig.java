@@ -30,7 +30,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         /*.requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll() // agregar usuarios nuevos*/
 
-                         .anyRequest().authenticated()
+                         /*.anyRequest().authenticated()*/
+                        .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
