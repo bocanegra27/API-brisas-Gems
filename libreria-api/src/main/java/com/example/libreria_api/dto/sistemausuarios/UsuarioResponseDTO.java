@@ -75,5 +75,3 @@ public class UsuarioResponseDTO {
     public String getTipdocNombre() { return tipdocNombre; }
     public void setTipdocNombre(String tipdocNombre) { this.tipdocNombre = tipdocNombre; }
 }
-
-
