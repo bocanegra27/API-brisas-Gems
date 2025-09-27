@@ -2,6 +2,7 @@ package com.example.libreria_api.service.sistemausuarios;
 
 
 import com.example.libreria_api.dto.sistemausuarios.*;
+import com.example.libreria_api.exception.ResourceNotFoundException;
 import com.example.libreria_api.model.sistemausuarios.*;
 import com.example.libreria_api.repository.sistemausuarios.UsuarioRepository;
 import com.example.libreria_api.repository.sistemausuarios.RolRepository;
@@ -41,14 +42,18 @@ public class UsuarioService {
     public Page<UsuarioResponseDTO> listarUsuarios(Integer rolId, Boolean activo, Pageable pageable) {
         Page<Usuario> pagina;
 
+        // --- LÓGICA MODIFICADA ---
         if (rolId != null && activo != null) {
             pagina = usuarioRepository.findByRol_RolIdAndUsuActivo(rolId, activo, pageable);
         } else if (rolId != null) {
-            pagina = usuarioRepository.findByRol_RolId(rolId, pageable);
+            // Si solo se filtra por rol, también filtramos por activos por defecto
+            pagina = usuarioRepository.findByRol_RolIdAndUsuActivo(rolId, true, pageable);
         } else if (activo != null) {
+            // Permite buscar específicamente por activos o inactivos
             pagina = usuarioRepository.findByUsuActivo(activo, pageable);
         } else {
-            pagina = usuarioRepository.findAll(pageable);
+            // Por defecto, si no se especifica nada, TRAER SOLO LOS ACTIVOS
+            pagina = usuarioRepository.findByUsuActivo(true, pageable);
         }
 
         return pagina.map(this::toResponse);
@@ -142,14 +147,16 @@ public class UsuarioService {
     }
 
     // ==============================
-    // ELIMINAR
+    // ELIMINAR (MÉTODO MODIFICADO)
     // ==============================
     @Transactional
     public void eliminar(Integer id) {
-        if (!usuarioRepository.existsById(id)) {
-            throw new EntityNotFoundException("Usuario no encontrado: " + id);
-        }
-        usuarioRepository.deleteById(id);
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
+
+        usuario.setUsuActivo(false);
+
+        usuarioRepository.save(usuario);
     }
 
     // ==============================
