@@ -1,8 +1,6 @@
 package com.example.libreria_api.dto.gestionpedidos;
 
 import java.util.Date;
-// Asume que también tendrás DTOs para los detalles del producto, etc.
-// Por ahora, lo mantenemos simple.
 
 public class PedidoDetailResponseDTO {
 
@@ -10,6 +8,9 @@ public class PedidoDetailResponseDTO {
     private String pedCodigo;
     private Date pedFechaCreacion;
     private String pedComentarios;
+
+    // --- CAMPO NUEVO AÑADIDO ---
+    private Integer estId; // ID del estado actual del pedido
 
     // Campos con más detalle
     private String estadoNombre;
@@ -28,6 +29,10 @@ public class PedidoDetailResponseDTO {
 
     public String getPedComentarios() { return pedComentarios; }
     public void setPedComentarios(String pedComentarios) { this.pedComentarios = pedComentarios; }
+
+    // --- GETTER Y SETTER NUEVOS ---
+    public Integer getEstId() { return estId; }
+    public void setEstId(Integer estId) { this.estId = estId; }
 
     public String getEstadoNombre() { return estadoNombre; }
     public void setEstadoNombre(String estadoNombre) { this.estadoNombre = estadoNombre; }

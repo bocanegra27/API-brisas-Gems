@@ -29,9 +29,6 @@ public class ContactoFormularioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    // ==============================
-    // CREAR (público)
-    // ==============================
     @Transactional
     public ContactoFormularioResponseDTO crear(ContactoFormularioCreateDTO dto) {
         ContactoFormulario entidad = new ContactoFormulario();
@@ -42,82 +39,52 @@ public class ContactoFormularioService {
         if (dto.getVia() != null) {
             entidad.setConVia(ViaContacto.valueOf(dto.getVia()));
         } else {
-            entidad.setConVia(ViaContacto.formulario); // default coherente con la BD
+            entidad.setConVia(ViaContacto.formulario);
         }
         entidad.setConTerminos(dto.isTerminos());
         entidad.setConFechaEnvio(LocalDateTime.now());
         entidad.setConEstado(EstadoContacto.pendiente);
-
         ContactoFormulario guardado = contactoRepository.save(entidad);
         return mapToResponseDTO(guardado);
     }
 
-    // ==============================
-    // ACTUALIZAR (admin)
-    // ==============================
     @Transactional
     public ContactoFormularioResponseDTO actualizar(Integer id, ContactoFormularioUpdateDTO dto) {
-        ContactoFormulario entidad = contactoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Contacto no encontrado"));
-
+        ContactoFormulario entidad = contactoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Contacto no encontrado"));
         if (dto.getUsuarioId() != null) {
-            Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
-                    .orElseThrow(() -> new EntityNotFoundException("Usuario cliente no encontrado"));
+            Usuario usuario = usuarioRepository.findById(dto.getUsuarioId()).orElseThrow(() -> new EntityNotFoundException("Usuario cliente no encontrado"));
             entidad.setUsuario(usuario);
         }
-
         if (dto.getUsuarioIdAdmin() != null) {
-            Usuario admin = usuarioRepository.findById(dto.getUsuarioIdAdmin())
-                    .orElseThrow(() -> new EntityNotFoundException("Usuario admin no encontrado"));
+            Usuario admin = usuarioRepository.findById(dto.getUsuarioIdAdmin()).orElseThrow(() -> new EntityNotFoundException("Usuario admin no encontrado"));
             entidad.setUsuarioAdmin(admin);
         }
-
         if (dto.getVia() != null) {
             entidad.setConVia(ViaContacto.valueOf(dto.getVia()));
         }
-
         if (dto.getEstado() != null) {
             entidad.setConEstado(EstadoContacto.valueOf(dto.getEstado()));
         }
-
         if (dto.getNotas() != null) {
             entidad.setConNotas(dto.getNotas());
         }
-
         ContactoFormulario actualizado = contactoRepository.save(entidad);
         return mapToResponseDTO(actualizado);
     }
 
-    // ==============================
-    // OBTENER POR ID
-    // ==============================
     @Transactional(readOnly = true)
     public ContactoFormularioResponseDTO obtenerPorId(Integer id) {
-        ContactoFormulario entidad = contactoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Contacto no encontrado"));
+        ContactoFormulario entidad = contactoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Contacto no encontrado"));
         return mapToResponseDTO(entidad);
     }
 
-    // ==============================
-    // LISTAR CON FILTROS
-    // ==============================
     @Transactional(readOnly = true)
-    public List<ContactoFormularioResponseDTO> listarConFiltros(String via, String estado,
-                                                                Integer usuarioId,
-                                                                LocalDateTime desde,
-                                                                LocalDateTime hasta) {
+    public List<ContactoFormularioResponseDTO> listarConFiltros(String via, String estado, Integer usuarioId, LocalDateTime desde, LocalDateTime hasta) {
         ViaContacto viaFiltro = (via != null) ? ViaContacto.valueOf(via) : null;
         EstadoContacto estadoFiltro = (estado != null) ? EstadoContacto.valueOf(estado) : null;
-
-        return contactoRepository.buscarConFiltros(viaFiltro, estadoFiltro, usuarioId, desde, hasta)
-                .stream()
-                .map(this::mapToResponseDTO)
-                .collect(Collectors.toList());
+        return contactoRepository.buscarConFiltros(viaFiltro, estadoFiltro, usuarioId, desde, hasta).stream().map(this::mapToResponseDTO).collect(Collectors.toList());
     }
 
-    // ==============================
-    // ELIMINAR
-    // ==============================
     @Transactional
     public void eliminar(Integer id) {
         if (!contactoRepository.existsById(id)) {
@@ -126,9 +93,6 @@ public class ContactoFormularioService {
         contactoRepository.deleteById(id);
     }
 
-    // ==============================
-    // MAPEO Entidad -> ResponseDTO
-    // ==============================
     private ContactoFormularioResponseDTO mapToResponseDTO(ContactoFormulario entidad) {
         ContactoFormularioResponseDTO dto = new ContactoFormularioResponseDTO();
         dto.setId(entidad.getConId());
@@ -141,17 +105,24 @@ public class ContactoFormularioService {
         dto.setTerminos(entidad.isConTerminos());
         dto.setEstado(entidad.getConEstado().name());
         dto.setNotas(entidad.getConNotas());
-
         if (entidad.getUsuario() != null) {
             dto.setUsuarioId(entidad.getUsuario().getUsuId());
             dto.setUsuarioNombre(entidad.getUsuario().getUsuNombre());
         }
-
         if (entidad.getUsuarioAdmin() != null) {
             dto.setUsuarioIdAdmin(entidad.getUsuarioAdmin().getUsuId());
             dto.setUsuarioAdminNombre(entidad.getUsuarioAdmin().getUsuNombre());
         }
-
         return dto;
+    }
+
+    @Transactional(readOnly = true)
+    public long contarContactosPorEstado(String estado) {
+        try {
+             EstadoContacto estadoEnum = EstadoContacto.valueOf(estado.toLowerCase());
+             return contactoRepository.countByConEstado(estadoEnum);
+        } catch (IllegalArgumentException e) {
+             return 0;
+        }
     }
 }

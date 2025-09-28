@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
+
+    long countByEstadoPedido_EstNombre(String nombreEstado);
+
 }

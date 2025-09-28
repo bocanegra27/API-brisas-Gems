@@ -26,5 +26,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     // Filtro combinado (rol y activo)
     Page<Usuario> findByRol_RolIdAndUsuActivo(Integer rolId, Boolean usuActivo, Pageable pageable);
+
+    long countByUsuActivo(boolean activo);
 }
 

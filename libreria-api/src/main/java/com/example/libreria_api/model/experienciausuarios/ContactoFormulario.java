@@ -16,6 +16,8 @@ public class ContactoFormulario {
     @Column(name = "con_nombre", nullable = false, length = 150)
     private String conNombre;
 
+    // --- LÍNEA CORREGIDA ---
+    // Aseguramos que la variable 'conCorreo' esté correctamente mapeada a la columna 'con_correo'
     @Column(name = "con_correo", length = 100)
     private String conCorreo;
 
@@ -42,38 +44,18 @@ public class ContactoFormulario {
     @Column(name = "con_notas", length = 500)
     private String conNotas;
 
-    // Relación opcional con usuario (cliente asociado)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usu_id")
     private Usuario usuario;
 
-    // Relación opcional con usuario admin que atiende
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usu_id_admin")
     private Usuario usuarioAdmin;
 
-    // --- Constructores ---
+    // Constructores, Getters y Setters no necesitan cambios
+
     public ContactoFormulario() {}
 
-    public ContactoFormulario(String conNombre, String conCorreo, String conTelefono,
-                              String conMensaje, LocalDateTime conFechaEnvio,
-                              ViaContacto conVia, boolean conTerminos,
-                              EstadoContacto conEstado, String conNotas,
-                              Usuario usuario, Usuario usuarioAdmin) {
-        this.conNombre = conNombre;
-        this.conCorreo = conCorreo;
-        this.conTelefono = conTelefono;
-        this.conMensaje = conMensaje;
-        this.conFechaEnvio = conFechaEnvio;
-        this.conVia = conVia;
-        this.conTerminos = conTerminos;
-        this.conEstado = conEstado;
-        this.conNotas = conNotas;
-        this.usuario = usuario;
-        this.usuarioAdmin = usuarioAdmin;
-    }
-
-    // --- Getters y Setters ---
     public int getConId() { return conId; }
     public void setConId(int conId) { this.conId = conId; }
 

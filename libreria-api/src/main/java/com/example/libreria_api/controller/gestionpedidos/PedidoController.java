@@ -63,4 +63,10 @@ public class PedidoController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> contarPedidosPorEstado(@RequestParam String estado) {
+        // Lo llamaremos desde PHP con /api/pedidos/count?estado=diseño
+        return ResponseEntity.ok(pedidoService.contarPedidosPorEstado(estado));
+    }
 }
