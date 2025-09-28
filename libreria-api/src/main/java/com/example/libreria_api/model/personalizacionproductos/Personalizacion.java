@@ -1,6 +1,5 @@
 package com.example.libreria_api.model.personalizacionproductos;
 
-import com.example.libreria_api.model.gestionpedidos.Pedido;
 import com.example.libreria_api.model.sistemausuarios.Usuario;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -19,8 +18,10 @@ public class Personalizacion {
     @Column(name = "per_fecha", nullable = false)
     private LocalDate perFecha;
 
-    @ManyToOne
-    @JoinColumn(name = "usu_id", referencedColumnName = "usu_id")
+    // --- CAMBIO CLAVE AQUÍ ---
+    // Le decimos a Hibernate que SIEMPRE cargue el objeto Usuario junto con la Personalizacion.
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "usu_id_cliente", referencedColumnName = "usu_id")
     private Usuario usuario;
 
     @OneToMany(mappedBy = "personalizacion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -28,6 +29,7 @@ public class Personalizacion {
     @OrderBy("detId ASC")
     private List<DetallePersonalizacion> detalles;
 
+    // ... (El resto de la clase, constructores, getters y setters, no cambia) ...
 
     public Personalizacion() {
     }
@@ -72,7 +74,4 @@ public class Personalizacion {
     public void setDetalles(List<DetallePersonalizacion> detalles) {
         this.detalles = detalles;
     }
-
 }
-
-

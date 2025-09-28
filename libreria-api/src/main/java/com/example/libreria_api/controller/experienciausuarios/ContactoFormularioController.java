@@ -80,4 +80,10 @@ public class ContactoFormularioController {
         contactoService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> contarContactosPorEstado(@RequestParam String estado) {
+        // Lo llamaremos desde PHP con /api/contactos/count?estado=pendiente
+        return ResponseEntity.ok(contactoService.contarContactosPorEstado(estado));
+    }
 }

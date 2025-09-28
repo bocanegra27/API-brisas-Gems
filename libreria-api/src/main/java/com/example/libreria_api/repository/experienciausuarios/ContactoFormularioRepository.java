@@ -27,6 +27,8 @@ public interface ContactoFormularioRepository extends JpaRepository<ContactoForm
     // Buscar por admin que atendió
     List<ContactoFormulario> findByUsuarioAdmin_UsuId(Integer usuarioAdminId);
 
+    long countByConEstado(EstadoContacto estado);
+
     // Buscar combinando filtros: vía + fechas + usuario
     @Query("SELECT c FROM ContactoFormulario c " +
             "WHERE (:via IS NULL OR c.conVia = :via) " +

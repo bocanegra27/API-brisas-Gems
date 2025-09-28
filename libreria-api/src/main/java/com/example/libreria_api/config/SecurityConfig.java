@@ -3,7 +3,6 @@ package com.example.libreria_api.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod; // <-- IMPORTANTE AÑADIR ESTE IMPORT
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,12 +25,22 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        // Endpoints públicos
-                        .requestMatchers("/api/auth/**").permitAll()
-                        /*.requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll() // agregar usuarios nuevos*/
+                                // Endpoints públicos que siempre estarán abiertos
+                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/usuarios").permitAll()
 
-                         /*.anyRequest().authenticated()*/
-                        .anyRequest().permitAll()
+
+
+                                // =================== MODO DE PRUEBA ===================
+                                // Permite todas las solicitudes sin autenticación.
+                                // Ideal para hacer pruebas en tus endpoints sin necesidad de un token.
+                                //.anyRequest().permitAll()//
+
+                        // =================== MODO DE PRODUCCIÓN ===================
+                        // Para reactivar la autenticación, comenta la línea de arriba (.anyRequest().permitAll())
+                        // y descomenta la siguiente línea. Esto requerirá un token para cualquier solicitud
+                        // que no sea "/api/auth/**".
+                        .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
