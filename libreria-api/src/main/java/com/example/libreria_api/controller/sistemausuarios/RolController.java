@@ -1,9 +1,11 @@
 package com.example.libreria_api.controller.sistemausuarios;
 
-import com.example.libreria_api.model.sistemausuarios.Rol;
+import com.example.libreria_api.dto.sistemausuarios.RolResponseDTO;
 import com.example.libreria_api.service.sistemausuarios.RolService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -11,26 +13,14 @@ import java.util.List;
 @RequestMapping("/api/roles")
 public class RolController {
 
-    @Autowired
-    private RolService rolService;
+    private final RolService rolService;
+
+    public RolController(RolService rolService) {
+        this.rolService = rolService;
+    }
 
     @GetMapping
-    public List<Rol> obtenerTodosLosRoles() {
-        return rolService.obtenerTodosLosRoles();
-    }
-
-    @PostMapping
-    public Rol crearRol(@RequestBody Rol rol) {
-        return rolService.guardarRol(rol);
-    }
-
-    @PutMapping("/{id}")
-    public Rol actualizar(@PathVariable Integer id, @RequestBody Rol rol) {
-        return rolService.actualizar(id, rol);
-    }
-
-    @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Integer id){
-        rolService.eliminarRol(id);
+    public ResponseEntity<List<RolResponseDTO>> listarTodos() {
+        return ResponseEntity.ok(rolService.listarTodos());
     }
 }
