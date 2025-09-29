@@ -28,6 +28,9 @@ public class SecurityConfig {
                                 // Endpoints públicos que siempre estarán abiertos
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/usuarios").permitAll()
+                                .requestMatchers("/api/opciones/**").permitAll()
+                                .requestMatchers("/api/valores/**").permitAll()
+                                .requestMatchers("/api/personalizaciones").permitAll()
 
 
 
