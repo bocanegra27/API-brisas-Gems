@@ -25,21 +25,22 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                                // Endpoints públicos que siempre estarán abiertos
-                                .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/usuarios").permitAll()
+                        // Endpoints públicos
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/usuarios").permitAll() // solo creación de usuarios
 
+                        // Dashboards por rol
+                        .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/designer/**").hasRole("DISEÑADOR")
+                        .requestMatchers("/user/**").hasRole("USUARIO")
 
+                        // Endpoints de API generales requieren autenticación
+                        .requestMatchers("/api/**").authenticated()
 
-                                // =================== MODO DE PRUEBA ===================
-                                // Permite todas las solicitudes sin autenticación.
-                                // Ideal para hacer pruebas en tus endpoints sin necesidad de un token.
-                                //.anyRequest().permitAll()//
+                        // =================== MODO DE PRUEBA ===================
+                        //.anyRequest().permitAll()
 
                         // =================== MODO DE PRODUCCIÓN ===================
-                        // Para reactivar la autenticación, comenta la línea de arriba (.anyRequest().permitAll())
-                        // y descomenta la siguiente línea. Esto requerirá un token para cualquier solicitud
-                        // que no sea "/api/auth/**".
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)
