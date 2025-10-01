@@ -28,6 +28,9 @@ public class SecurityConfig {
                         // Endpoints públicos
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/usuarios").permitAll() // solo creación de usuarios
+                        .requestMatchers("/api/opciones/**").permitAll()
+                        .requestMatchers("/api/valores/**").permitAll()
+                        .requestMatchers("/api/personalizaciones").permitAll()
 
                         // Dashboards por rol
                         .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
