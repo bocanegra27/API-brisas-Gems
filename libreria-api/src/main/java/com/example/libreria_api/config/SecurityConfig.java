@@ -30,7 +30,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/usuarios").permitAll() // solo creación de usuarios
                         .requestMatchers("/api/opciones/**").permitAll()
                         .requestMatchers("/api/valores/**").permitAll()
-                        .requestMatchers("/api/personalizaciones").permitAll()
+                        .requestMatchers("/api/personalizaciones/**").permitAll()
+                        .requestMatchers("/api/contactos/**").permitAll()
 
                         // Dashboards por rol
                         .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
