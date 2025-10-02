@@ -7,6 +7,10 @@ import java.util.Date;
 public class PedidoMapper {
 
     public static PedidoResponseDTO toPedidoResponseDTO(Pedido pedido) {
+        if (pedido == null) {
+            return null;
+        }
+
         PedidoResponseDTO dto = new PedidoResponseDTO();
         dto.setPed_id(pedido.getPed_id());
         dto.setPedCodigo(pedido.getPedCodigo());
@@ -18,24 +22,40 @@ public class PedidoMapper {
         }
 
         dto.setPerId(pedido.getPerId());
-        dto.setUsuId(pedido.getUsuIdEmpleado());
+
+        // ✅ CORRECCIÓN CRÍTICA: Mapear usuIdEmpleado a usuId
+        dto.setUsuId(pedido.getUsuIdEmpleado()); // Esto debería resolver el problema del campo
+
         return dto;
     }
 
     public static Pedido toPedido(PedidoRequestDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
         Pedido pedido = new Pedido();
         pedido.setPedCodigo(dto.getPedCodigo());
         pedido.setPedComentarios(dto.getPedComentarios());
+        pedido.setPedFechaCreacion(new Date());
+        pedido.setPerId(dto.getPerId());
 
-        if (dto.getEstId() != null) {
-            EstadoPedido estado = new EstadoPedido();
-            estado.setEst_id(dto.getEstId());
-            pedido.setEstadoPedido(estado);
+        // ✅ CORRECCIÓN: Mapear usuId a usuIdEmpleado
+        pedido.setUsuIdEmpleado(dto.getUsuId());
+
+        return pedido;
+    }
+
+    public static void updatePedidoFromDTO(Pedido pedido, PedidoRequestDTO dto) {
+        if (pedido == null || dto == null) {
+            return;
         }
 
+        pedido.setPedCodigo(dto.getPedCodigo());
+        pedido.setPedComentarios(dto.getPedComentarios());
         pedido.setPerId(dto.getPerId());
+
+        // ✅ CORRECCIÓN: Mapear usuId a usuIdEmpleado
         pedido.setUsuIdEmpleado(dto.getUsuId());
-        pedido.setPedFechaCreacion(new Date());
-        return pedido;
     }
 }
