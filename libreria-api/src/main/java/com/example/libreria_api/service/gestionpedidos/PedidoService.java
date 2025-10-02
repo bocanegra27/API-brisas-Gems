@@ -71,25 +71,51 @@ public class PedidoService {
 
     @Transactional
     public PedidoResponseDTO guardarPedido(PedidoRequestDTO requestDTO) {
-        Pedido nuevoPedido = PedidoMapper.toPedido(requestDTO);
-        Pedido pedidoGuardado = pedidoRepository.save(nuevoPedido);
-        return PedidoMapper.toPedidoResponseDTO(pedidoGuardado);
+        try {
+            Pedido nuevoPedido = PedidoMapper.toPedido(requestDTO);
+
+            // ASIGNAR ESTADO PEDIDO CORRECTAMENTE usando el repository
+            if (requestDTO.getEstId() != null) {
+                EstadoPedido estado = estadoPedidoRepository.findById(requestDTO.getEstId())
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                "EstadoPedido no encontrado con ID: " + requestDTO.getEstId()));
+                nuevoPedido.setEstadoPedido(estado);
+            }
+
+            // Generar código automático si no viene
+            if (nuevoPedido.getPedCodigo() == null || nuevoPedido.getPedCodigo().trim().isEmpty()) {
+                nuevoPedido.setPedCodigo("PED-" + System.currentTimeMillis());
+            }
+
+            Pedido pedidoGuardado = pedidoRepository.save(nuevoPedido);
+            return PedidoMapper.toPedidoResponseDTO(pedidoGuardado);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al guardar pedido: " + e.getMessage(), e);
+        }
     }
 
     @Transactional
     public PedidoResponseDTO actualizar(Integer id, PedidoRequestDTO requestDTO) {
         return pedidoRepository.findById(id).map(pedidoExistente -> {
-            pedidoExistente.setPedCodigo(requestDTO.getPedCodigo());
-            pedidoExistente.setPedComentarios(requestDTO.getPedComentarios());
-            if (requestDTO.getEstId() != null) {
-                EstadoPedido nuevoEstado = new EstadoPedido();
-                nuevoEstado.setEst_id(requestDTO.getEstId());
-                pedidoExistente.setEstadoPedido(nuevoEstado);
+            try {
+                // Usar el nuevo método del mapper para actualizar
+                PedidoMapper.updatePedidoFromDTO(pedidoExistente, requestDTO);
+
+                // ACTUALIZAR ESTADO si viene en el DTO
+                if (requestDTO.getEstId() != null) {
+                    EstadoPedido nuevoEstado = estadoPedidoRepository.findById(requestDTO.getEstId())
+                            .orElseThrow(() -> new EntityNotFoundException(
+                                    "EstadoPedido no encontrado con ID: " + requestDTO.getEstId()));
+                    pedidoExistente.setEstadoPedido(nuevoEstado);
+                }
+
+                Pedido pedidoActualizado = pedidoRepository.save(pedidoExistente);
+                return PedidoMapper.toPedidoResponseDTO(pedidoActualizado);
+
+            } catch (Exception e) {
+                throw new RuntimeException("Error al actualizar pedido: " + e.getMessage(), e);
             }
-            pedidoExistente.setPerId(requestDTO.getPerId());
-            pedidoExistente.setUsuIdEmpleado(requestDTO.getUsuId());
-            Pedido pedidoActualizado = pedidoRepository.save(pedidoExistente);
-            return PedidoMapper.toPedidoResponseDTO(pedidoActualizado);
         }).orElse(null);
     }
 
