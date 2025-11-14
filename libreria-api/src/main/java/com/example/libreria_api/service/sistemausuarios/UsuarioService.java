@@ -122,6 +122,22 @@ public class UsuarioService {
         usuarioRepository.save(u);
     }
 
+    @Transactional
+    public UsuarioResponseDTO actualizarRol(Integer id, Integer nuevoRolId) {
+        Usuario u = usuarioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + id));
+
+        // 1. Verificar si el nuevo rol existe
+        Rol nuevoRol = rolRepository.findById(nuevoRolId)
+                .orElseThrow(() -> new EntityNotFoundException("Rol no encontrado: " + nuevoRolId));
+
+        // 2. Asignar el nuevo rol
+        u.setRol(nuevoRol);
+
+        // 3. Guardar y retornar el DTO de respuesta
+        return toResponse(usuarioRepository.save(u));
+    }
+
     private UsuarioResponseDTO toResponse(Usuario u) {
         return new UsuarioResponseDTO(u.getUsuId(), u.getUsuNombre(), u.getUsuCorreo(), u.getUsuTelefono(), u.getUsuActivo(), u.getUsuDocnum(), u.getUsuOrigen().name(), u.getRol() != null ? u.getRol().getRolId() : null, u.getRol() != null ? u.getRol().getRolNombre() : null, u.getTipoDocumento() != null ? u.getTipoDocumento().getTipdocId() : null, u.getTipoDocumento() != null ? u.getTipoDocumento().getTipdocNombre() : null);
     }
