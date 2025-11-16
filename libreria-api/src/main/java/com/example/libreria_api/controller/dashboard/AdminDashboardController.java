@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMINISTRADOR')")
 public class AdminDashboardController {
 

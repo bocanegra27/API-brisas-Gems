@@ -17,6 +17,8 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+    private final AuthEntryPoint authEntryPoint;
+    private final AccessDenied accessDenied;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -27,25 +29,27 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // Endpoints públicos
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/usuarios").permitAll() // solo creación de usuarios
+                        .requestMatchers("/api/usuarios").permitAll()
                         .requestMatchers("/api/opciones/**").permitAll()
                         .requestMatchers("/api/valores/**").permitAll()
                         .requestMatchers("/api/personalizaciones/**").permitAll()
                         .requestMatchers("/api/contactos/**").permitAll()
 
                         // Dashboards por rol
-                        .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
-                        .requestMatchers("/designer/**").hasRole("DISEÑADOR")
-                        .requestMatchers("/user/**").hasRole("USUARIO")
+                        .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/api/designer/**").hasRole("DISEÑADOR")
+                        .requestMatchers("/api/user/**").hasRole("USUARIO")
 
                         // Endpoints de API generales requieren autenticación
                         .requestMatchers("/api/**").authenticated()
 
-                        // =================== MODO DE PRUEBA ===================
-                        //.anyRequest().permitAll()
-
-                        // =================== MODO DE PRODUCCIÓN ===================
+                        // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated()
+                )
+                // Manejo de excepciones de seguridad
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authEntryPoint)  // 401
+                        .accessDeniedHandler(accessDenied)         // 403
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
