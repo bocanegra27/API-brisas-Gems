@@ -13,6 +13,7 @@ public class TipoDeDocumentoService {
     private TipoDeDocumentoRepository tipoDeDocumentoRepository;
 
     public List<TipoDeDocumento> obtenerTodos() {
+
         return tipoDeDocumentoRepository.findAll();
     }
 
@@ -29,6 +30,7 @@ public class TipoDeDocumentoService {
     }
 
     public void eliminardocumento(Integer id) {
+
         tipoDeDocumentoRepository.deleteById(id);
     }
 }

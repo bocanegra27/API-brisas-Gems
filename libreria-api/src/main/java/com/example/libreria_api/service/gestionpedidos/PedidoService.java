@@ -4,6 +4,7 @@ import com.example.libreria_api.dto.gestionpedidos.PedidoDetailResponseDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoMapper;
 import com.example.libreria_api.dto.gestionpedidos.PedidoRequestDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
+import com.example.libreria_api.exception.ResourceNotFoundException;
 import com.example.libreria_api.model.gestionpedidos.EstadoPedido;
 import com.example.libreria_api.model.gestionpedidos.Pedido;
 import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
@@ -12,7 +13,7 @@ import com.example.libreria_api.repository.gestionpedidos.EstadoPedidoRepository
 import com.example.libreria_api.repository.gestionpedidos.PedidoRepository;
 import com.example.libreria_api.repository.personalizacionproductos.PersonalizacionRepository;
 import com.example.libreria_api.repository.sistemausuarios.UsuarioRepository;
-import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,32 +41,41 @@ public class PedidoService {
 
     @Transactional(readOnly = true)
     public PedidoDetailResponseDTO obtenerPedidoPorId(Integer id) {
-        Pedido pedido = pedidoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Pedido no encontrado con ID: " + id));
+        // ✅ CAMBIO: Usar ResourceNotFoundException en lugar de EntityNotFoundException
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido", "id", id));
+
         Personalizacion personalizacion = null;
         if (pedido.getPerId() != null) {
             personalizacion = personalizacionRepository.findById(pedido.getPerId()).orElse(null);
         }
+
         Usuario cliente = null;
         if (personalizacion != null && personalizacion.getUsuario() != null) {
             cliente = personalizacion.getUsuario();
         }
+
         Usuario empleado = null;
         if (pedido.getUsuIdEmpleado() != null) {
             empleado = usuarioRepository.findById(pedido.getUsuIdEmpleado()).orElse(null);
         }
+
         PedidoDetailResponseDTO dto = new PedidoDetailResponseDTO();
         dto.setPed_id(pedido.getPed_id());
         dto.setPedCodigo(pedido.getPedCodigo());
         dto.setPedFechaCreacion(pedido.getPedFechaCreacion());
         dto.setPedComentarios(pedido.getPedComentarios());
+
         if (pedido.getEstadoPedido() != null) {
             dto.setEstId(pedido.getEstadoPedido().getEst_id());
             dto.setEstadoNombre(pedido.getEstadoPedido().getEstNombre());
         } else {
             dto.setEstadoNombre("Desconocido");
         }
+
         dto.setClienteNombre(cliente != null ? cliente.getUsuNombre() : "Desconocido");
         dto.setEmpleadoNombre(empleado != null ? empleado.getUsuNombre() : "No asignado");
+
         return dto;
     }
 

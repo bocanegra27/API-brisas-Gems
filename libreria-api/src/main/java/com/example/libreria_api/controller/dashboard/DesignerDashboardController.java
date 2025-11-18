@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/designer")
+@RequestMapping("/api/designer")
 @PreAuthorize("hasRole('DISEÑADOR')")
 public class DesignerDashboardController {
 

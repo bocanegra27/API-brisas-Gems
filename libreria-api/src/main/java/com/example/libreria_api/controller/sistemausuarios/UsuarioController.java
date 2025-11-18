@@ -57,6 +57,11 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{usuId}/rol")
+    public UsuarioResponseDTO actualizarRol(@PathVariable Integer usuId, @Valid @RequestBody RolUpdateDTO dto) {
+        return service.actualizarRol(usuId, dto.getRolId());
+    }
+
     // --- ENDPOINT CORREGIDO ---
     // El @RequestParam ya estaba bien, pero lo hago más explícito
     @GetMapping("/count")

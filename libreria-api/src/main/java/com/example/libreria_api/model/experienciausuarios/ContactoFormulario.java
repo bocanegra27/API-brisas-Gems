@@ -52,7 +52,7 @@ public class ContactoFormulario {
     @JoinColumn(name = "usu_id_admin")
     private Usuario usuarioAdmin;
 
-    // Constructores, Getters y Setters no necesitan cambios
+    // Constructores, Getters y Setters
 
     public ContactoFormulario() {}
 
