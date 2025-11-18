@@ -10,7 +10,7 @@ public class PedidoResponseDTO {
     private String pedComentarios;
     private Integer estId;
     private Integer perId;
-    private Integer usuId;
+    private Integer usuId; // ✅ Este campo debe llamarse EXACTAMENTE 'usuId'
 
     // Getters y Setters
     public int getPed_id() {
@@ -61,11 +61,11 @@ public class PedidoResponseDTO {
         this.perId = perId;
     }
 
-    public Integer getUsuId() {
+    public Integer getUsuId() { // ✅ Debe ser getUsuId()
         return usuId;
     }
 
-    public void setUsuId(Integer usuId) {
+    public void setUsuId(Integer usuId) { // ✅ Debe ser setUsuId()
         this.usuId = usuId;
     }
 }
