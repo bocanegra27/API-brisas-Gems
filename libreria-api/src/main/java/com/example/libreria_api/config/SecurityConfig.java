@@ -50,7 +50,8 @@ public class SecurityConfig {
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated()
                 )
-                // Manejo de excepciones de seguridad
+
+                // Manejo de excepciones de seguridad 401 y 403
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authEntryPoint)  // 401
                         .accessDeniedHandler(accessDenied)         // 403
