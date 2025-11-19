@@ -9,11 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -35,34 +31,27 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        // Endpoints públicos (sin autenticación)
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // Endpoints públicos
+                        .requestMatchers("/api/auth/").permitAll()
                         .requestMatchers("/api/usuarios").permitAll()
-                        .requestMatchers("/api/opciones/**").permitAll()
-                        .requestMatchers("/api/valores/**").permitAll()
-                        .requestMatchers("/api/personalizaciones/**").permitAll()
-                        .requestMatchers("/api/contactos/**").permitAll()
-
-                        // ✅ HEALTH CHECK público para monitoreo
-                        .requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers("/actuator/info").permitAll()
-
-                        // ✅ ENDPOINTS DE PEDIDOS - SOLO PARA ADMINISTRADORES
-                        .requestMatchers("/api/pedidos/**").hasRole("ADMINISTRADOR")
-                        .requestMatchers("/api/estados-pedido/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/api/opciones/").permitAll()
+                        .requestMatchers("/api/valores/").permitAll()
+                        .requestMatchers("/api/personalizaciones/").permitAll()
+                        .requestMatchers("/api/contactos/").permitAll()
 
                         // Dashboards por rol
-                        .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
-                        .requestMatchers("/api/designer/**").hasRole("DISEÑADOR")
-                        .requestMatchers("/api/user/**").hasRole("USUARIO")
+                        .requestMatchers("/api/admin/").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/api/designer/").hasRole("DISEÑADOR")
+                        .requestMatchers("/api/user/").hasRole("USUARIO")
 
                         // Endpoints de API generales requieren autenticación
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/").authenticated()
 
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated()
                 )
-                // Manejo de excepciones de seguridad
+
+                // Manejo de excepciones de seguridad 401 y 403
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authEntryPoint)  // 401
                         .accessDeniedHandler(accessDenied)         // 403
@@ -71,19 +60,5 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 }
