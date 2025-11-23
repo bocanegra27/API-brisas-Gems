@@ -10,10 +10,20 @@ public class EstadoPedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int est_id;
 
-    @Column(name = "est_nombre")
+    @Column(name = "est_nombre", nullable = false, length = 50)
     private String estNombre;
 
+    @Column(name = "est_descripcion", length = 200)
+    private String estDescripcion;
+
+    // Constructores
     public EstadoPedido() {
+    }
+
+    public EstadoPedido(int est_id, String estNombre, String estDescripcion) {
+        this.est_id = est_id;
+        this.estNombre = estNombre;
+        this.estDescripcion = estDescripcion;
     }
 
     // Getters y Setters
@@ -31,5 +41,22 @@ public class EstadoPedido {
 
     public void setEstNombre(String estNombre) {
         this.estNombre = estNombre;
+    }
+
+    public String getEstDescripcion() {
+        return estDescripcion;
+    }
+
+    public void setEstDescripcion(String estDescripcion) {
+        this.estDescripcion = estDescripcion;
+    }
+
+    @Override
+    public String toString() {
+        return "EstadoPedido{" +
+                "est_id=" + est_id +
+                ", estNombre='" + estNombre + '\'' +
+                ", estDescripcion='" + estDescripcion + '\'' +
+                '}';
     }
 }
