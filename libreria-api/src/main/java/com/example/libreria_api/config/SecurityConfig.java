@@ -39,6 +39,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/personalizaciones/**").permitAll()
                         .requestMatchers("/api/contactos/**").permitAll()
 
+                        // las imagenes
+                        .requestMatchers("/assets/**").permitAll()
+                        .requestMatchers("/static/**").permitAll()
+
                         // Dashboards por rol
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/designer/**").hasRole("DISEÑADOR")
