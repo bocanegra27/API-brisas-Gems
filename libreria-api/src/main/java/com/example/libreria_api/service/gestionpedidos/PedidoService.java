@@ -14,6 +14,7 @@ import com.example.libreria_api.repository.gestionpedidos.PedidoRepository;
 import com.example.libreria_api.repository.personalizacionproductos.PersonalizacionRepository;
 import com.example.libreria_api.repository.sistemausuarios.UsuarioRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

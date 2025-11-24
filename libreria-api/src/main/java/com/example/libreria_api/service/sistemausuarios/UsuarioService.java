@@ -48,7 +48,7 @@ public class UsuarioService {
 
     @Transactional(readOnly = true)
     public UsuarioResponseDTO obtenerPorId(Integer id) {
-        // ✅ CAMBIO: ResourceNotFoundException
+        //  CAMBIO: ResourceNotFoundException
         Usuario u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
         return toResponse(u);
@@ -56,23 +56,23 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO crear(UsuarioCreateDTO dto) {
-        // ✅ CAMBIO: DuplicateResourceException para email
+        //  CAMBIO: DuplicateResourceException para email
         if (usuarioRepository.existsByUsuCorreo(dto.getCorreo())) {
             throw new DuplicateResourceException("Usuario", "correo", dto.getCorreo());
         }
 
-        // ✅ CAMBIO: DuplicateResourceException para documento
+        //  CAMBIO: DuplicateResourceException para documento
         if (dto.getDocnum() != null && usuarioRepository.existsByUsuDocnum(dto.getDocnum())) {
             throw new DuplicateResourceException("Usuario", "documento", dto.getDocnum());
         }
 
-        // ✅ CAMBIO: ResourceNotFoundException para rol
+        //  CAMBIO: ResourceNotFoundException para rol
         Rol rol = rolRepository.findById(dto.getRolId())
                 .orElseThrow(() -> new ResourceNotFoundException("Rol", "id", dto.getRolId()));
 
         TipoDeDocumento tip = null;
         if (dto.getTipdocId() != null) {
-            // ✅ CAMBIO: ResourceNotFoundException para tipo documento
+            //  CAMBIO: ResourceNotFoundException para tipo documento
             tip = tipoDocumentoRepository.findById(dto.getTipdocId())
                     .orElseThrow(() -> new ResourceNotFoundException("TipoDeDocumento", "id", dto.getTipdocId()));
         }
@@ -93,11 +93,11 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO actualizar(Integer id, UsuarioUpdateDTO dto) {
-        // ✅ CAMBIO: ResourceNotFoundException
+        //  CAMBIO: ResourceNotFoundException
         Usuario u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
 
-        // ✅ CAMBIO: DuplicateResourceException para correo
+        //  CAMBIO: DuplicateResourceException para correo
         if (dto.getCorreo() != null && !dto.getCorreo().equalsIgnoreCase(u.getUsuCorreo())) {
             if (usuarioRepository.existsByUsuCorreo(dto.getCorreo())) {
                 throw new DuplicateResourceException("Usuario", "correo", dto.getCorreo());
@@ -146,11 +146,11 @@ public class UsuarioService {
 
     @Transactional
     public void actualizarPassword(Integer id, PasswordUpdateDTO dto) {
-        // ✅ CAMBIO: ResourceNotFoundException
+        // CAMBIO: ResourceNotFoundException
         Usuario u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
 
-        // ✅ CAMBIO: BadRequestException para contraseña incorrecta
+        // CAMBIO: BadRequestException para contraseña incorrecta
         if (!passwordEncoder.matches(dto.getPasswordActual(), u.getUsuPassword())) {
             throw new BadRequestException("La contraseña actual no es correcta");
         }
@@ -161,11 +161,11 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO actualizarRol(Integer id, Integer nuevoRolId) {
-        // ✅ CAMBIO: ResourceNotFoundException
+        // CAMBIO: ResourceNotFoundException
         Usuario u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
 
-        // ✅ CAMBIO: ResourceNotFoundException para rol
+        // CAMBIO: ResourceNotFoundException para rol
         Rol nuevoRol = rolRepository.findById(nuevoRolId)
                 .orElseThrow(() -> new ResourceNotFoundException("Rol", "id", nuevoRolId));
 
