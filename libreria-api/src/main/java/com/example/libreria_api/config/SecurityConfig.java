@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
@@ -36,7 +35,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         // Endpoints públicos
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()   //dos asteriscos para arregalr problema
                         .requestMatchers("/api/usuarios").permitAll()
                         .requestMatchers("/api/opciones/**").permitAll()
                         .requestMatchers("/api/valores/**").permitAll()
@@ -54,6 +53,10 @@ public class SecurityConfig {
                         // ✅ ENDPOINTS DE PEDIDOS - SOLO PARA ADMINISTRADORES
                         .requestMatchers("/api/pedidos/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/estados-pedido/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/api/opciones/").permitAll()
+                        .requestMatchers("/api/valores/").permitAll()
+                        .requestMatchers("/api/personalizaciones/").permitAll()
+                        .requestMatchers("/api/contactos/").permitAll()
 
                         // Dashboards por rol
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
