@@ -32,7 +32,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         // Endpoints públicos
-                        .requestMatchers("/api/auth/").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()   //dos asteriscos para arregalr problema
                         .requestMatchers("/api/usuarios").permitAll()
                         .requestMatchers("/api/opciones/").permitAll()
                         .requestMatchers("/api/valores/").permitAll()
