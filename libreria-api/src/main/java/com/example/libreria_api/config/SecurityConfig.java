@@ -46,11 +46,11 @@ public class SecurityConfig {
                         .requestMatchers("/assets/**").permitAll()
                         .requestMatchers("/static/**").permitAll()
 
-                        // ✅ HEALTH CHECK público para monitoreo
+                        // HEALTH CHECK público para monitoreo
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/info").permitAll()
 
-                        // ✅ ENDPOINTS DE PEDIDOS - SOLO PARA ADMINISTRADORES
+                        // ENDPOINTS DE PEDIDOS - SOLO PARA ADMINISTRADORES
                         .requestMatchers("/api/pedidos/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/estados-pedido/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/opciones/").permitAll()

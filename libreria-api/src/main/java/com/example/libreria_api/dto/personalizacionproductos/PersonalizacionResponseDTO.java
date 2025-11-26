@@ -7,11 +7,11 @@ public class PersonalizacionResponseDTO {
 
     private int id;
     private LocalDate fecha;
-    private int usuarioClienteId;
+    private Integer usuarioClienteId; // ✅ CAMBIO: int → Integer (permite null)
     private String usuarioNombre;
     private List<DetalleDTO> detalles;
 
-    // Clase interna o separada
+    // Clase interna para los detalles
     public static class DetalleDTO {
         private int detId;
         private int valId;
@@ -43,8 +43,8 @@ public class PersonalizacionResponseDTO {
     public LocalDate getFecha() { return fecha; }
     public void setFecha(LocalDate fecha) { this.fecha = fecha; }
 
-    public int getUsuarioClienteId() { return usuarioClienteId; }
-    public void setUsuarioClienteId(int usuarioClienteId) { this.usuarioClienteId = usuarioClienteId; }
+    public Integer getUsuarioClienteId() { return usuarioClienteId; } // ✅ CAMBIO
+    public void setUsuarioClienteId(Integer usuarioClienteId) { this.usuarioClienteId = usuarioClienteId; } // ✅ CAMBIO
 
     public String getUsuarioNombre() { return usuarioNombre; }
     public void setUsuarioNombre(String usuarioNombre) { this.usuarioNombre = usuarioNombre; }
