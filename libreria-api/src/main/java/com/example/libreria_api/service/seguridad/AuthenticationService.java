@@ -28,9 +28,13 @@ public class AuthenticationService {
                 )
         );
 
-        // Obtener usuario
+        // Obtener usuario (asumiendo que 'user' es una entidad con un método getId())
         var user = usuarioRepository.findByUsuCorreo(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado después de autenticación"));
+
+        // *** PASO 1: Obtener el ID del usuario ***
+        // ASUMIENDO que tu entidad Usuario tiene un método getUsuId()
+        Integer userId = user.getUsuId();
 
         // Generar token JWT
         var jwtToken = jwtService.generateToken(user);
@@ -41,6 +45,8 @@ public class AuthenticationService {
 
         // Construir respuesta con información completa
         return LoginResponseDTO.of(
+                // *** PASO 2: Agregar el userId como primer argumento ***
+                userId, // <-- Nuevo argumento
                 jwtToken,
                 dashboardUrl,
                 userRole,

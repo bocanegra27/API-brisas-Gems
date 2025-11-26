@@ -12,6 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginResponseDTO {
+    // Nuevo campo para el ID del usuario
+    private Integer userId;
     private String token;
     private String dashboardUrl;    // URL de redirección basada en rol
     private String userRole;        // Rol principal del usuario
@@ -20,11 +22,12 @@ public class LoginResponseDTO {
     private String userName;        // Nombre del usuario
     private String message;         // Mensaje de bienvenida
 
-    // Constructor para facilitar la creación
-    public static LoginResponseDTO of(String token, String dashboardUrl,
+    // Constructor estático actualizado para incluir el userId
+    public static LoginResponseDTO of(Integer userId, String token, String dashboardUrl,
                                       String userRole, List<String> roles,
                                       String email, String userName) {
         return LoginResponseDTO.builder()
+                .userId(userId) // Se agrega el ID al builder
                 .token(token)
                 .dashboardUrl(dashboardUrl)
                 .userRole(userRole)
