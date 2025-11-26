@@ -18,10 +18,9 @@ public class Personalizacion {
     @Column(name = "per_fecha", nullable = false)
     private LocalDate perFecha;
 
-    // --- CAMBIO CLAVE AQUÍ ---
-    // Le decimos a Hibernate que SIEMPRE cargue el objeto Usuario junto con la Personalizacion.
+
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "usu_id_cliente", referencedColumnName = "usu_id")
+    @JoinColumn(name = "usu_id_cliente", referencedColumnName = "usu_id", nullable = true)
     private Usuario usuario;
 
     @OneToMany(mappedBy = "personalizacion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -29,7 +28,7 @@ public class Personalizacion {
     @OrderBy("detId ASC")
     private List<DetallePersonalizacion> detalles;
 
-    // ... (El resto de la clase, constructores, getters y setters, no cambia) ...
+
 
     public Personalizacion() {
     }
