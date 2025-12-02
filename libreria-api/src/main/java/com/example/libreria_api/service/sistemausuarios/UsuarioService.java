@@ -34,15 +34,28 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public Page<UsuarioResponseDTO> listarUsuarios(Integer rolId, Boolean activo, Pageable pageable) {
         Page<Usuario> pagina;
+
+        // Si se especifican rolId y activo
         if (rolId != null && activo != null) {
             pagina = usuarioRepository.findByRol_RolIdAndUsuActivo(rolId, activo, pageable);
-        } else if (rolId != null) {
-            pagina = usuarioRepository.findByRol_RolIdAndUsuActivo(rolId, true, pageable);
-        } else if (activo != null) {
-            pagina = usuarioRepository.findByUsuActivo(activo, pageable);
-        } else {
-            pagina = usuarioRepository.findByUsuActivo(true, pageable);
         }
+        // Si solo se especifica rolId (asumimos activo=true si no se indica el filtro 'activo')
+        // OJO: Si quieres listar todos los de ese rol (activos e inactivos), deberías
+        // crear un método findByRol_RolId en el repository.
+        else if (rolId != null) {
+            // Asumiendo que SIEMPRE quieres ver solo los ACTIVOS de un rol, si no se especifica 'activo'
+            pagina = usuarioRepository.findByRol_RolIdAndUsuActivo(rolId, true, pageable);
+        }
+        // Si solo se especifica activo
+        else if (activo != null) {
+            pagina = usuarioRepository.findByUsuActivo(activo, pageable);
+        }
+        // Si no se especifica ningún filtro (rolId == null AND activo == null)
+        else {
+            // CAMBIO A REALIZAR: Llamar a findAll() para obtener activos e inactivos
+            pagina = usuarioRepository.findAll(pageable); // <--- CAMBIO CLAVE
+        }
+
         return pagina.map(this::toResponse);
     }
 
@@ -137,13 +150,17 @@ public class UsuarioService {
 
     @Transactional
     public void eliminar(Integer id) {
-        // ✅ Ya tenías ResourceNotFoundException aquí, perfecto
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
-        usuario.setUsuActivo(false);
-        usuarioRepository.save(usuario);
-    }
+        // La comprobación de existencia antes de eliminar es buena práctica
+        if (!usuarioRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Usuario", "id", id);
+        }
 
+        // CAMBIO CLAVE: Usa deleteById para eliminar el registro de la base de datos
+        usuarioRepository.deleteById(id);
+
+        // Nota: El método deleteById no lanza ResourceNotFoundException si el ID no existe
+        // por eso es mejor comprobar antes con existsById o findById.
+    }
     @Transactional
     public void actualizarPassword(Integer id, PasswordUpdateDTO dto) {
         // CAMBIO: ResourceNotFoundException
