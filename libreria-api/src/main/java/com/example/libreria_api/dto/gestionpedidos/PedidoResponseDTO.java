@@ -1,24 +1,33 @@
 package com.example.libreria_api.dto.gestionpedidos;
 
 import java.util.Date;
+// Si tu modelo Pedido usa java.util.Date, mantenemos Date aquí.
+// Si usas Instant o LocalDateTime en el futuro, recuerda cambiar este import.
 
 public class PedidoResponseDTO {
 
-    private int ped_id;
+    private Integer pedId;
     private String pedCodigo;
     private Date pedFechaCreacion;
     private String pedComentarios;
+
     private Integer estId;
+    private String estadoNombre;
+
+    // 🟢 CAMBIO CLAVE: Campo para la ruta del render (uploads/renders/...)
+    private String renderPath;
+
     private Integer perId;
-    private Integer usuId; // ✅ Este campo debe llamarse EXACTAMENTE 'usuId'
+    private Integer usuId;
 
     // Getters y Setters
-    public int getPed_id() {
-        return ped_id;
+
+    public Integer getPedId() {
+        return pedId;
     }
 
-    public void setPed_id(int ped_id) {
-        this.ped_id = ped_id;
+    public void setPedId(Integer pedId) {
+        this.pedId = pedId;
     }
 
     public String getPedCodigo() {
@@ -53,6 +62,23 @@ public class PedidoResponseDTO {
         this.estId = estId;
     }
 
+    public String getEstadoNombre() {
+        return estadoNombre;
+    }
+
+    public void setEstadoNombre(String estadoNombre) {
+        this.estadoNombre = estadoNombre;
+    }
+
+    // 🟢 NUEVOS GETTER Y SETTER para la ruta del render
+    public String getRenderPath() {
+        return renderPath;
+    }
+
+    public void setRenderPath(String renderPath) {
+        this.renderPath = renderPath;
+    }
+
     public Integer getPerId() {
         return perId;
     }
@@ -61,11 +87,11 @@ public class PedidoResponseDTO {
         this.perId = perId;
     }
 
-    public Integer getUsuId() { // ✅ Debe ser getUsuId()
+    public Integer getUsuId() {
         return usuId;
     }
 
-    public void setUsuId(Integer usuId) { // ✅ Debe ser setUsuId()
+    public void setUsuId(Integer usuId) {
         this.usuId = usuId;
     }
 }

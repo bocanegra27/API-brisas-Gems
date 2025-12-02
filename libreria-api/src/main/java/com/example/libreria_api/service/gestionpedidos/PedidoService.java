@@ -7,42 +7,105 @@ import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
 import com.example.libreria_api.exception.ResourceNotFoundException;
 import com.example.libreria_api.model.gestionpedidos.EstadoPedido;
 import com.example.libreria_api.model.gestionpedidos.Pedido;
+import com.example.libreria_api.model.gestionpedidos.Render3d;
 import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
 import com.example.libreria_api.model.sistemausuarios.Usuario;
 import com.example.libreria_api.repository.gestionpedidos.EstadoPedidoRepository;
 import com.example.libreria_api.repository.gestionpedidos.PedidoRepository;
+import com.example.libreria_api.repository.gestionpedidos.Render3dRepository;
 import com.example.libreria_api.repository.personalizacionproductos.PersonalizacionRepository;
 import com.example.libreria_api.repository.sistemausuarios.UsuarioRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class PedidoService {
+
+    private static final String UPLOAD_DIR = "uploads/renders/";
+
     private final PedidoRepository pedidoRepository;
     private final UsuarioRepository usuarioRepository;
     private final EstadoPedidoRepository estadoPedidoRepository;
     private final PersonalizacionRepository personalizacionRepository;
+    private final Render3dRepository render3dRepository;
 
-    public PedidoService(PedidoRepository pedidoRepository, UsuarioRepository usuarioRepository, EstadoPedidoRepository estadoPedidoRepository, PersonalizacionRepository personalizacionRepository) {
+    public PedidoService(PedidoRepository pedidoRepository, UsuarioRepository usuarioRepository, EstadoPedidoRepository estadoPedidoRepository, PersonalizacionRepository personalizacionRepository, Render3dRepository render3dRepository) {
         this.pedidoRepository = pedidoRepository;
         this.usuarioRepository = usuarioRepository;
         this.estadoPedidoRepository = estadoPedidoRepository;
         this.personalizacionRepository = personalizacionRepository;
+        this.render3dRepository = render3dRepository;
+
+        try {
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error al inicializar el directorio de carga.", e);
+        }
     }
+
+    private String guardarArchivo(MultipartFile file) throws IOException {
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null) {
+            int dotIndex = originalFilename.lastIndexOf('.');
+            if (dotIndex > 0) {
+                extension = originalFilename.substring(dotIndex);
+            }
+        }
+
+        String newFilename = UUID.randomUUID().toString() + extension;
+        Path filePath = Paths.get(UPLOAD_DIR, newFilename);
+
+        Files.copy(file.getInputStream(), filePath);
+
+        return UPLOAD_DIR + newFilename;
+    }
+
 
     @Transactional(readOnly = true)
     public List<PedidoResponseDTO> obtenerTodosLosPedidos() {
-        return pedidoRepository.findAll().stream().map(PedidoMapper::toPedidoResponseDTO).collect(Collectors.toList());
+        System.out.println(">>> INICIANDO CONSULTA DE PEDIDOS...");
+        // Usamos el método que fuerza la carga del estado (EAGER FETCH)
+        List<Pedido> pedidos = pedidoRepository.findAllWithEstadoEagerly();
+
+        if (pedidos.isEmpty()) {
+            return List.of();
+        }
+
+        return pedidos.stream().map(pedido -> {
+            PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
+
+            // LÓGICA DE RENDER: Solo para la carga inicial de la lista
+            try {
+                render3dRepository.findTopRenderByPedId(pedido.getPed_id())
+                        .ifPresent(render -> {
+                            dto.setRenderPath(render.getRenImagen());
+                        });
+            } catch (Exception e) {
+                System.err.println(">>> Advertencia: Error buscando Render para Pedido ID " + pedido.getPed_id());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public PedidoDetailResponseDTO obtenerPedidoPorId(Integer id) {
-        // ✅ CAMBIO: Usar ResourceNotFoundException en lugar de EntityNotFoundException
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido", "id", id));
 
@@ -81,50 +144,102 @@ public class PedidoService {
     }
 
     @Transactional
-    public PedidoResponseDTO guardarPedido(PedidoRequestDTO requestDTO) {
+    public PedidoResponseDTO guardarPedido(PedidoRequestDTO requestDTO, MultipartFile render) {
         try {
             Pedido nuevoPedido = PedidoMapper.toPedido(requestDTO);
 
-            // ASIGNAR ESTADO PEDIDO CORRECTAMENTE usando el repository
-            if (requestDTO.getEstId() != null) {
-                EstadoPedido estado = estadoPedidoRepository.findById(requestDTO.getEstId())
-                        .orElseThrow(() -> new EntityNotFoundException(
-                                "EstadoPedido no encontrado con ID: " + requestDTO.getEstId()));
-                nuevoPedido.setEstadoPedido(estado);
+            // 1. LÓGICA DE ESTADO POR DEFECTO
+            final Integer finalIdEstado = (requestDTO.getEstId() != null) ? requestDTO.getEstId() : 1;
+
+            EstadoPedido estado = estadoPedidoRepository.findById(finalIdEstado)
+                    .orElseThrow(() -> new ResourceNotFoundException("EstadoPedido", "id", finalIdEstado));
+
+            nuevoPedido.setEstadoPedido(estado);
+
+            // 2. LÓGICA DE GENERACIÓN DE CÓDIGO AUTOMÁTICO
+            String fecha = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String randomSuffix = UUID.randomUUID().toString().substring(0, 4).toUpperCase();
+            String codigoGenerado = "PED-" + fecha + "-" + randomSuffix;
+
+            nuevoPedido.setPedCodigo(codigoGenerado);
+
+            // 3. Guardar en base de datos
+            Pedido pedidoGuardado = pedidoRepository.saveAndFlush(nuevoPedido);
+
+            // 4. LÓGICA DE GUARDADO DE RENDER
+            if (render != null && !render.isEmpty()) {
+                String rutaArchivo = guardarArchivo(render);
+
+                Render3d nuevoRender = new Render3d();
+                nuevoRender.setPedido(pedidoGuardado);
+                nuevoRender.setRenFechaAprobacion(LocalDate.now());
+                nuevoRender.setRenImagen(rutaArchivo);
+
+                render3dRepository.save(nuevoRender);
             }
 
-            // Generar código automático si no viene
-            if (nuevoPedido.getPedCodigo() == null || nuevoPedido.getPedCodigo().trim().isEmpty()) {
-                nuevoPedido.setPedCodigo("PED-" + System.currentTimeMillis());
-            }
-
-            Pedido pedidoGuardado = pedidoRepository.save(nuevoPedido);
             return PedidoMapper.toPedidoResponseDTO(pedidoGuardado);
 
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (IOException e) {
+            throw new RuntimeException("Error I/O al guardar el archivo: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new RuntimeException("Error al guardar pedido: " + e.getMessage(), e);
         }
     }
 
     @Transactional
-    public PedidoResponseDTO actualizar(Integer id, PedidoRequestDTO requestDTO) {
+    public PedidoResponseDTO actualizar(Integer id, PedidoRequestDTO requestDTO, MultipartFile render) {
         return pedidoRepository.findById(id).map(pedidoExistente -> {
             try {
-                // Usar el nuevo método del mapper para actualizar
+                // Usar el nuevo método del mapper para actualizar campos básicos
                 PedidoMapper.updatePedidoFromDTO(pedidoExistente, requestDTO);
 
-                // ACTUALIZAR ESTADO si viene en el DTO
+                EstadoPedido estadoActualizado = null; // Variable para guardar el nuevo estado explícitamente
+
+                // 1. ACTUALIZAR ESTADO
                 if (requestDTO.getEstId() != null) {
-                    EstadoPedido nuevoEstado = estadoPedidoRepository.findById(requestDTO.getEstId())
-                            .orElseThrow(() -> new EntityNotFoundException(
-                                    "EstadoPedido no encontrado con ID: " + requestDTO.getEstId()));
+                    final Integer nuevoEstadoId = requestDTO.getEstId();
+
+                    EstadoPedido nuevoEstado = estadoPedidoRepository.findById(nuevoEstadoId)
+                            .orElseThrow(() -> new ResourceNotFoundException("EstadoPedido", "id", nuevoEstadoId));
+
                     pedidoExistente.setEstadoPedido(nuevoEstado);
+                    estadoActualizado = nuevoEstado; // Guardamos referencia
                 }
 
-                Pedido pedidoActualizado = pedidoRepository.save(pedidoExistente);
-                return PedidoMapper.toPedidoResponseDTO(pedidoActualizado);
+                // 2. LÓGICA DE GUARDADO DE NUEVO RENDER
+                if (render != null && !render.isEmpty()) {
+                    String rutaArchivo = guardarArchivo(render);
 
+                    Render3d nuevoRender = new Render3d();
+                    nuevoRender.setRenImagen(rutaArchivo);
+                    nuevoRender.setRenFechaAprobacion(LocalDate.now());
+                    nuevoRender.setPedido(pedidoExistente);
+
+                    render3dRepository.save(nuevoRender);
+                }
+
+                // 3. GUARDAR CAMBIOS (saveAndFlush fuerza el commit inmediato)
+                Pedido pedidoActualizado = pedidoRepository.saveAndFlush(pedidoExistente);
+
+                // 4. GENERAR RESPUESTA Y CORREGIR DATOS "STALE" (OBSOLETOS)
+                PedidoResponseDTO responseDTO = PedidoMapper.toPedidoResponseDTO(pedidoActualizado);
+
+                // Si cambiamos el estado, forzamos que el DTO de respuesta tenga el ID y Nombre nuevos.
+                if (estadoActualizado != null) {
+                    responseDTO.setEstId(estadoActualizado.getEst_id());
+                    responseDTO.setEstadoNombre(estadoActualizado.getEstNombre());
+                    // NO AGREGAMOS LÓGICA DEL RENDER PATH AQUÍ
+                }
+
+                return responseDTO;
+
+            } catch (IOException e) {
+                throw new RuntimeException("Error I/O al guardar el archivo: " + e.getMessage(), e);
             } catch (Exception e) {
+                System.err.println("ERROR CRÍTICO al actualizar pedido ID " + id + ": " + e.getMessage());
                 throw new RuntimeException("Error al actualizar pedido: " + e.getMessage(), e);
             }
         }).orElse(null);

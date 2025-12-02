@@ -1,30 +1,25 @@
 package com.example.libreria_api.dto.gestionpedidos;
 
-import com.example.libreria_api.model.gestionpedidos.EstadoPedido;
 import com.example.libreria_api.model.gestionpedidos.Pedido;
 import java.util.Date;
 
 public class PedidoMapper {
 
     public static PedidoResponseDTO toPedidoResponseDTO(Pedido pedido) {
-        if (pedido == null) {
-            return null;
-        }
+        if (pedido == null) return null;
 
         PedidoResponseDTO dto = new PedidoResponseDTO();
-        dto.setPed_id(pedido.getPed_id());
+        // 🟢 CORRECCIÓN DE NOMBRE: Usamos setPedId, ya que el DTO usa pedId (Resuelve 'setPedId')
+        dto.setPedId(pedido.getPed_id());
+
         dto.setPedCodigo(pedido.getPedCodigo());
         dto.setPedFechaCreacion(pedido.getPedFechaCreacion());
         dto.setPedComentarios(pedido.getPedComentarios());
 
         if (pedido.getEstadoPedido() != null) {
             dto.setEstId(pedido.getEstadoPedido().getEst_id());
+            dto.setEstadoNombre(pedido.getEstadoPedido().getEstNombre());
         }
-
-        dto.setPerId(pedido.getPerId());
-
-        // ✅ CORRECCIÓN CRÍTICA: Mapear usuIdEmpleado a usuId
-        dto.setUsuId(pedido.getUsuIdEmpleado()); // Esto debería resolver el problema del campo
 
         return dto;
     }
@@ -35,27 +30,29 @@ public class PedidoMapper {
         }
 
         Pedido pedido = new Pedido();
-        pedido.setPedCodigo(dto.getPedCodigo());
+        // El código se genera en el Servicio.
+
         pedido.setPedComentarios(dto.getPedComentarios());
         pedido.setPedFechaCreacion(new Date());
         pedido.setPerId(dto.getPerId());
 
-        // ✅ CORRECCIÓN: Mapear usuId a usuIdEmpleado
+        // Mapeamos el ID de usuario al empleado
         pedido.setUsuIdEmpleado(dto.getUsuId());
 
         return pedido;
     }
 
     public static void updatePedidoFromDTO(Pedido pedido, PedidoRequestDTO dto) {
-        if (pedido == null || dto == null) {
-            return;
+        if (dto == null) return;
+
+        if (dto.getPedComentarios() != null) {
+            pedido.setPedComentarios(dto.getPedComentarios());
         }
-
-        pedido.setPedCodigo(dto.getPedCodigo());
-        pedido.setPedComentarios(dto.getPedComentarios());
-        pedido.setPerId(dto.getPerId());
-
-        // ✅ CORRECCIÓN: Mapear usuId a usuIdEmpleado
-        pedido.setUsuIdEmpleado(dto.getUsuId());
+        if (dto.getPerId() != null) {
+            pedido.setPerId(dto.getPerId());
+        }
+        if (dto.getUsuId() != null) {
+            pedido.setUsuIdEmpleado(dto.getUsuId());
+        }
     }
 }

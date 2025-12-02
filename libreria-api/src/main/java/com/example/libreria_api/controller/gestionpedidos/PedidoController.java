@@ -5,13 +5,16 @@ import com.example.libreria_api.dto.gestionpedidos.PedidoRequestDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
 import com.example.libreria_api.service.gestionpedidos.PedidoService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMethod; // Importación necesaria
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/pedidos**")
+@RequestMapping("/api/pedidos")
 public class PedidoController {
 
     private final PedidoService pedidoService;
@@ -20,53 +23,49 @@ public class PedidoController {
         this.pedidoService = pedidoService;
     }
 
-    // Endpoint para obtener la lista general
     @GetMapping
     public ResponseEntity<List<PedidoResponseDTO>> obtenerTodosLosPedidos() {
         List<PedidoResponseDTO> pedidos = pedidoService.obtenerTodosLosPedidos();
         return ResponseEntity.ok(pedidos);
     }
 
-    // Endpoint para crear un nuevo pedido
-    @PostMapping
-    public ResponseEntity<PedidoResponseDTO> crearPedido(@RequestBody PedidoRequestDTO requestDTO) {
-        PedidoResponseDTO nuevoPedido = pedidoService.guardarPedido(requestDTO);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PedidoResponseDTO> guardarPedido(
+            @ModelAttribute PedidoRequestDTO requestDTO,
+            @RequestPart(value = "render", required = false) MultipartFile render) {
+
+        PedidoResponseDTO nuevoPedido = pedidoService.guardarPedido(requestDTO, render);
         return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
     }
 
-    // --- CÓDIGO CLAVE CORREGIDO ---
-    // Endpoint para obtener un pedido específico por ID
     @GetMapping("/{id}")
-    public ResponseEntity<PedidoDetailResponseDTO> obtenerPedidoPorId(@PathVariable("id") Integer id) {
+    public ResponseEntity<PedidoDetailResponseDTO> obtenerPedidoPorId(@PathVariable Integer id) {
         PedidoDetailResponseDTO pedido = pedidoService.obtenerPedidoPorId(id);
         return ResponseEntity.ok(pedido);
     }
 
-    // Endpoint para actualizar un pedido
-    @PutMapping("/{id}")
-    public ResponseEntity<PedidoResponseDTO> actualizar(@PathVariable("id") Integer id, @RequestBody PedidoRequestDTO requestDTO) {
-        PedidoResponseDTO pedidoActualizado = pedidoService.actualizar(id, requestDTO);
-        if (pedidoActualizado != null) {
-            return ResponseEntity.ok(pedidoActualizado);
-        } else {
+    // 🔥 VERSIÓN ESTABLE Y CORREGIDA: Acepta PUT y POST (para el spoofing) y elimina 'consumes'
+    // para aceptar ambos Content-Types (multipart/form-data Y urlencoded).
+    @RequestMapping(value = "/{id}", method = {RequestMethod.PUT, RequestMethod.POST})
+    public ResponseEntity<PedidoResponseDTO> actualizar(
+            @PathVariable Integer id,
+            @ModelAttribute PedidoRequestDTO requestDTO,
+            @RequestPart(value = "render", required = false) MultipartFile render) {
+
+        PedidoResponseDTO pedidoActualizado = pedidoService.actualizar(id, requestDTO, render);
+
+        if (pedidoActualizado == null) {
             return ResponseEntity.notFound().build();
         }
+
+        return ResponseEntity.ok(pedidoActualizado);
     }
 
-    // Endpoint para eliminar un pedido
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarPedido(@PathVariable("id") Integer id) {
-        boolean eliminado = pedidoService.eliminarPedido(id);
-        if (eliminado) {
+    public ResponseEntity<Void> eliminarPedido(@PathVariable Integer id) {
+        if (pedidoService.eliminarPedido(id)) {
             return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
         }
-    }
-
-    @GetMapping("/count")
-    public ResponseEntity<Long> contarPedidosPorEstado(@RequestParam String estado) {
-        // Lo llamaremos desde PHP con /api/pedidos/count?estado=diseño
-        return ResponseEntity.ok(pedidoService.contarPedidosPorEstado(estado));
+        return ResponseEntity.notFound().build();
     }
 }
