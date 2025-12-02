@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
@@ -65,7 +67,18 @@ public class UsuarioController {
     // --- ENDPOINT CORREGIDO ---
     // El @RequestParam ya estaba bien, pero lo hago más explícito
     @GetMapping("/count")
-    public ResponseEntity<Long> contarUsuariosPorActivo(@RequestParam(name = "activo", defaultValue = "true") boolean activo) {
-        return ResponseEntity.ok(service.contarUsuariosPorActivo(activo));
+    public ResponseEntity<Map<String, Long>> contarUsuarios(
+            @RequestParam(required = false) Boolean activo
+    ) {
+        long count;
+
+        if (activo != null) {
+            count = service.contarUsuariosPorActivo(activo);
+        } else {
+            count = service.contarUsuariosPorActivo(true) +
+                    service.contarUsuariosPorActivo(false);
+        }
+
+        return ResponseEntity.ok(Map.of("count", count));
     }
 }
