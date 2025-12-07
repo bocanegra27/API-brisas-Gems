@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/contactos")
@@ -82,8 +83,9 @@ public class ContactoFormularioController {
     }
 
     @GetMapping("/count")
-    public ResponseEntity<Long> contarContactosPorEstado(@RequestParam String estado) {
-        // Lo llamaremos desde PHP con /api/contactos/count?estado=pendiente
-        return ResponseEntity.ok(contactoService.contarContactosPorEstado(estado));
+    public ResponseEntity<Map<String, Long>> contarContactosPorEstado(@RequestParam String estado) {
+        long count = contactoService.contarContactosPorEstado(estado);
+
+        return ResponseEntity.ok(Map.of("count", count));
     }
 }

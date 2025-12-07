@@ -258,4 +258,17 @@ public class PedidoService {
     public long contarPedidosPorEstado(String nombreEstado) {
         return pedidoRepository.countByEstadoPedido_EstNombre(nombreEstado);
     }
+
+    @Transactional(readOnly = true)
+    public long contarPedidosPorEstadoId(Integer estadoId) {
+        return pedidoRepository.countByEstadoId(estadoId);
+    }
+
+    @Transactional(readOnly = true)
+    public long contarTotalPedidos() {
+        return pedidoRepository.count();
+    }
+
+
+
 }
