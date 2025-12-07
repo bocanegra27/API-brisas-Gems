@@ -20,7 +20,9 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public Page<UsuarioResponseDTO> listarUsuarios(@RequestParam(required = false) Integer rolId, @RequestParam(required = false) Boolean activo, Pageable pageable) {
+    public Page<UsuarioResponseDTO> listarUsuarios(
+            @RequestParam(required = false) Integer rolId,
+            @RequestParam(required = false) Boolean activo, Pageable pageable) {
         return service.listarUsuarios(rolId, activo, pageable);
     }
 

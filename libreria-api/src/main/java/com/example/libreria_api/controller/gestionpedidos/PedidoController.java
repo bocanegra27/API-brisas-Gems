@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod; // Importación ne
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/pedidos")
@@ -67,5 +68,20 @@ public class PedidoController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Map<String, Long>> contarPedidosPorEstado(
+            @RequestParam(required = false) Integer estadoId) {
+
+        long count;
+
+        if (estadoId != null) {
+            count = pedidoService.contarPedidosPorEstadoId(estadoId);
+        } else {
+            count = pedidoService.contarTotalPedidos();
+        }
+
+        return ResponseEntity.ok(Map.of("count", count));
     }
 }
