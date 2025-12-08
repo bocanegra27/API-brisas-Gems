@@ -4,51 +4,48 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class PersonalizacionResponseDTO {
-
-    private int id;
+    private Integer id;
     private LocalDate fecha;
-    private Integer usuarioClienteId; // ✅ CAMBIO: int → Integer (permite null)
+    private Integer usuarioClienteId;
     private String usuarioNombre;
+    private Integer sesionId;
+    private String sesionToken;
+    private String tipoCliente;
     private List<DetalleDTO> detalles;
 
-    // Clase interna para los detalles
     public static class DetalleDTO {
-        private int detId;
-        private int valId;
+        private Integer detId;
+        private Integer valId;
         private String valNombre;
-        private int opcionId;
+        private Integer opcionId;
         private String opcionNombre;
 
-        // Getters y setters
-        public int getDetId() { return detId; }
-        public void setDetId(int detId) { this.detId = detId; }
-
-        public int getValId() { return valId; }
-        public void setValId(int valId) { this.valId = valId; }
-
+        public Integer getDetId() { return detId; }
+        public void setDetId(Integer detId) { this.detId = detId; }
+        public Integer getValId() { return valId; }
+        public void setValId(Integer valId) { this.valId = valId; }
         public String getValNombre() { return valNombre; }
         public void setValNombre(String valNombre) { this.valNombre = valNombre; }
-
-        public int getOpcionId() { return opcionId; }
-        public void setOpcionId(int opcionId) { this.opcionId = opcionId; }
-
+        public Integer getOpcionId() { return opcionId; }
+        public void setOpcionId(Integer opcionId) { this.opcionId = opcionId; }
         public String getOpcionNombre() { return opcionNombre; }
         public void setOpcionNombre(String opcionNombre) { this.opcionNombre = opcionNombre; }
     }
 
-    // Getters y setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
     public LocalDate getFecha() { return fecha; }
     public void setFecha(LocalDate fecha) { this.fecha = fecha; }
-
-    public Integer getUsuarioClienteId() { return usuarioClienteId; } // ✅ CAMBIO
-    public void setUsuarioClienteId(Integer usuarioClienteId) { this.usuarioClienteId = usuarioClienteId; } // ✅ CAMBIO
-
+    public Integer getUsuarioClienteId() { return usuarioClienteId; }
+    public void setUsuarioClienteId(Integer usuarioClienteId) { this.usuarioClienteId = usuarioClienteId; }
     public String getUsuarioNombre() { return usuarioNombre; }
     public void setUsuarioNombre(String usuarioNombre) { this.usuarioNombre = usuarioNombre; }
-
+    public Integer getSesionId() { return sesionId; }
+    public void setSesionId(Integer sesionId) { this.sesionId = sesionId; }
+    public String getSesionToken() { return sesionToken; }
+    public void setSesionToken(String sesionToken) { this.sesionToken = sesionToken; }
+    public String getTipoCliente() { return tipoCliente; }
+    public void setTipoCliente(String tipoCliente) { this.tipoCliente = tipoCliente; }
     public List<DetalleDTO> getDetalles() { return detalles; }
     public void setDetalles(List<DetalleDTO> detalles) { this.detalles = detalles; }
 }

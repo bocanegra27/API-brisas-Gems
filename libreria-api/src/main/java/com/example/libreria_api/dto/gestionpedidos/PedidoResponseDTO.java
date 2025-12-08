@@ -1,8 +1,6 @@
 package com.example.libreria_api.dto.gestionpedidos;
 
 import java.util.Date;
-// Si tu modelo Pedido usa java.util.Date, mantenemos Date aquí.
-// Si usas Instant o LocalDateTime en el futuro, recuerda cambiar este import.
 
 public class PedidoResponseDTO {
 
@@ -10,18 +8,19 @@ public class PedidoResponseDTO {
     private String pedCodigo;
     private Date pedFechaCreacion;
     private String pedComentarios;
-
     private Integer estId;
     private String estadoNombre;
-
-    // 🟢 CAMBIO CLAVE: Campo para la ruta del render (uploads/renders/...)
     private String renderPath;
-
     private Integer perId;
     private Integer usuId;
 
-    // Getters y Setters
+    // NUEVOS CAMPOS para sesiones anónimas
+    private Integer sesionId;
+    private String sesionToken;
+    private Integer conId;
+    private String pedIdentificadorCliente;
 
+    // Getters y Setters existentes
     public Integer getPedId() {
         return pedId;
     }
@@ -70,7 +69,6 @@ public class PedidoResponseDTO {
         this.estadoNombre = estadoNombre;
     }
 
-    // 🟢 NUEVOS GETTER Y SETTER para la ruta del render
     public String getRenderPath() {
         return renderPath;
     }
@@ -93,5 +91,38 @@ public class PedidoResponseDTO {
 
     public void setUsuId(Integer usuId) {
         this.usuId = usuId;
+    }
+
+    // NUEVOS GETTERS Y SETTERS
+    public Integer getSesionId() {
+        return sesionId;
+    }
+
+    public void setSesionId(Integer sesionId) {
+        this.sesionId = sesionId;
+    }
+
+    public String getSesionToken() {
+        return sesionToken;
+    }
+
+    public void setSesionToken(String sesionToken) {
+        this.sesionToken = sesionToken;
+    }
+
+    public Integer getConId() {
+        return conId;
+    }
+
+    public void setConId(Integer conId) {
+        this.conId = conId;
+    }
+
+    public String getPedIdentificadorCliente() {
+        return pedIdentificadorCliente;
+    }
+
+    public void setPedIdentificadorCliente(String pedIdentificadorCliente) {
+        this.pedIdentificadorCliente = pedIdentificadorCliente;
     }
 }

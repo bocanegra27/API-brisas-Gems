@@ -35,7 +35,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // Endpoints públicos y de Autenticación
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/usuarios").permitAll() // POST/GET de usuarios
+                        .requestMatchers("/api/usuarios").permitAll()
+                        .requestMatchers("/api/sesiones-anonimas/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/personalizaciones").permitAll()
 
                         // Rutas públicas de lectura (imágenes y salud)
                         .requestMatchers("/assets/**").permitAll()
@@ -56,7 +58,7 @@ public class SecurityConfig {
 
                         // =================================================================
 
-                        // ✅ ENDPOINTS RESTRINGIDOS (Ejemplos)
+                        // ENDPOINTS RESTRINGIDOS (Ejemplos)
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/designer/**").hasRole("DISEÑADOR")
                         .requestMatchers("/api/user/**").hasRole("USUARIO")

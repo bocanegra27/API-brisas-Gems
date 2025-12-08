@@ -6,6 +6,8 @@ import com.example.libreria_api.dto.experienciausuarios.ContactoFormularioRespon
 import com.example.libreria_api.model.experienciausuarios.ContactoFormulario;
 import com.example.libreria_api.model.experienciausuarios.EstadoContacto;
 import com.example.libreria_api.model.experienciausuarios.ViaContacto;
+import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
+import com.example.libreria_api.model.sistemausuarios.SesionAnonima;
 import com.example.libreria_api.model.sistemausuarios.Usuario;
 import com.example.libreria_api.repository.experienciausuarios.ContactoFormularioRepository;
 import com.example.libreria_api.repository.sistemausuarios.UsuarioRepository;
@@ -36,14 +38,31 @@ public class ContactoFormularioService {
         entidad.setConCorreo(dto.getCorreo());
         entidad.setConTelefono(dto.getTelefono());
         entidad.setConMensaje(dto.getMensaje());
+
         if (dto.getVia() != null) {
             entidad.setConVia(ViaContacto.valueOf(dto.getVia()));
         } else {
             entidad.setConVia(ViaContacto.formulario);
         }
+
         entidad.setConTerminos(dto.isTerminos());
         entidad.setConFechaEnvio(LocalDateTime.now());
         entidad.setConEstado(EstadoContacto.pendiente);
+
+        // NUEVO: Mapear sesion anonima si existe
+        if (dto.getSesionId() != null) {
+            SesionAnonima sesion = new SesionAnonima();
+            sesion.setSesId(dto.getSesionId());
+            entidad.setSesion(sesion);
+        }
+
+        // NUEVO: Mapear personalizacion si existe
+        if (dto.getPersonalizacionId() != null) {
+            Personalizacion personalizacion = new Personalizacion();
+            personalizacion.setPerId(dto.getPersonalizacionId());
+            entidad.setPersonalizacion(personalizacion);
+        }
+
         ContactoFormulario guardado = contactoRepository.save(entidad);
         return mapToResponseDTO(guardado);
     }
@@ -105,14 +124,35 @@ public class ContactoFormularioService {
         dto.setTerminos(entidad.isConTerminos());
         dto.setEstado(entidad.getConEstado().name());
         dto.setNotas(entidad.getConNotas());
+
+        // Mapear usuario registrado
         if (entidad.getUsuario() != null) {
             dto.setUsuarioId(entidad.getUsuario().getUsuId());
             dto.setUsuarioNombre(entidad.getUsuario().getUsuNombre());
+            dto.setTipoCliente("registrado");
         }
+        // Mapear sesion anonima
+        else if (entidad.getSesion() != null) {
+            dto.setSesionId(entidad.getSesion().getSesId());
+            dto.setSesionToken(entidad.getSesion().getSesToken().substring(0, 8));
+            dto.setTipoCliente("anonimo");
+        }
+        // Sin usuario ni sesion
+        else {
+            dto.setTipoCliente("externo");
+        }
+
+        // Mapear admin
         if (entidad.getUsuarioAdmin() != null) {
             dto.setUsuarioIdAdmin(entidad.getUsuarioAdmin().getUsuId());
             dto.setUsuarioAdminNombre(entidad.getUsuarioAdmin().getUsuNombre());
         }
+
+        // NUEVO: Mapear personalizacion vinculada
+        if (entidad.getPersonalizacion() != null) {
+            dto.setPersonalizacionId(entidad.getPersonalizacion().getPerId());
+        }
+
         return dto;
     }
 

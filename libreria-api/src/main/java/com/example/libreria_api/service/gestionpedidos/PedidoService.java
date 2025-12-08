@@ -9,6 +9,7 @@ import com.example.libreria_api.model.gestionpedidos.EstadoPedido;
 import com.example.libreria_api.model.gestionpedidos.Pedido;
 import com.example.libreria_api.model.gestionpedidos.Render3d;
 import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
+import com.example.libreria_api.model.sistemausuarios.SesionAnonima;
 import com.example.libreria_api.model.sistemausuarios.Usuario;
 import com.example.libreria_api.repository.gestionpedidos.EstadoPedidoRepository;
 import com.example.libreria_api.repository.gestionpedidos.PedidoRepository;
@@ -162,6 +163,13 @@ public class PedidoService {
             String codigoGenerado = "PED-" + fecha + "-" + randomSuffix;
 
             nuevoPedido.setPedCodigo(codigoGenerado);
+
+            // Mapear sesión anónima si existe
+            if (requestDTO.getSesionId() != null) {
+                SesionAnonima sesion = new SesionAnonima();
+                sesion.setSesId(requestDTO.getSesionId());
+                nuevoPedido.setSesion(sesion);
+            }
 
             // 3. Guardar en base de datos
             Pedido pedidoGuardado = pedidoRepository.saveAndFlush(nuevoPedido);
