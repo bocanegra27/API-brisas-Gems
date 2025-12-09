@@ -8,9 +8,11 @@ import com.example.libreria_api.model.personalizacionproductos.OpcionPersonaliza
 import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
 import com.example.libreria_api.model.personalizacionproductos.ValorPersonalizacion;
 import com.example.libreria_api.model.sistemausuarios.Usuario;
+import com.example.libreria_api.model.sistemausuarios.SesionAnonima;
 import com.example.libreria_api.repository.personalizacionproductos.DetallePersonalizacionRepository;
 import com.example.libreria_api.repository.personalizacionproductos.PersonalizacionRepository;
 import com.example.libreria_api.repository.personalizacionproductos.ValorPersonalizacionRepository;
+import com.example.libreria_api.repository.sistemausuarios.SesionAnonimaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,11 +36,14 @@ public class PersonalizacionService {
     @Autowired
     private ValorPersonalizacionRepository valorPersonalizacionRepository;
 
+    @Autowired
+    private SesionAnonimaRepository sesionAnonimaRepository;
+
     @Transactional(readOnly = true)
     public List<PersonalizacionResponseDTO> filtrarPersonalizaciones(Integer clienteId, LocalDate desde, LocalDate hasta) {
         List<Personalizacion> entidades = personalizacionRepository.findAll();
         return entidades.stream()
-                .filter(p -> clienteId == null || (p.getUsuario() != null && p.getUsuario().getUsuId() == clienteId))
+                .filter(p -> clienteId == null || (p.getUsuario() != null && p.getUsuario().getUsuId().equals(clienteId)))
                 .filter(p -> desde == null || !p.getPerFecha().isBefore(desde))
                 .filter(p -> hasta == null || !p.getPerFecha().isAfter(hasta))
                 .map(this::mapToResponseDTO)
@@ -53,54 +58,58 @@ public class PersonalizacionService {
 
     @Transactional
     public PersonalizacionResponseDTO crear(PersonalizacionCreateDTO dto) {
-        // 1️⃣ Crear el encabezado de personalización
+        // Validar que tenga usuario O sesion (no ambos, no ninguno)
+        if (dto.getUsuarioClienteId() != null && dto.getSesionId() != null) {
+            throw new IllegalArgumentException("No puede especificar usuario y sesion simultaneamente");
+        }
+        if (dto.getUsuarioClienteId() == null && dto.getSesionId() == null) {
+            throw new IllegalArgumentException("Debe especificar usuario o sesion");
+        }
+
         Personalizacion nueva = new Personalizacion();
         nueva.setPerFecha(dto.getFecha());
 
-        // Solo asignar usuario si no es null (usuarios anónimos permitidos)
         if (dto.getUsuarioClienteId() != null) {
             Usuario usuario = new Usuario();
             usuario.setUsuId(dto.getUsuarioClienteId());
             nueva.setUsuario(usuario);
         }
 
-        // Guardar primero la personalización para obtener el ID
+        if (dto.getSesionId() != null) {
+            SesionAnonima sesion = sesionAnonimaRepository.findById(dto.getSesionId())
+                    .orElseThrow(() -> new IllegalArgumentException("Sesion no encontrada"));
+            nueva.setSesion(sesion);
+        }
+
         Personalizacion guardada = personalizacionRepository.save(nueva);
 
-        // 2️⃣ Crear los detalles de personalización (SI HAY VALORES SELECCIONADOS)
         if (dto.getValoresSeleccionados() != null && !dto.getValoresSeleccionados().isEmpty()) {
             List<DetallePersonalizacion> detalles = new ArrayList<>();
 
             for (Integer valorId : dto.getValoresSeleccionados()) {
-                // Buscar el valor en la base de datos
                 ValorPersonalizacion valor = valorPersonalizacionRepository
                         .findById(valorId)
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Valor de personalización no encontrado: " + valorId));
+                        .orElseThrow(() -> new IllegalArgumentException("Valor no encontrado: " + valorId));
 
-                // Crear el detalle
                 DetallePersonalizacion detalle = new DetallePersonalizacion();
                 detalle.setPersonalizacion(guardada);
                 detalle.setValorPersonalizacion(valor);
-
                 detalles.add(detalle);
             }
 
-            // Guardar todos los detalles
             detallePersonalizacionRepository.saveAll(detalles);
-
-            // Asignar los detalles a la personalización guardada (para que se incluyan en la respuesta)
             guardada.setDetalles(detalles);
         }
 
-        // 3️⃣ Retornar el DTO con todos los datos
         return mapToResponseDTO(guardada);
     }
 
     @Transactional
     public PersonalizacionResponseDTO actualizar(Integer id, PersonalizacionUpdateDTO dto) {
         return personalizacionRepository.findById(id).map(p -> {
-            if (dto.getFecha() != null) p.setPerFecha(dto.getFecha());
+            if (dto.getFecha() != null) {
+                p.setPerFecha(dto.getFecha());
+            }
             if (dto.getUsuarioClienteId() != null) {
                 Usuario usuario = new Usuario();
                 usuario.setUsuId(dto.getUsuarioClienteId());
@@ -125,15 +134,16 @@ public class PersonalizacionService {
         dto.setId(p.getPerId());
         dto.setFecha(p.getPerFecha());
 
-        // Mapear usuario (puede ser null para usuarios anónimos)
         if (p.getUsuario() != null) {
             dto.setUsuarioClienteId(p.getUsuario().getUsuId());
             dto.setUsuarioNombre(p.getUsuario().getUsuNombre());
-        } else {
-            dto.setUsuarioClienteId(null); // ✅ Ahora sí retorna null correctamente
+            dto.setTipoCliente("registrado");
+        } else if (p.getSesion() != null) {
+            dto.setSesionId(p.getSesion().getSesId());
+            dto.setSesionToken(p.getSesion().getSesToken().substring(0, 8));
+            dto.setTipoCliente("anonimo");
         }
 
-        // Mapear detalles
         if (p.getDetalles() != null && !p.getDetalles().isEmpty()) {
             List<PersonalizacionResponseDTO.DetalleDTO> detallesDTO = p.getDetalles().stream()
                     .map(detalle -> {

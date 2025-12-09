@@ -18,24 +18,18 @@ public class ContactoFormularioCreateDTO {
     @NotBlank
     private String mensaje;
 
-    private String via; // opcional, null = usa default de BD
+    private String via;
 
-    @AssertTrue(message = "Debe aceptar los términos")
+    @AssertTrue(message = "Debe aceptar los terminos")
     private boolean terminos;
 
-    // ===== Constructores =====
+    // NUEVOS CAMPOS para sesiones anonimas
+    private Integer sesionId;
+    private Integer personalizacionId;
+
     public ContactoFormularioCreateDTO() {}
 
-    public ContactoFormularioCreateDTO(String nombre, String correo, String telefono, String mensaje, String via, boolean terminos) {
-        this.nombre = nombre;
-        this.correo = correo;
-        this.telefono = telefono;
-        this.mensaje = mensaje;
-        this.via = via;
-        this.terminos = terminos;
-    }
-
-    // ===== Getters y Setters =====
+    // Getters y Setters existentes
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
@@ -54,6 +48,15 @@ public class ContactoFormularioCreateDTO {
     public boolean isTerminos() { return terminos; }
     public void setTerminos(boolean terminos) { this.terminos = terminos; }
 
+    // NUEVOS GETTERS Y SETTERS
+    public Integer getSesionId() { return sesionId; }
+    public void setSesionId(Integer sesionId) { this.sesionId = sesionId; }
+
+    public Integer getPersonalizacionId() { return personalizacionId; }
+    public void setPersonalizacionId(Integer personalizacionId) {
+        this.personalizacionId = personalizacionId;
+    }
+
     @Override
     public String toString() {
         return "ContactoFormularioCreateDTO{" +
@@ -63,6 +66,8 @@ public class ContactoFormularioCreateDTO {
                 ", mensaje='" + mensaje + '\'' +
                 ", via='" + via + '\'' +
                 ", terminos=" + terminos +
+                ", sesionId=" + sesionId +
+                ", personalizacionId=" + personalizacionId +
                 '}';
     }
 }

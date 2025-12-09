@@ -14,38 +14,20 @@ public class ContactoFormularioResponseDTO {
     private boolean terminos;
     private String estado;
     private String notas;
-
     private Integer usuarioId;
     private String usuarioNombre;
-
     private Integer usuarioIdAdmin;
     private String usuarioAdminNombre;
 
-    // ===== Constructores =====
+    // NUEVOS CAMPOS para sesiones anonimas
+    private Integer sesionId;
+    private String sesionToken;
+    private Integer personalizacionId;
+    private String tipoCliente;
+
     public ContactoFormularioResponseDTO() {}
 
-    public ContactoFormularioResponseDTO(Integer id, String nombre, String correo, String telefono, String mensaje,
-                                         LocalDateTime fechaEnvio, String via, boolean terminos,
-                                         String estado, String notas,
-                                         Integer usuarioId, String usuarioNombre,
-                                         Integer usuarioIdAdmin, String usuarioAdminNombre) {
-        this.id = id;
-        this.nombre = nombre;
-        this.correo = correo;
-        this.telefono = telefono;
-        this.mensaje = mensaje;
-        this.fechaEnvio = fechaEnvio;
-        this.via = via;
-        this.terminos = terminos;
-        this.estado = estado;
-        this.notas = notas;
-        this.usuarioId = usuarioId;
-        this.usuarioNombre = usuarioNombre;
-        this.usuarioIdAdmin = usuarioIdAdmin;
-        this.usuarioAdminNombre = usuarioAdminNombre;
-    }
-
-    // ===== Getters y Setters =====
+    // Getters y Setters existentes
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -86,7 +68,24 @@ public class ContactoFormularioResponseDTO {
     public void setUsuarioIdAdmin(Integer usuarioIdAdmin) { this.usuarioIdAdmin = usuarioIdAdmin; }
 
     public String getUsuarioAdminNombre() { return usuarioAdminNombre; }
-    public void setUsuarioAdminNombre(String usuarioAdminNombre) { this.usuarioAdminNombre = usuarioAdminNombre; }
+    public void setUsuarioAdminNombre(String usuarioAdminNombre) {
+        this.usuarioAdminNombre = usuarioAdminNombre;
+    }
+
+    // NUEVOS GETTERS Y SETTERS
+    public Integer getSesionId() { return sesionId; }
+    public void setSesionId(Integer sesionId) { this.sesionId = sesionId; }
+
+    public String getSesionToken() { return sesionToken; }
+    public void setSesionToken(String sesionToken) { this.sesionToken = sesionToken; }
+
+    public Integer getPersonalizacionId() { return personalizacionId; }
+    public void setPersonalizacionId(Integer personalizacionId) {
+        this.personalizacionId = personalizacionId;
+    }
+
+    public String getTipoCliente() { return tipoCliente; }
+    public void setTipoCliente(String tipoCliente) { this.tipoCliente = tipoCliente; }
 
     @Override
     public String toString() {
@@ -105,6 +104,9 @@ public class ContactoFormularioResponseDTO {
                 ", usuarioNombre='" + usuarioNombre + '\'' +
                 ", usuarioIdAdmin=" + usuarioIdAdmin +
                 ", usuarioAdminNombre='" + usuarioAdminNombre + '\'' +
+                ", sesionId=" + sesionId +
+                ", personalizacionId=" + personalizacionId +
+                ", tipoCliente='" + tipoCliente + '\'' +
                 '}';
     }
 }

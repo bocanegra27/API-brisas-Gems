@@ -41,4 +41,10 @@ public interface ContactoFormularioRepository extends JpaRepository<ContactoForm
                                               @Param("usuarioId") Integer usuarioId,
                                               @Param("desde") LocalDateTime desde,
                                               @Param("hasta") LocalDateTime hasta);
+
+    @Query("SELECT c FROM ContactoFormulario c WHERE c.sesion.sesId = :sesionId")
+    List<ContactoFormulario> findBySesionId(@Param("sesionId") Integer sesionId);
+
+    @Query("SELECT c FROM ContactoFormulario c WHERE c.personalizacion.perId = :personalizacionId")
+    List<ContactoFormulario> findByPersonalizacionId(@Param("personalizacionId") Integer personalizacionId);
 }

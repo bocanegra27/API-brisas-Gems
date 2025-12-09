@@ -12,29 +12,20 @@ public class PedidoDetailResponseDTO {
     private String estadoNombre;
     private String clienteNombre;
     private String empleadoNombre;
-    private Integer perId;      // ✅ NUEVO: ID de personalización
-    private Integer usuId;      // ✅ NUEVO: ID de usuario
+    private Integer perId;
+    private Integer usuId;
 
-    // Constructores
+    // NUEVOS CAMPOS para sesiones anónimas
+    private Integer sesionId;
+    private String sesionToken;
+    private Integer conId;
+    private String pedIdentificadorCliente;
+
+    // Constructor vacío
     public PedidoDetailResponseDTO() {
     }
 
-    public PedidoDetailResponseDTO(int ped_id, String pedCodigo, Date pedFechaCreacion,
-                                   String pedComentarios, Integer estId, String estadoNombre,
-                                   String clienteNombre, String empleadoNombre, Integer perId, Integer usuId) {
-        this.ped_id = ped_id;
-        this.pedCodigo = pedCodigo;
-        this.pedFechaCreacion = pedFechaCreacion;
-        this.pedComentarios = pedComentarios;
-        this.estId = estId;
-        this.estadoNombre = estadoNombre;
-        this.clienteNombre = clienteNombre;
-        this.empleadoNombre = empleadoNombre;
-        this.perId = perId;     // ✅ NUEVO
-        this.usuId = usuId;     // ✅ NUEVO
-    }
-
-    // Getters y Setters
+    // Getters y Setters existentes
     public int getPed_id() {
         return ped_id;
     }
@@ -99,7 +90,6 @@ public class PedidoDetailResponseDTO {
         this.empleadoNombre = empleadoNombre;
     }
 
-    // ✅ NUEVOS GETTERS Y SETTERS
     public Integer getPerId() {
         return perId;
     }
@@ -116,6 +106,39 @@ public class PedidoDetailResponseDTO {
         this.usuId = usuId;
     }
 
+    // NUEVOS GETTERS Y SETTERS
+    public Integer getSesionId() {
+        return sesionId;
+    }
+
+    public void setSesionId(Integer sesionId) {
+        this.sesionId = sesionId;
+    }
+
+    public String getSesionToken() {
+        return sesionToken;
+    }
+
+    public void setSesionToken(String sesionToken) {
+        this.sesionToken = sesionToken;
+    }
+
+    public Integer getConId() {
+        return conId;
+    }
+
+    public void setConId(Integer conId) {
+        this.conId = conId;
+    }
+
+    public String getPedIdentificadorCliente() {
+        return pedIdentificadorCliente;
+    }
+
+    public void setPedIdentificadorCliente(String pedIdentificadorCliente) {
+        this.pedIdentificadorCliente = pedIdentificadorCliente;
+    }
+
     @Override
     public String toString() {
         return "PedidoDetailResponseDTO{" +
@@ -128,6 +151,8 @@ public class PedidoDetailResponseDTO {
                 ", empleadoNombre='" + empleadoNombre + '\'' +
                 ", perId=" + perId +
                 ", usuId=" + usuId +
+                ", sesionId=" + sesionId +
+                ", pedIdentificadorCliente='" + pedIdentificadorCliente + '\'' +
                 '}';
     }
 }

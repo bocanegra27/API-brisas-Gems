@@ -2,14 +2,17 @@ package com.example.libreria_api.dto.gestionpedidos;
 
 public class PedidoRequestDTO {
 
-    // Se eliminó pedCodigo para que sea generado por el sistema
     private String pedComentarios;
-    private Integer estId; // Puede ser nulo (el sistema asignará 1 por defecto)
+    private Integer estId;
     private Integer perId;
     private Integer usuId;
 
-    // Getters y Setters
+    // NUEVOS CAMPOS para sesiones anónimas
+    private Integer sesionId;
+    private Integer conId;
+    private String pedIdentificadorCliente;
 
+    // Getters y Setters existentes
     public String getPedComentarios() {
         return pedComentarios;
     }
@@ -40,5 +43,30 @@ public class PedidoRequestDTO {
 
     public void setUsuId(Integer usuId) {
         this.usuId = usuId;
+    }
+
+    // NUEVOS GETTERS Y SETTERS
+    public Integer getSesionId() {
+        return sesionId;
+    }
+
+    public void setSesionId(Integer sesionId) {
+        this.sesionId = sesionId;
+    }
+
+    public Integer getConId() {
+        return conId;
+    }
+
+    public void setConId(Integer conId) {
+        this.conId = conId;
+    }
+
+    public String getPedIdentificadorCliente() {
+        return pedIdentificadorCliente;
+    }
+
+    public void setPedIdentificadorCliente(String pedIdentificadorCliente) {
+        this.pedIdentificadorCliente = pedIdentificadorCliente;
     }
 }

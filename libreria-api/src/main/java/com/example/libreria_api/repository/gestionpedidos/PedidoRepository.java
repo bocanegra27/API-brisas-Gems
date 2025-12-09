@@ -16,5 +16,8 @@ public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
 
     @Query("SELECT COUNT(p) FROM Pedido p WHERE p.estadoPedido.est_id = :estadoId")
     long countByEstadoId(@Param("estadoId") Integer estadoId);
+
+    @Query("SELECT p FROM Pedido p WHERE p.sesion.sesId = :sesionId")
+    List<Pedido> findBySesionId(@Param("sesionId") Integer sesionId);
 }
 

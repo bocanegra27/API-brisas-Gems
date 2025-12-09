@@ -1,5 +1,7 @@
 package com.example.libreria_api.model.experienciausuarios;
 
+import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
+import com.example.libreria_api.model.sistemausuarios.SesionAnonima;
 import com.example.libreria_api.model.sistemausuarios.Usuario;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -16,7 +18,6 @@ public class ContactoFormulario {
     @Column(name = "con_nombre", nullable = false, length = 150)
     private String conNombre;
 
-    // --- LÍNEA CORREGIDA ---
     // Aseguramos que la variable 'conCorreo' esté correctamente mapeada a la columna 'con_correo'
     @Column(name = "con_correo", length = 100)
     private String conCorreo;
@@ -51,6 +52,14 @@ public class ContactoFormulario {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usu_id_admin")
     private Usuario usuarioAdmin;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ses_id")
+    private SesionAnonima sesion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "per_id")
+    private Personalizacion personalizacion;
 
     // Constructores, Getters y Setters
 
@@ -91,4 +100,12 @@ public class ContactoFormulario {
 
     public Usuario getUsuarioAdmin() { return usuarioAdmin; }
     public void setUsuarioAdmin(Usuario usuarioAdmin) { this.usuarioAdmin = usuarioAdmin; }
+
+    public SesionAnonima getSesion() { return sesion; }
+    public void setSesion(SesionAnonima sesion) { this.sesion = sesion; }
+
+    public Personalizacion getPersonalizacion() { return personalizacion; }
+    public void setPersonalizacion(Personalizacion personalizacion) {
+        this.personalizacion = personalizacion;
+    }
 }

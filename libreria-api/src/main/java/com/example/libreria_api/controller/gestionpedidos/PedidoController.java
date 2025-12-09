@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestMethod; // Importación necesaria
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -83,5 +83,22 @@ public class PedidoController {
         }
 
         return ResponseEntity.ok(Map.of("count", count));
+    }
+
+    // ==============================
+// CREAR PEDIDO DESDE CONTACTO
+// ==============================
+    @PostMapping("/desde-contacto/{contactoId}")
+    public ResponseEntity<PedidoResponseDTO> crearPedidoDesdeContacto(
+            @PathVariable Integer contactoId,
+            @RequestParam(required = false) Integer estadoId,
+            @RequestParam(required = false) String comentarios
+    ) {
+        PedidoResponseDTO pedido = pedidoService.crearDesdeContacto(
+                contactoId,
+                estadoId,
+                comentarios
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
     }
 }
