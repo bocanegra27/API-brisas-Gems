@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +41,7 @@ public class PersonalizacionService {
     private SesionAnonimaRepository sesionAnonimaRepository;
 
     @Transactional(readOnly = true)
-    public List<PersonalizacionResponseDTO> filtrarPersonalizaciones(Integer clienteId, LocalDate desde, LocalDate hasta) {
+    public List<PersonalizacionResponseDTO> filtrarPersonalizaciones(Integer clienteId, LocalDateTime desde, LocalDateTime hasta) {
         List<Personalizacion> entidades = personalizacionRepository.findAll();
         return entidades.stream()
                 .filter(p -> clienteId == null || (p.getUsuario() != null && p.getUsuario().getUsuId().equals(clienteId)))
@@ -140,7 +141,15 @@ public class PersonalizacionService {
             dto.setTipoCliente("registrado");
         } else if (p.getSesion() != null) {
             dto.setSesionId(p.getSesion().getSesId());
-            dto.setSesionToken(p.getSesion().getSesToken().substring(0, 8));
+
+            // ✅ CAMBIO: Verificación segura del token
+            String token = p.getSesion().getSesToken();
+            if (token != null && token.length() >= 8) {
+                dto.setSesionToken(token.substring(0, 8));
+            } else if (token != null) {
+                dto.setSesionToken(token);
+            }
+
             dto.setTipoCliente("anonimo");
         }
 

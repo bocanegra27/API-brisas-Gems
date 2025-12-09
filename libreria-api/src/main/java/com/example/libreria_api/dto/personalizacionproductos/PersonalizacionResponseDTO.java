@@ -1,11 +1,11 @@
 package com.example.libreria_api.dto.personalizacionproductos;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class PersonalizacionResponseDTO {
     private Integer id;
-    private LocalDate fecha;
+    private LocalDateTime fecha;
     private Integer usuarioClienteId;
     private String usuarioNombre;
     private Integer sesionId;
@@ -34,8 +34,8 @@ public class PersonalizacionResponseDTO {
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
-    public LocalDate getFecha() { return fecha; }
-    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
+    public LocalDateTime getFecha() { return fecha; }
+    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
     public Integer getUsuarioClienteId() { return usuarioClienteId; }
     public void setUsuarioClienteId(Integer usuarioClienteId) { this.usuarioClienteId = usuarioClienteId; }
     public String getUsuarioNombre() { return usuarioNombre; }

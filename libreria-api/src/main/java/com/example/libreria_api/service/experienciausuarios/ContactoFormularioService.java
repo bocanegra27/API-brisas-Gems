@@ -148,7 +148,16 @@ public class ContactoFormularioService {
         // Mapear sesion anonima
         else if (entidad.getSesion() != null) {
             dto.setSesionId(entidad.getSesion().getSesId());
-            dto.setSesionToken(entidad.getSesion().getSesToken().substring(0, 8));
+
+            // ✅ CAMBIO: Verificación segura del token
+            String token = entidad.getSesion().getSesToken();
+            if (token != null && token.length() >= 8) {
+                dto.setSesionToken(token.substring(0, 8));
+            } else if (token != null) {
+                dto.setSesionToken(token);
+            }
+            // Si token es null, simplemente no se setea y queda null en el DTO
+
             dto.setTipoCliente("anonimo");
         }
         // Sin usuario ni sesion
@@ -162,7 +171,7 @@ public class ContactoFormularioService {
             dto.setUsuarioAdminNombre(entidad.getUsuarioAdmin().getUsuNombre());
         }
 
-        // NUEVO: Mapear personalizacion vinculada
+        // Mapear personalizacion vinculada
         if (entidad.getPersonalizacion() != null) {
             dto.setPersonalizacionId(entidad.getPersonalizacion().getPerId());
         }
