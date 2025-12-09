@@ -6,17 +6,25 @@ import com.example.libreria_api.dto.experienciausuarios.ContactoFormularioRespon
 import com.example.libreria_api.model.experienciausuarios.ContactoFormulario;
 import com.example.libreria_api.model.experienciausuarios.EstadoContacto;
 import com.example.libreria_api.model.experienciausuarios.ViaContacto;
+import com.example.libreria_api.model.personalizacionproductos.DetallePersonalizacion;
+import com.example.libreria_api.model.personalizacionproductos.OpcionPersonalizacion;
 import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
+import com.example.libreria_api.model.personalizacionproductos.ValorPersonalizacion;
 import com.example.libreria_api.model.sistemausuarios.SesionAnonima;
 import com.example.libreria_api.model.sistemausuarios.Usuario;
 import com.example.libreria_api.repository.experienciausuarios.ContactoFormularioRepository;
 import com.example.libreria_api.repository.sistemausuarios.UsuarioRepository;
+import com.example.libreria_api.repository.personalizacionproductos.PersonalizacionRepository;
+import com.example.libreria_api.repository.personalizacionproductos.DetallePersonalizacionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,11 +32,17 @@ public class ContactoFormularioService {
 
     private final ContactoFormularioRepository contactoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PersonalizacionRepository personalizacionRepository;
+    private final DetallePersonalizacionRepository detallePersonalizacionRepository;
 
     public ContactoFormularioService(ContactoFormularioRepository contactoRepository,
-                                     UsuarioRepository usuarioRepository) {
+                                     UsuarioRepository usuarioRepository,
+                                     PersonalizacionRepository personalizacionRepository,
+                                     DetallePersonalizacionRepository detallePersonalizacionRepository) {
         this.contactoRepository = contactoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.personalizacionRepository = personalizacionRepository;
+        this.detallePersonalizacionRepository = detallePersonalizacionRepository;
     }
 
     @Transactional
@@ -164,5 +178,75 @@ public class ContactoFormularioService {
         } catch (IllegalArgumentException e) {
              return 0;
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> obtenerContactoConPersonalizacion(Integer contactoId) {
+        // Obtener contacto
+        ContactoFormulario contacto = contactoRepository.findById(contactoId)
+                .orElseThrow(() -> new EntityNotFoundException("Contacto no encontrado"));
+
+        Map<String, Object> resultado = new HashMap<>();
+
+        // Datos básicos del contacto
+        resultado.put("contacto", mapToResponseDTO(contacto));
+
+        // Si tiene personalización vinculada, obtener detalles
+        if (contacto.getPersonalizacion() != null) {
+            Integer perId = contacto.getPersonalizacion().getPerId();
+
+            // Obtener personalización completa
+            Personalizacion personalizacion = personalizacionRepository.findById(perId)
+                    .orElse(null);
+
+            if (personalizacion != null) {
+                Map<String, Object> datosPersonalizacion = new HashMap<>();
+                datosPersonalizacion.put("id", personalizacion.getPerId());
+                datosPersonalizacion.put("fecha", personalizacion.getPerFecha());
+
+                // Obtener detalles de personalización
+                List<DetallePersonalizacion> detalles =
+                        detallePersonalizacionRepository.findByPersonalizacion_PerId(perId);
+
+                // Construir resumen legible
+                Map<String, String> resumen = new HashMap<>();
+                List<Map<String, Object>> detallesFormateados = new ArrayList<>();
+
+                for (DetallePersonalizacion detalle : detalles) {
+                    // Obtener nombres desde las relaciones
+                    ValorPersonalizacion valor = detalle.getValorPersonalizacion();
+                    OpcionPersonalizacion opcion = valor.getOpcionPersonalizacion();
+
+                    String opcionNombre = opcion.getOpcNombre();
+                    String valorNombre = valor.getValNombre();
+
+                    // Agregar al resumen
+                    resumen.put(opcionNombre, valorNombre);
+
+                    // Agregar a detalles formateados
+                    Map<String, Object> detalleFormateado = new HashMap<>();
+                    detalleFormateado.put("detId", detalle.getDetId());
+                    detalleFormateado.put("opcionId", opcion.getOpcId());
+                    detalleFormateado.put("opcionNombre", opcionNombre);
+                    detalleFormateado.put("valorId", valor.getValId());
+                    detalleFormateado.put("valorNombre", valorNombre);
+                    detalleFormateado.put("valorImagen", valor.getValImagen());
+
+                    detallesFormateados.add(detalleFormateado);
+                }
+
+                datosPersonalizacion.put("detalles", detallesFormateados);
+                datosPersonalizacion.put("resumen", resumen);
+
+                resultado.put("personalizacion", datosPersonalizacion);
+                resultado.put("tienePersonalizacion", true);
+            } else {
+                resultado.put("tienePersonalizacion", false);
+            }
+        } else {
+            resultado.put("tienePersonalizacion", false);
+        }
+
+        return resultado;
     }
 }

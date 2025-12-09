@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/usuarios").permitAll()
                         .requestMatchers("/api/sesiones-anonimas/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/personalizaciones").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/contactos").permitAll()
 
                         // Rutas públicas de lectura (imágenes y salud)
                         .requestMatchers("/assets/**").permitAll()
@@ -62,7 +63,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/designer/**").hasRole("DISEÑADOR")
                         .requestMatchers("/api/user/**").hasRole("USUARIO")
-                        .requestMatchers("/api/estados-pedido/**").hasRole("ADMINISTRADOR") // Rutas sensibles
+                        .requestMatchers("/api/estados-pedido/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos/desde-contacto/**").hasRole("ADMINISTRADOR")
 
                         // Regla Catch-all: Si no coincide con lo anterior, requiere autenticación
                         .requestMatchers("/api/**").authenticated()

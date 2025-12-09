@@ -88,4 +88,10 @@ public class ContactoFormularioController {
 
         return ResponseEntity.ok(Map.of("count", count));
     }
+
+    @GetMapping("/{id}/con-personalizacion")
+    public ResponseEntity<Map<String, Object>> obtenerContactoConPersonalizacion(@PathVariable Integer id) {
+        Map<String, Object> resultado = contactoService.obtenerContactoConPersonalizacion(id);
+        return ResponseEntity.ok(resultado);
+    }
 }

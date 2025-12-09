@@ -5,18 +5,21 @@ import com.example.libreria_api.dto.gestionpedidos.PedidoMapper;
 import com.example.libreria_api.dto.gestionpedidos.PedidoRequestDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
 import com.example.libreria_api.exception.ResourceNotFoundException;
+import com.example.libreria_api.model.experienciausuarios.ContactoFormulario;
 import com.example.libreria_api.model.gestionpedidos.EstadoPedido;
 import com.example.libreria_api.model.gestionpedidos.Pedido;
 import com.example.libreria_api.model.gestionpedidos.Render3d;
 import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
 import com.example.libreria_api.model.sistemausuarios.SesionAnonima;
 import com.example.libreria_api.model.sistemausuarios.Usuario;
+import com.example.libreria_api.repository.experienciausuarios.ContactoFormularioRepository;
 import com.example.libreria_api.repository.gestionpedidos.EstadoPedidoRepository;
 import com.example.libreria_api.repository.gestionpedidos.PedidoRepository;
 import com.example.libreria_api.repository.gestionpedidos.Render3dRepository;
 import com.example.libreria_api.repository.personalizacionproductos.PersonalizacionRepository;
 import com.example.libreria_api.repository.sistemausuarios.UsuarioRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -40,13 +44,20 @@ public class PedidoService {
     private final UsuarioRepository usuarioRepository;
     private final EstadoPedidoRepository estadoPedidoRepository;
     private final PersonalizacionRepository personalizacionRepository;
+    private final ContactoFormularioRepository contactoRepository;
     private final Render3dRepository render3dRepository;
 
-    public PedidoService(PedidoRepository pedidoRepository, UsuarioRepository usuarioRepository, EstadoPedidoRepository estadoPedidoRepository, PersonalizacionRepository personalizacionRepository, Render3dRepository render3dRepository) {
+    public PedidoService(PedidoRepository pedidoRepository,
+                         UsuarioRepository usuarioRepository,
+                         EstadoPedidoRepository estadoPedidoRepository,
+                         PersonalizacionRepository personalizacionRepository,
+                         ContactoFormularioRepository contactoRepository,
+                         Render3dRepository render3dRepository) {
         this.pedidoRepository = pedidoRepository;
         this.usuarioRepository = usuarioRepository;
         this.estadoPedidoRepository = estadoPedidoRepository;
         this.personalizacionRepository = personalizacionRepository;
+        this.contactoRepository = contactoRepository;
         this.render3dRepository = render3dRepository;
 
         try {
@@ -275,6 +286,91 @@ public class PedidoService {
     @Transactional(readOnly = true)
     public long contarTotalPedidos() {
         return pedidoRepository.count();
+    }
+
+    @Transactional
+    public PedidoResponseDTO crearDesdeContacto(Integer contactoId, Integer estadoId, String comentarios) {
+        // Obtener contacto
+        ContactoFormulario contacto = contactoRepository.findById(contactoId)
+                .orElseThrow(() -> new EntityNotFoundException("Contacto no encontrado"));
+
+        // Crear pedido
+        Pedido pedido = new Pedido();
+
+        // Generar código único
+        String codigo = generarCodigoPedido();
+        pedido.setPedCodigo(codigo);
+
+        // Fechas
+        pedido.setPedFechaCreacion(new Date());
+
+        // Comentarios
+        if (comentarios != null && !comentarios.isEmpty()) {
+            pedido.setPedComentarios(comentarios);
+        } else {
+            // Comentario por defecto con info del contacto
+            String comentarioAuto = String.format(
+                    "Pedido creado desde contacto de %s (%s). Mensaje: %s",
+                    contacto.getConNombre(),
+                    contacto.getConCorreo(),
+                    contacto.getConMensaje().substring(0, Math.min(100, contacto.getConMensaje().length()))
+            );
+            pedido.setPedComentarios(comentarioAuto);
+        }
+
+        // Estado
+        if (estadoId != null) {
+            EstadoPedido estado = estadoPedidoRepository.findById(estadoId)
+                    .orElseThrow(() -> new EntityNotFoundException("Estado no encontrado"));
+            pedido.setEstadoPedido(estado);
+        } else {
+            // Estado por defecto: 1 (Pendiente)
+            EstadoPedido estadoDefault = estadoPedidoRepository.findById(1)
+                    .orElseThrow(() -> new EntityNotFoundException("Estado default no encontrado"));
+            pedido.setEstadoPedido(estadoDefault);
+        }
+
+        // VINCULAR CONTACTO
+        pedido.setConId(contactoId);
+
+        // VINCULAR PERSONALIZACIÓN (si existe)
+        if (contacto.getPersonalizacion() != null) {
+            pedido.setPerId(contacto.getPersonalizacion().getPerId());
+        }
+
+        // VINCULAR SESIÓN ANÓNIMA (si existe)
+        if (contacto.getSesion() != null) {
+            SesionAnonima sesion = new SesionAnonima();
+            sesion.setSesId(contacto.getSesion().getSesId());
+            pedido.setSesion(sesion);
+        }
+
+        // VINCULAR USUARIO (si existe)
+        if (contacto.getUsuario() != null) {
+            pedido.setUsuIdEmpleado(contacto.getUsuario().getUsuId());
+        } else {
+            // Si es anónimo o externo, usar identificador
+            pedido.setPedIdentificadorCliente(
+                    contacto.getConNombre() + " - " +
+                            (contacto.getConTelefono() != null ? contacto.getConTelefono() : contacto.getConCorreo())
+            );
+        }
+
+        // Guardar
+        Pedido guardado = pedidoRepository.save(pedido);
+
+        // Log
+        System.out.println("✅ Pedido creado desde contacto: " + guardado.getPedCodigo());
+
+        // Retornar DTO
+        return PedidoMapper.toPedidoResponseDTO(guardado);
+    }
+
+    // Método auxiliar para generar código único
+    private String generarCodigoPedido() {
+        String prefijo = "PED-";
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        return prefijo + timestamp.substring(timestamp.length() - 8);
     }
 
 
