@@ -5,6 +5,7 @@ import com.example.libreria_api.model.sistemausuarios.SesionAnonima;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -17,7 +18,7 @@ public class Personalizacion {
     private Integer perId;
 
     @Column(name = "per_fecha", nullable = false)
-    private LocalDate perFecha;
+    private LocalDateTime perFecha;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usu_id_cliente", referencedColumnName = "usu_id")
@@ -49,11 +50,11 @@ public class Personalizacion {
         this.perId = perId;
     }
 
-    public LocalDate getPerFecha() {
+    public LocalDateTime getPerFecha() {
         return perFecha;
     }
 
-    public void setPerFecha(LocalDate perFecha) {
+    public void setPerFecha(LocalDateTime perFecha) {
         this.perFecha = perFecha;
     }
 

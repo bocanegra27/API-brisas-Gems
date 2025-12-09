@@ -1,19 +1,19 @@
 package com.example.libreria_api.dto.personalizacionproductos;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class PersonalizacionCreateDTO {
-    private LocalDate fecha;
+    private LocalDateTime fecha;
     private Integer usuarioClienteId;
     private Integer sesionId;
     private List<Integer> valoresSeleccionados;
 
-    public LocalDate getFecha() {
+    public LocalDateTime getFecha() {
         return fecha;
     }
 
-    public void setFecha(LocalDate fecha) {
+    public void setFecha(LocalDateTime fecha) {
         this.fecha = fecha;
     }
 
