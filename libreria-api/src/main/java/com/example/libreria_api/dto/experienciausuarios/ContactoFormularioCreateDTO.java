@@ -24,6 +24,7 @@ public class ContactoFormularioCreateDTO {
     private boolean terminos;
 
     // NUEVOS CAMPOS para sesiones anonimas
+    private Integer usuarioId;
     private Integer sesionId;
     private Integer personalizacionId;
 
@@ -49,6 +50,10 @@ public class ContactoFormularioCreateDTO {
     public void setTerminos(boolean terminos) { this.terminos = terminos; }
 
     // NUEVOS GETTERS Y SETTERS
+
+    public Integer getUsuarioId() { return usuarioId; } // <--- ¡Agregar este Getter!
+    public void setUsuarioId(Integer usuarioId) { this.usuarioId = usuarioId; } // <--- ¡Agregar este Setter!
+
     public Integer getSesionId() { return sesionId; }
     public void setSesionId(Integer sesionId) { this.sesionId = sesionId; }
 
