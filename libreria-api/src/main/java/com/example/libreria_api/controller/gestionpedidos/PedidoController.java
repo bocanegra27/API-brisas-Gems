@@ -3,6 +3,7 @@ package com.example.libreria_api.controller.gestionpedidos;
 import com.example.libreria_api.dto.gestionpedidos.PedidoDetailResponseDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoRequestDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
+import com.example.libreria_api.exception.ResourceNotFoundException;
 import com.example.libreria_api.service.gestionpedidos.PedidoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -102,5 +103,37 @@ public class PedidoController {
                 personalizacionId
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
+    }
+
+    // ==============================
+    // CAMBIAR ESTADO (CON HISTORIAL)
+    // ==============================
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<PedidoResponseDTO> cambiarEstado(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Object> payload) { // Usamos Map para JSON simple
+
+        // Extracción de datos (asumiendo que Laravel envía {nuevoEstadoId, comentarios, responsableId})
+        Integer nuevoEstadoId = (Integer) payload.get("nuevoEstadoId");
+        String comentarios = (String) payload.get("comentarios");
+        // 🔥 NOTA: El ID del responsable debe venir del JWT del usuario logueado, no del body.
+        // Usaremos un placeholder (usu_id = 2, Pedro Paramo) hasta que se integre la seguridad.
+        Integer responsableId = 2; // <<--- TEMPORAL: Reemplazar con lógica de JWT
+
+        if (nuevoEstadoId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+            PedidoResponseDTO pedido = pedidoService.actualizarEstadoConHistorial(
+                    id,
+                    nuevoEstadoId,
+                    comentarios,
+                    responsableId
+            );
+            return ResponseEntity.ok(pedido);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
