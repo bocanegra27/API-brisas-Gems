@@ -35,7 +35,8 @@ public interface ContactoFormularioRepository extends JpaRepository<ContactoForm
             "AND (:estado IS NULL OR c.conEstado = :estado) " +
             "AND (:usuarioId IS NULL OR c.usuario.usuId = :usuarioId) " +
             "AND (:desde IS NULL OR c.conFechaEnvio >= :desde) " +
-            "AND (:hasta IS NULL OR c.conFechaEnvio <= :hasta)")
+            "AND (:hasta IS NULL OR c.conFechaEnvio <= :hasta)" +
+            "ORDER BY c.conFechaEnvio DESC")
     List<ContactoFormulario> buscarConFiltros(@Param("via") ViaContacto via,
                                               @Param("estado") EstadoContacto estado,
                                               @Param("usuarioId") Integer usuarioId,

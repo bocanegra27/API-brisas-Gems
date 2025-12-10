@@ -63,11 +63,23 @@ public class ContactoFormularioService {
         entidad.setConFechaEnvio(LocalDateTime.now());
         entidad.setConEstado(EstadoContacto.pendiente);
 
-        // NUEVO: Mapear sesion anonima si existe
-        if (dto.getSesionId() != null) {
+        // FIX: Mapear la identidad del cliente (Usuario o Sesión Anónima)
+        // La entidad ContactoFormulario usa objetos relacionados, no IDs directos.
+        if (dto.getUsuarioId() != null && dto.getUsuarioId() > 0) {
+            // Es un usuario registrado
+            Usuario usuario = new Usuario();
+            usuario.setUsuId(dto.getUsuarioId());
+            entidad.setUsuario(usuario); // Mapea al objeto Usuario
+            // Asegurarse de que el campo de sesión sea nulo
+            entidad.setSesion(null);
+        }
+        else if (dto.getSesionId() != null && dto.getSesionId() > 0) {
+            // Es un usuario anónimo
             SesionAnonima sesion = new SesionAnonima();
             sesion.setSesId(dto.getSesionId());
-            entidad.setSesion(sesion);
+            entidad.setSesion(sesion); // Mapea al objeto Sesion
+            // Asegurarse de que el campo de usuario sea nulo
+            entidad.setUsuario(null);
         }
 
         // NUEVO: Mapear personalizacion si existe

@@ -92,12 +92,14 @@ public class PedidoController {
     public ResponseEntity<PedidoResponseDTO> crearPedidoDesdeContacto(
             @PathVariable Integer contactoId,
             @RequestParam(required = false) Integer estadoId,
-            @RequestParam(required = false) String comentarios
+            @RequestParam(required = false) String comentarios,
+            @RequestParam(required = false) Integer personalizacionId
     ) {
         PedidoResponseDTO pedido = pedidoService.crearDesdeContacto(
                 contactoId,
                 estadoId,
-                comentarios
+                comentarios,
+                personalizacionId
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
     }
