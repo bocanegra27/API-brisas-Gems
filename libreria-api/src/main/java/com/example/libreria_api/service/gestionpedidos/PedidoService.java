@@ -289,7 +289,7 @@ public class PedidoService {
     }
 
     @Transactional
-    public PedidoResponseDTO crearDesdeContacto(Integer contactoId, Integer estadoId, String comentarios) {
+    public PedidoResponseDTO crearDesdeContacto(Integer contactoId, Integer estadoId, String comentarios, Integer personalizacionId) {
         // Obtener contacto
         ContactoFormulario contacto = contactoRepository.findById(contactoId)
                 .orElseThrow(() -> new EntityNotFoundException("Contacto no encontrado"));

@@ -22,7 +22,17 @@ public class PedidoMapper {
         // NUEVOS MAPEOS para sesión anónima
         if (pedido.getSesion() != null) {
             dto.setSesionId(pedido.getSesion().getSesId());
-            dto.setSesionToken(pedido.getSesion().getSesToken().substring(0, 8));
+
+            // 🔥 CAMBIO CRÍTICO: Comprobar que getSesToken() no sea null antes de usar substring
+            String sesToken = pedido.getSesion().getSesToken();
+
+            if (sesToken != null) {
+                // Si el token no es null, se mapea el fragmento de 8 caracteres
+                dto.setSesionToken(sesToken.substring(0, Math.min(sesToken.length(), 8)));
+            } else {
+                // Si el token es null (o la entidad se cargó mal), se asigna null
+                dto.setSesionToken(null);
+            }
         }
 
         dto.setConId(pedido.getConId());
