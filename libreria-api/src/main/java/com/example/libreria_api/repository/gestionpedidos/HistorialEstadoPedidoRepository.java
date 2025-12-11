@@ -12,6 +12,11 @@ import java.util.List;
 public interface HistorialEstadoPedidoRepository extends JpaRepository<HistorialEstadoPedido, Integer> {
 
     // Método para obtener el historial completo de un pedido, ordenado por fecha descendente (timeline)
-    @Query("SELECT h FROM HistorialEstadoPedido h WHERE h.pedido.ped_id = :pedidoId ORDER BY h.hisFechaCambio DESC")
-    List<HistorialEstadoPedido> findByPedidoIdOrderByHisFechaCambioDesc(@Param("pedidoId") Integer pedidoId);
+    @Query("SELECT h FROM HistorialEstadoPedido h " +
+            "LEFT JOIN FETCH h.estadoPedido ep " +
+            "LEFT JOIN FETCH h.usuarioResponsable ur " +
+            // Usar el nombre exacto del campo ID en la Entidad Pedido.java
+            "WHERE h.pedido.ped_id = :pedidoId " +
+            "ORDER BY h.hisFechaCambio DESC")
+    List<HistorialEstadoPedido> findHistorialConDetalles(@Param("pedidoId") Integer pedidoId);
 }

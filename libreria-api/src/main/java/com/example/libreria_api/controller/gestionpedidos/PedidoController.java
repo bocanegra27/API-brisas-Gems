@@ -1,5 +1,6 @@
 package com.example.libreria_api.controller.gestionpedidos;
 
+import com.example.libreria_api.dto.gestionpedidos.HistorialResponseDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoDetailResponseDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoRequestDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
@@ -136,4 +137,24 @@ public class PedidoController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // ==============================
+    // OBTENER HISTORIAL DE PEDIDO
+    // ==============================
+    /**
+     * Devuelve el historial de cambios de estado para un pedido específico.
+     * GET /api/pedidos/{id}/historial
+     */
+    @GetMapping("/{id}/historial")
+    public ResponseEntity<List<HistorialResponseDTO>> obtenerHistorial(@PathVariable Integer id) {
+        try {
+            List<HistorialResponseDTO> historial = pedidoService.obtenerHistorialPorPedido(id);
+            return ResponseEntity.ok(historial);
+        } catch (Exception e) {
+            // Manejar excepciones de manera controlada (ej: 404 si el pedido no existe)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
 }

@@ -1,9 +1,6 @@
 package com.example.libreria_api.service.gestionpedidos;
 
-import com.example.libreria_api.dto.gestionpedidos.PedidoDetailResponseDTO;
-import com.example.libreria_api.dto.gestionpedidos.PedidoMapper;
-import com.example.libreria_api.dto.gestionpedidos.PedidoRequestDTO;
-import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
+import com.example.libreria_api.dto.gestionpedidos.*;
 import com.example.libreria_api.exception.ResourceNotFoundException;
 import com.example.libreria_api.model.experienciausuarios.ContactoFormulario;
 import com.example.libreria_api.model.gestionpedidos.EstadoPedido;
@@ -419,6 +416,20 @@ public class PedidoService {
 
         // 4. RETORNAR RESPUESTA
         return PedidoMapper.toPedidoResponseDTO(pedidoActualizado);
+    }
+
+    /**
+     * Obtiene el historial completo de estados de un pedido.
+     * @param pedidoId ID del pedido.
+     * @return Lista de HistorialResponseDTO ordenada por fecha descendente.
+     */
+    @Transactional(readOnly = true)
+    public List<HistorialResponseDTO> obtenerHistorialPorPedido(Integer pedidoId) {
+        // 🔥 CAMBIAR EL NOMBRE DEL METODO PARA USAR FETCH JOIN
+        return historialRepository.findHistorialConDetalles(pedidoId)
+                .stream()
+                .map(HistorialMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
 
