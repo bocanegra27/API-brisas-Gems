@@ -1,12 +1,10 @@
 package com.example.libreria_api.service.gestionpedidos;
 
-import com.example.libreria_api.dto.gestionpedidos.PedidoDetailResponseDTO;
-import com.example.libreria_api.dto.gestionpedidos.PedidoMapper;
-import com.example.libreria_api.dto.gestionpedidos.PedidoRequestDTO;
-import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
+import com.example.libreria_api.dto.gestionpedidos.*;
 import com.example.libreria_api.exception.ResourceNotFoundException;
 import com.example.libreria_api.model.experienciausuarios.ContactoFormulario;
 import com.example.libreria_api.model.gestionpedidos.EstadoPedido;
+import com.example.libreria_api.model.gestionpedidos.HistorialEstadoPedido;
 import com.example.libreria_api.model.gestionpedidos.Pedido;
 import com.example.libreria_api.model.gestionpedidos.Render3d;
 import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
@@ -14,6 +12,7 @@ import com.example.libreria_api.model.sistemausuarios.SesionAnonima;
 import com.example.libreria_api.model.sistemausuarios.Usuario;
 import com.example.libreria_api.repository.experienciausuarios.ContactoFormularioRepository;
 import com.example.libreria_api.repository.gestionpedidos.EstadoPedidoRepository;
+import com.example.libreria_api.repository.gestionpedidos.HistorialEstadoPedidoRepository;
 import com.example.libreria_api.repository.gestionpedidos.PedidoRepository;
 import com.example.libreria_api.repository.gestionpedidos.Render3dRepository;
 import com.example.libreria_api.repository.personalizacionproductos.PersonalizacionRepository;
@@ -46,19 +45,23 @@ public class PedidoService {
     private final PersonalizacionRepository personalizacionRepository;
     private final ContactoFormularioRepository contactoRepository;
     private final Render3dRepository render3dRepository;
+    private final HistorialEstadoPedidoRepository historialRepository;
+
 
     public PedidoService(PedidoRepository pedidoRepository,
                          UsuarioRepository usuarioRepository,
                          EstadoPedidoRepository estadoPedidoRepository,
                          PersonalizacionRepository personalizacionRepository,
                          ContactoFormularioRepository contactoRepository,
-                         Render3dRepository render3dRepository) {
+                         Render3dRepository render3dRepository,
+                         HistorialEstadoPedidoRepository historialRepository) {
         this.pedidoRepository = pedidoRepository;
         this.usuarioRepository = usuarioRepository;
         this.estadoPedidoRepository = estadoPedidoRepository;
         this.personalizacionRepository = personalizacionRepository;
         this.contactoRepository = contactoRepository;
         this.render3dRepository = render3dRepository;
+        this.historialRepository = historialRepository;
 
         try {
             Path uploadPath = Paths.get(UPLOAD_DIR);
@@ -373,6 +376,61 @@ public class PedidoService {
         return prefijo + timestamp.substring(timestamp.length() - 8);
     }
 
+    /**
+     * Registra un cambio de estado en el historial y actualiza el estado actual del pedido.
+     * @param pedidoId ID del pedido a actualizar.
+     * @param nuevoEstadoId ID del nuevo estado.
+     * @param comentarios Comentario del cambio (his_comentarios).
+     * @param responsableId ID del usuario que realiza el cambio.
+     * @return DTO del pedido actualizado.
+     */
+    @Transactional
+    public PedidoResponseDTO actualizarEstadoConHistorial(
+            Integer pedidoId,
+            Integer nuevoEstadoId,
+            String comentarios,
+            Integer responsableId) {
+
+        // 1. OBTENER PEDIDO Y ESTADOS
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido", "id", pedidoId));
+
+        EstadoPedido nuevoEstado = estadoPedidoRepository.findById(nuevoEstadoId)
+                .orElseThrow(() -> new ResourceNotFoundException("EstadoPedido", "id", nuevoEstadoId));
+
+        Usuario responsable = usuarioRepository.findById(responsableId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", responsableId));
+
+        // 2. ACTUALIZAR ESTADO EN LA TABLA PEDIDO
+        pedido.setEstadoPedido(nuevoEstado);
+        Pedido pedidoActualizado = pedidoRepository.save(pedido); // Guarda el cambio de estado en la tabla principal
+
+        // 3. REGISTRAR HISTORIAL
+        HistorialEstadoPedido historial = new HistorialEstadoPedido();
+        historial.setPedido(pedidoActualizado);
+        historial.setEstadoPedido(nuevoEstado);
+        historial.setHisComentarios(comentarios);
+        historial.setUsuarioResponsable(responsable);
+
+        historialRepository.save(historial); // Inserta el registro del evento
+
+        // 4. RETORNAR RESPUESTA
+        return PedidoMapper.toPedidoResponseDTO(pedidoActualizado);
+    }
+
+    /**
+     * Obtiene el historial completo de estados de un pedido.
+     * @param pedidoId ID del pedido.
+     * @return Lista de HistorialResponseDTO ordenada por fecha descendente.
+     */
+    @Transactional(readOnly = true)
+    public List<HistorialResponseDTO> obtenerHistorialPorPedido(Integer pedidoId) {
+        // 🔥 CAMBIAR EL NOMBRE DEL METODO PARA USAR FETCH JOIN
+        return historialRepository.findHistorialConDetalles(pedidoId)
+                .stream()
+                .map(HistorialMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
 
 
 }
