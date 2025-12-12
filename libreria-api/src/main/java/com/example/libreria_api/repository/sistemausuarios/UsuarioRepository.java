@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
@@ -26,6 +27,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     // Filtro combinado (rol y activo)
     Page<Usuario> findByRol_RolIdAndUsuActivo(Integer rolId, Boolean usuActivo, Pageable pageable);
+    // Buscar usuarios cuyos IDs de Rol estén DENTRO de la lista proporcionada
+    List<Usuario> findByRol_RolIdInAndUsuActivo(List<Integer> rolIds, Boolean activo);
 
     long countByUsuActivo(boolean activo);
 }
