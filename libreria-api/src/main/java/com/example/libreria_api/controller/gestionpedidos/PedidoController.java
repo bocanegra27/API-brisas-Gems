@@ -58,13 +58,14 @@ public class PedidoController {
         return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PedidoDetailResponseDTO> obtenerPedidoPorId(@PathVariable Integer id) {
-        PedidoDetailResponseDTO pedido = pedidoService.obtenerPedidoPorId(id);
-        return ResponseEntity.ok(pedido);
-    }
+        @GetMapping("/{pedId}")
+    // 🔥 CORRECCIÓN: Cambiar el tipo de retorno de PedidoDetailResponseDTO a PedidoResponseDTO
+        public PedidoResponseDTO obtenerPorId(@PathVariable Integer pedId) {
+            // Llamamos al servicio, que ahora devuelve PedidoResponseDTO
+            return pedidoService.obtenerPedidoPorId(pedId);
+        }
 
-    // 🔥 VERSIÓN ESTABLE Y CORREGIDA: Acepta PUT y POST (para el spoofing) y elimina 'consumes'
+
     // para aceptar ambos Content-Types (multipart/form-data Y urlencoded).
     @RequestMapping(value = "/{id}", method = {RequestMethod.PUT, RequestMethod.POST})
     public ResponseEntity<PedidoResponseDTO> actualizar(
