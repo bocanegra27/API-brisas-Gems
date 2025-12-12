@@ -5,6 +5,7 @@ import com.example.libreria_api.dto.gestionpedidos.PedidoDetailResponseDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoRequestDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
 import com.example.libreria_api.exception.ResourceNotFoundException;
+import com.example.libreria_api.model.gestionpedidos.Pedido;
 import com.example.libreria_api.service.gestionpedidos.PedidoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,6 +39,22 @@ public class PedidoController {
             @RequestPart(value = "render", required = false) MultipartFile render) {
 
         PedidoResponseDTO nuevoPedido = pedidoService.guardarPedido(requestDTO, render);
+        return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
+    }
+
+    /**
+     * Endpoint auxiliar para crear pedidos manualmente SIN adjuntar un archivo (render).
+     * Recibe JSON en el cuerpo.
+     * POST /api/pedidos/json-manual
+     */
+    @PostMapping(value = "/json-manual", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PedidoResponseDTO> guardarPedidoJson(
+            @RequestBody PedidoRequestDTO requestDTO) {
+
+        // Llamamos al método de servicio principal, pasando 'null' para el archivo render.
+        // Esto asegura que la lógica de validación y trazabilidad sea la misma.
+        PedidoResponseDTO nuevoPedido = pedidoService.guardarPedido(requestDTO, null);
+
         return new ResponseEntity<>(nuevoPedido, HttpStatus.CREATED);
     }
 
@@ -95,13 +112,13 @@ public class PedidoController {
             @PathVariable Integer contactoId,
             @RequestParam(required = false) Integer estadoId,
             @RequestParam(required = false) String comentarios,
-            @RequestParam(required = false) Integer personalizacionId
+            @RequestParam(required = false) Integer usuIdEmpleado
     ) {
         PedidoResponseDTO pedido = pedidoService.crearDesdeContacto(
                 contactoId,
                 estadoId,
                 comentarios,
-                personalizacionId
+                usuIdEmpleado
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
     }
@@ -155,6 +172,31 @@ public class PedidoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @PatchMapping("/{id}/asignar")
+    public ResponseEntity<PedidoResponseDTO> asignarDisenador(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Integer> payload) { // Recibe {usuIdEmpleado: X}
+
+        Integer usuIdEmpleado = payload.get("usuIdEmpleado");
+
+        // **NOTA:** El ID del responsable debe venir del JWT del admin logueado.
+        // Usaremos un placeholder (Pedro Paramo=2) por ahora.
+        Integer responsableId = 2;
+
+        if (usuIdEmpleado == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        PedidoResponseDTO pedido = pedidoService.asignarEmpleado(
+                id,
+                usuIdEmpleado,
+                responsableId
+        );
+
+        return ResponseEntity.ok(pedido);
+    }
+
 
 
 }

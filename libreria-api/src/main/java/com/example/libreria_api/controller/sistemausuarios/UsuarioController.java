@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -64,6 +65,17 @@ public class UsuarioController {
     @PatchMapping("/{usuId}/rol")
     public UsuarioResponseDTO actualizarRol(@PathVariable Integer usuId, @Valid @RequestBody RolUpdateDTO dto) {
         return service.actualizarRol(usuId, dto.getRolId());
+    }
+
+    @GetMapping("/empleados")
+    public ResponseEntity<List<UsuarioResponseDTO>> obtenerEmpleadosPorRoles() {
+        // Definimos los roles asignables: 2 (administrador) y 3 (diseñador).
+        List<Integer> rolesAsignables = List.of(2, 3);
+
+        // 🔥 CORRECCIÓN: Usar la variable inyectada 'service'
+        List<UsuarioResponseDTO> empleados = service.obtenerUsuariosPorRoles(rolesAsignables);
+
+        return ResponseEntity.ok(empleados);
     }
 
     // --- ENDPOINT CORREGIDO ---

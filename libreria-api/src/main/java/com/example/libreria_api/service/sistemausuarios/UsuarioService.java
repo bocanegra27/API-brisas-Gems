@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
@@ -210,4 +212,19 @@ public class UsuarioService {
     public long contarUsuariosPorActivo(boolean activo) {
         return usuarioRepository.countByUsuActivo(activo);
     }
+
+    /**
+     * Obtiene una lista de usuarios activos que tienen los roles asignables.
+     * @param rolIds Lista de IDs de roles (ej: [2, 3] para Admin y Diseñador).
+     * @return Lista de UsuarioResponseDTO de empleados activos.
+     */
+    @Transactional(readOnly = true)
+    public List<UsuarioResponseDTO> obtenerUsuariosPorRoles(List<Integer> rolIds) {
+        // 🔥 Usamos el método robusto, forzando que solo sean usuarios ACTIVOS (true)
+        return usuarioRepository.findByRol_RolIdInAndUsuActivo(rolIds, true)
+                .stream()
+                .map(this::toResponse) // Reutiliza tu método de mapeo existente
+                .collect(java.util.stream.Collectors.toList());
+    }
+
 }
