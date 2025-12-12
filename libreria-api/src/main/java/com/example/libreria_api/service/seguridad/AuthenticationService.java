@@ -2,12 +2,18 @@ package com.example.libreria_api.service.seguridad;
 
 import com.example.libreria_api.dto.seguridad.LoginRequestDTO;
 import com.example.libreria_api.dto.seguridad.LoginResponseDTO;
+import com.example.libreria_api.model.seguridad.Token;
+import com.example.libreria_api.repository.seguridad.TokenRepository;
 import com.example.libreria_api.repository.sistemausuarios.UsuarioRepository;
+import com.example.libreria_api.service.notificaciones.EmailService; // Importación nueva
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,43 +24,71 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final DashboardService dashboardService;
+    private final TokenRepository tokenRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    // 🔥 NUEVO: Inyectamos el servicio de correo
+    private final EmailService emailService;
 
     public LoginResponseDTO login(LoginRequestDTO request) {
-        // Autenticar credenciales
+        // ... (Tu código de login sigue igual, no lo toco) ...
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
-
-        // Obtener usuario (asumiendo que 'user' es una entidad con un método getId())
         var user = usuarioRepository.findByUsuCorreo(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado después de autenticación"));
-
-        // *** PASO 1: Obtener el ID del usuario ***
-        // ASUMIENDO que tu entidad Usuario tiene un método getUsuId()
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         Integer userId = user.getUsuId();
-
-        // Generar token JWT
         var jwtToken = jwtService.generateToken(user);
-
-        // Determinar dashboard basado en roles
         String dashboardUrl = dashboardService.determinarDashboardUrl(user);
         String userRole = dashboardService.obtenerRolPrincipal(user);
 
-        // Construir respuesta con información completa
         return LoginResponseDTO.of(
-                // *** PASO 2: Agregar el userId como primer argumento ***
-                userId, // <-- Nuevo argumento
-                jwtToken,
-                dashboardUrl,
-                userRole,
-                user.getAuthorities().stream()
-                        .map(auth -> auth.getAuthority())
-                        .collect(Collectors.toList()),
-                user.getUsername(),
-                user.getUsuNombre()
+                userId, jwtToken, dashboardUrl, userRole,
+                user.getAuthorities().stream().map(auth -> auth.getAuthority()).collect(Collectors.toList()),
+                user.getUsername(), user.getUsuNombre()
         );
+    }
+
+    /**
+     * Genera un token y envía el correo REAL
+     */
+    public void forgotPassword(String email) {
+        var userOpt = usuarioRepository.findByUsuCorreo(email);
+
+        if (userOpt.isEmpty()) {
+            return;
+        }
+
+        var usuario = userOpt.get();
+        String tokenString = UUID.randomUUID().toString();
+
+        Token token = new Token();
+        token.setToken(tokenString);
+        token.setTipo("recuperacion");
+        token.setFechaExpiracion(LocalDateTime.now().plusHours(24));
+        token.setUsuario(usuario);
+
+        tokenRepository.save(token);
+
+        // 🔥 REEMPLAZO: En lugar de System.out, llamamos al EmailService
+        // Esto enviará el correo real a través de Gmail
+        emailService.enviarCorreoRecuperacion(email, usuario.getUsuNombre(), tokenString);
+
+        System.out.println(">>> Proceso de recuperación iniciado para: " + email);
+    }
+
+    public void resetPassword(String tokenString, String newPassword) {
+        // ... (Tu código de resetPassword sigue igual) ...
+        Token token = tokenRepository.findByToken(tokenString)
+                .orElseThrow(() -> new RuntimeException("Token inválido"));
+
+        if (token.getFechaExpiracion().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("El token ha expirado");
+        }
+
+        var usuario = token.getUsuario();
+        usuario.setUsuPassword(passwordEncoder.encode(newPassword));
+        usuarioRepository.save(usuario);
+        tokenRepository.delete(token);
     }
 }
