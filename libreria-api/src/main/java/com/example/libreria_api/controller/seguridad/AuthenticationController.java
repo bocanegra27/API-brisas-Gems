@@ -2,6 +2,7 @@ package com.example.libreria_api.controller.seguridad;
 
 import com.example.libreria_api.dto.seguridad.LoginRequestDTO;
 import com.example.libreria_api.dto.seguridad.LoginResponseDTO;
+import com.example.libreria_api.dto.seguridad.ResetPasswordDTO; // Asegúrate de tener este DTO creado
 import com.example.libreria_api.service.seguridad.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,5 +27,23 @@ public class AuthenticationController {
     ) {
         LoginResponseDTO response = authenticationService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        if (email != null && !email.isEmpty()) {
+            authenticationService.forgotPassword(email);
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    // 🔥 NUEVO: Endpoint para restablecer la contraseña
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordDTO request) {
+        authenticationService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok().build();
     }
 }
