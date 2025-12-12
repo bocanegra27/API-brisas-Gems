@@ -95,4 +95,14 @@ public class UsuarioController {
 
         return ResponseEntity.ok(Map.of("count", count));
     }
+
+    @PostMapping("/registro/convertir/{sesionToken}")
+    public ResponseEntity<UsuarioResponseDTO> crearYConvertir(
+            @PathVariable String sesionToken,
+            @Valid @RequestBody UsuarioCreateDTO dto) {
+        
+        UsuarioResponseDTO creado = service.crearYConvertir(dto, sesionToken);
+        return ResponseEntity.status(201).body(creado);
+    }
+
 }

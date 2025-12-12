@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/sesiones-anonimas/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/personalizaciones").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contactos").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios/registro/convertir/**").permitAll()
 
                         // Rutas públicas de lectura (imágenes y salud)
                         .requestMatchers("/assets/**").permitAll()
