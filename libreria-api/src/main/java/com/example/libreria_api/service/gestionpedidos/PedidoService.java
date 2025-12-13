@@ -143,36 +143,16 @@ public class PedidoService {
     }
 
     @Transactional(readOnly = true)
-    public PedidoDetailResponseDTO obtenerPedidoPorId(Integer id) {
+// 🔥 CAMBIO CRÍTICO: El método ahora devuelve el PedidoResponseDTO estándar
+    public PedidoResponseDTO obtenerPedidoPorId(Integer id) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido", "id", id));
 
-        // Antes se buscaban por ID, ahora se obtienen directamente de la Entidad:
-        Personalizacion personalizacion = pedido.getPersonalizacion();
-        Usuario cliente = pedido.getCliente(); // 🔥 Nuevo campo Cliente
-        Usuario empleado = pedido.getEmpleadoAsignado(); // 🔥 Nuevo campo Empleado Asignado
+        // 1. Usar el mapper base (que mapea IDs como usuIdCliente, perId, etc.)
+        PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
 
-        PedidoDetailResponseDTO dto = new PedidoDetailResponseDTO();
-        dto.setPed_id(pedido.getPed_id());
-        dto.setPedCodigo(pedido.getPedCodigo());
-        dto.setPedFechaCreacion(pedido.getPedFechaCreacion());
-        dto.setPedComentarios(pedido.getPedComentarios());
-
-        if (pedido.getEstadoPedido() != null) {
-            dto.setEstId(pedido.getEstadoPedido().getEst_id());
-            dto.setEstadoNombre(pedido.getEstadoPedido().getEstNombre());
-        } else {
-            dto.setEstadoNombre("Desconocido");
-        }
-
-        // Usar la Entidad Usuario para el nombre
-        dto.setClienteNombre(cliente != null ? cliente.getUsuNombre() : (pedido.getPedIdentificadorCliente() != null ? pedido.getPedIdentificadorCliente() : "Desconocido"));
-        dto.setEmpleadoNombre(empleado != null ? empleado.getUsuNombre() : "No asignado");
-
-        // Mapear Personalización ID para el DTO (si es necesario)
-        if (personalizacion != null) {
-            dto.setPerId(personalizacion.getPerId());
-        }
+        // 2. Enriquecer con Nombres y lógica de presentación (reutilizando tu método auxiliar)
+        dto = enriquecerDTOConNombres(pedido, dto);
 
         return dto;
     }
@@ -575,6 +555,37 @@ public class PedidoService {
 
         return dto;
     }
+
+    /**
+     * Obtiene todos los pedidos de un cliente específico (para Dashboard de Usuario).
+     */
+    @Transactional(readOnly = true)
+    public List<PedidoResponseDTO> obtenerPedidosPorCliente(Integer usuIdCliente) {
+        List<Pedido> pedidos = pedidoRepository.findByClienteUsuId(usuIdCliente);
+
+        return pedidos.stream().map(pedido -> {
+            PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
+            // Reutilizamos el método auxiliar para rellenar nombres
+            return enriquecerDTOConNombres(pedido, dto);
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene todos los pedidos asignados a un empleado/diseñador específico (para Dashboard de Diseñador).
+     */
+    @Transactional(readOnly = true)
+    public List<PedidoResponseDTO> obtenerPedidosPorEmpleado(Integer usuIdEmpleado) {
+        List<Pedido> pedidos = pedidoRepository.findByEmpleadoAsignadoUsuId(usuIdEmpleado);
+
+        return pedidos.stream().map(pedido -> {
+            PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
+            // Reutilizamos el método auxiliar para rellenar nombres
+            return enriquecerDTOConNombres(pedido, dto);
+        }).collect(Collectors.toList());
+    }
+
+
+
 
 
 }

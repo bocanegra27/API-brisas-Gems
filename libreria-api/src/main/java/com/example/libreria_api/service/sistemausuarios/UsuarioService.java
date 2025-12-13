@@ -8,6 +8,7 @@ import com.example.libreria_api.model.sistemausuarios.*;
 import com.example.libreria_api.repository.sistemausuarios.RolRepository;
 import com.example.libreria_api.repository.sistemausuarios.TipoDeDocumentoRepository;
 import com.example.libreria_api.repository.sistemausuarios.UsuarioRepository;
+import com.example.libreria_api.repository.sistemausuarios.SesionAnonimaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,15 +23,18 @@ public class UsuarioService {
     private final RolRepository rolRepository;
     private final TipoDeDocumentoRepository tipoDocumentoRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SesionAnonimaRepository sesionAnonimaRepository;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           RolRepository rolRepository,
                           TipoDeDocumentoRepository tipoDocumentoRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder,
+                          SesionAnonimaRepository sesionAnonimaRepository) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.tipoDocumentoRepository = tipoDocumentoRepository;
         this.passwordEncoder = passwordEncoder;
+        this.sesionAnonimaRepository = sesionAnonimaRepository;
     }
 
     @Transactional(readOnly = true)
@@ -225,6 +229,56 @@ public class UsuarioService {
                 .stream()
                 .map(this::toResponse) // Reutiliza tu método de mapeo existente
                 .collect(java.util.stream.Collectors.toList());
+    }
+    /**
+     * Crea un Usuario y marca la Sesión Anónima correspondiente como convertida.
+     * Esto dispara el Trigger de la BD que actualiza Personalizaciones y Contactos.
+     */
+    @Transactional // 🔥 Debe ser transaccional para actualizar ambas entidades
+    public UsuarioResponseDTO crearYConvertir(UsuarioCreateDTO dto, String sesionToken) {
+        // 1. Validaciones base (correo, documento)
+        if (usuarioRepository.existsByUsuCorreo(dto.getCorreo())) {
+            throw new DuplicateResourceException("Usuario", "correo", dto.getCorreo());
+        }
+        if (dto.getDocnum() != null && usuarioRepository.existsByUsuDocnum(dto.getDocnum())) {
+            throw new DuplicateResourceException("Usuario", "documento", dto.getDocnum());
+        }
+
+        // 2. Buscar Sesión Anónima
+        SesionAnonima sesion = sesionAnonimaRepository.findBySesToken(sesionToken) // Usa el método que tienes en tu SesionAnonimaRepository
+                .orElseThrow(() -> new ResourceNotFoundException("Sesión Anónima", "token", sesionToken));
+
+        if (sesion.getSesConvertido()) {
+            throw new BadRequestException("La sesión ya fue convertida a usuario.");
+        }
+
+        // 3. Crear el nuevo Usuario (Usa la misma lógica que tu método crear)
+        Rol rol = rolRepository.findById(dto.getRolId())
+                .orElseThrow(() -> new ResourceNotFoundException("Rol", "id", dto.getRolId()));
+        TipoDeDocumento tip = (dto.getTipdocId() != null) ?
+                tipoDocumentoRepository.findById(dto.getTipdocId())
+                        .orElseThrow(() -> new ResourceNotFoundException("TipoDeDocumento", "id", dto.getTipdocId())) : null;
+
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.setUsuNombre(dto.getNombre());
+        nuevoUsuario.setUsuCorreo(dto.getCorreo());
+        nuevoUsuario.setUsuTelefono(dto.getTelefono());
+        nuevoUsuario.setUsuPassword(passwordEncoder.encode(dto.getPassword()));
+        nuevoUsuario.setUsuDocnum(dto.getDocnum());
+        nuevoUsuario.setUsuOrigen(OrigenUsuario.registro); // 🔥 Marcar el origen como registro
+        nuevoUsuario.setUsuActivo(true); // Asumimos que el usuario registrado está activo
+        nuevoUsuario.setRol(rol);
+        nuevoUsuario.setTipoDocumento(tip);
+
+        Usuario usuarioGuardado = usuarioRepository.save(nuevoUsuario);
+
+        // 4. Actualizar Sesión Anónima (Esto dispara tu TRIGGER en la BD)
+        sesion.setSesConvertido(true);
+        sesion.setUsuarioConvertido(usuarioGuardado); // Vínculo con el nuevo usuario
+        sesionAnonimaRepository.save(sesion);
+
+        // 5. Devolver DTO
+        return toResponse(usuarioGuardado);
     }
 
 }
