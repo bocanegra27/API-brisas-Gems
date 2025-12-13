@@ -4,6 +4,8 @@ import com.example.libreria_api.dto.personalizacionproductos.DetallePersonalizac
 import com.example.libreria_api.dto.personalizacionproductos.DetallePersonalizacionUpdateDTO;
 import com.example.libreria_api.dto.personalizacionproductos.DetallePersonalizacionResponseDTO;
 import com.example.libreria_api.service.personalizacionproductos.DetallePersonalizacionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@Tag(name="Detalles de Personalización", description = "Gestión de los valores " +
+        "de personalización específicos elegidos por el cliente (Detalles) que " +
+        "componen un registro de Personalización (perId) individual.")
 @RequestMapping("/api/personalizaciones/{perId}/detalles")
 public class DetallePersonalizacionController {
 
@@ -26,6 +31,9 @@ public class DetallePersonalizacionController {
     // LISTAR DETALLES DE UNA PERSONALIZACIÓN
     // ==============================
     @GetMapping
+    @Operation(summary = "Listar detalles de una personalización",
+    description = "Recupera todos los detalles de personalización asociados a" +
+            " un registro de Personalización padre específico")
     public List<DetallePersonalizacionResponseDTO> listar(@PathVariable int perId) {
         return detalleService.listarPorPersonalizacion(perId);
     }
@@ -34,6 +42,9 @@ public class DetallePersonalizacionController {
     // OBTENER DETALLE POR ID
     // ==============================
     @GetMapping("/{detId}")
+    @Operation(summary = "Obtener detalle específico por ID",
+    description = "Busca y devuelve un detalle de personalización por su ID (detId), asegurando que " +
+            "pertenezca al registro padre")
     public ResponseEntity<DetallePersonalizacionResponseDTO> obtenerPorId(@PathVariable int perId,
                                                                           @PathVariable int detId) {
         try {
@@ -53,6 +64,9 @@ public class DetallePersonalizacionController {
     // CREAR DETALLE
     // ==============================
     @PostMapping
+    @Operation(summary = "Crear nuevo detalle de personalización",
+    description = "Añade un nuevo detalle de personalización (opción elegida " +
+            "y su valor) al registro de Personalización padre")
     public ResponseEntity<?> crear(@PathVariable int perId,
                                    @RequestBody DetallePersonalizacionCreateDTO dto) {
         try {
@@ -69,6 +83,9 @@ public class DetallePersonalizacionController {
     // ACTUALIZAR DETALLE
     // ==============================
     @PutMapping("/{detId}")
+    @Operation(summary = "Actualizar un detalle de personalización",
+    description = "Modifica un detalle de personalización existente (detId), verificando " +
+            "su pertenencia al registro padre")
     public ResponseEntity<?> actualizar(@PathVariable int perId,
                                         @PathVariable int detId,
                                         @RequestBody DetallePersonalizacionUpdateDTO dto) {
@@ -90,6 +107,8 @@ public class DetallePersonalizacionController {
     // ELIMINAR DETALLE
     // ==============================
     @DeleteMapping("/{detId}")
+    @Operation(summary = "Eliminar detalle de personalización",
+    description = "Elimina un detalle específico (detId) del registro de Personalización padre")
     public ResponseEntity<?> eliminar(@PathVariable int perId,
                                       @PathVariable int detId) {
         try {
