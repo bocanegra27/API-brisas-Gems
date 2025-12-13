@@ -556,5 +556,36 @@ public class PedidoService {
         return dto;
     }
 
+    /**
+     * Obtiene todos los pedidos de un cliente específico (para Dashboard de Usuario).
+     */
+    @Transactional(readOnly = true)
+    public List<PedidoResponseDTO> obtenerPedidosPorCliente(Integer usuIdCliente) {
+        List<Pedido> pedidos = pedidoRepository.findByClienteUsuId(usuIdCliente);
+
+        return pedidos.stream().map(pedido -> {
+            PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
+            // Reutilizamos el método auxiliar para rellenar nombres
+            return enriquecerDTOConNombres(pedido, dto);
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene todos los pedidos asignados a un empleado/diseñador específico (para Dashboard de Diseñador).
+     */
+    @Transactional(readOnly = true)
+    public List<PedidoResponseDTO> obtenerPedidosPorEmpleado(Integer usuIdEmpleado) {
+        List<Pedido> pedidos = pedidoRepository.findByEmpleadoAsignadoUsuId(usuIdEmpleado);
+
+        return pedidos.stream().map(pedido -> {
+            PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
+            // Reutilizamos el método auxiliar para rellenar nombres
+            return enriquecerDTOConNombres(pedido, dto);
+        }).collect(Collectors.toList());
+    }
+
+
+
+
 
 }

@@ -1,11 +1,9 @@
 package com.example.libreria_api.controller.gestionpedidos;
 
 import com.example.libreria_api.dto.gestionpedidos.HistorialResponseDTO;
-import com.example.libreria_api.dto.gestionpedidos.PedidoDetailResponseDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoRequestDTO;
 import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
 import com.example.libreria_api.exception.ResourceNotFoundException;
-import com.example.libreria_api.model.gestionpedidos.Pedido;
 import com.example.libreria_api.service.gestionpedidos.PedidoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -219,6 +217,29 @@ public class PedidoController {
 
         return ResponseEntity.ok(pedido);
     }
+
+    @GetMapping("/cliente/{usuIdCliente}")
+    @Operation(summary = "Obtener pedidos por ID de Cliente (Dashboard de Usuario)",
+            description = "Recupera todos los pedidos creados por el cliente con el ID especificado.")
+// 🔥 Importante: Requiere que tu Spring Security tenga configurado Principal y Roles.
+// Esto permite que el cliente solo acceda a SUS pedidos.
+// Si aún no has configurado el JWT/Principal, puedes empezar con @PreAuthorize("permitAll()")
+// y cambiarlo más tarde, o usar un filtro simple en el Service.
+    public ResponseEntity<List<PedidoResponseDTO>> obtenerPedidosPorCliente(@PathVariable Integer usuIdCliente) {
+        List<PedidoResponseDTO> pedidos = pedidoService.obtenerPedidosPorCliente(usuIdCliente);
+        return ResponseEntity.ok(pedidos);
+    }
+
+    @GetMapping("/empleado/{usuIdEmpleado}")
+    @Operation(summary = "Obtener pedidos asignados a un Empleado/Diseñador",
+            description = "Recupera todos los pedidos que tienen asignado al empleado con el ID especificado.")
+// 🔥 Importante: Similar a arriba, requiere seguridad para que el diseñador solo vea sus asignaciones.
+    public ResponseEntity<List<PedidoResponseDTO>> obtenerPedidosPorEmpleado(@PathVariable Integer usuIdEmpleado) {
+        List<PedidoResponseDTO> pedidos = pedidoService.obtenerPedidosPorEmpleado(usuIdEmpleado);
+        return ResponseEntity.ok(pedidos);
+    }
+
+
 
 
 
