@@ -32,14 +32,22 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+
+
                 .authorizeHttpRequests(authorize -> authorize
+
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
                         // Endpoints públicos y de Autenticación
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/usuarios").permitAll()
+                        .requestMatchers("/api/usuarios/**").permitAll()
                         .requestMatchers("/api/sesiones-anonimas/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/personalizaciones").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/contactos").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios/registro/convertir/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/personalizaciones/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/contactos/**").permitAll()
 
                         // Rutas públicas de lectura (imágenes y salud)
                         .requestMatchers("/assets/**").permitAll()
