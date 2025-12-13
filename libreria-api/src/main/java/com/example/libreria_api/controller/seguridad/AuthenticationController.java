@@ -10,8 +10,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 @RestController
+@Tag(name="Autenticacion  y seguridad", description = "Operaciones relacionadas con el inicio de sesión y " +
+        "la generación de tokens de acceso (JWT).")
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
@@ -19,6 +24,9 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/login")
+    @Operation(summary = "Iniciar sesión y obtener token JWT",
+    description = "Permite a un usuario autenticarse con credenciales (usuario/email y contraseña) para recibir un " +
+            "token de acceso (JWT) que deberá usar en futuras solicitudes protegidas.")
     public ResponseEntity<LoginResponseDTO> login(
             @Valid @RequestBody LoginRequestDTO request
     ) {
