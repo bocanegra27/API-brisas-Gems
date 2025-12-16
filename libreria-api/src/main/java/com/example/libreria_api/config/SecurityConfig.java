@@ -55,11 +55,6 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll() // Health Check y Info
                         .requestMatchers("/uploads/**").permitAll() //imagenes render 3d
 
-                        // =================================================================
-                        // 🟢 CONFIGURACIÓN PARA PRUEBAS Y CRUD DE PEDIDOS (RESUELVE 401)
-                        // Permite TODAS las operaciones CRUD en /api/pedidos para realizar pruebas
-                        .requestMatchers("/api/pedidos/**").permitAll()
-
                         // Permite la lectura de todas las opciones/valores
                         .requestMatchers(HttpMethod.GET, "/api/opciones/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/valores/**").permitAll()
