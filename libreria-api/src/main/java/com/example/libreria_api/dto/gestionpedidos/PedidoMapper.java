@@ -1,7 +1,6 @@
 package com.example.libreria_api.dto.gestionpedidos;
 
 import com.example.libreria_api.model.gestionpedidos.Pedido;
-import com.example.libreria_api.model.sistemausuarios.SesionAnonima; // <- Podría ser necesario
 
 public class PedidoMapper {
 
@@ -20,17 +19,25 @@ public class PedidoMapper {
             dto.setEstadoNombre(pedido.getEstadoPedido().getEstNombre());
         }
 
-        // 🔥 Trazabilidad 1: Personalización (Usando la Entidad)
+        // --- CORRECCIÓN AQUÍ ---
+        // Inicializamos el costo en 0.0 para evitar errores si no encontramos el dato
+        dto.setPedCostoTotal(0.0);
+
+        // Trazabilidad 1: Personalización
         if (pedido.getPersonalizacion() != null) {
             dto.setPerId(pedido.getPersonalizacion().getPerId());
+
+            // NOTA: Como 'Personalizacion' no tiene precio, aquí deberíamos
+            // sumar los detalles o sacar el precio de la tabla Pedido si existe.
+            // Por ahora lo dejamos en 0.0 para que el sistema funcione.
         }
 
-        // 🔥 Trazabilidad 2: Empleado Asignado (Usando la Entidad)
+        // Trazabilidad 2: Empleado Asignado
         if (pedido.getEmpleadoAsignado() != null) {
             dto.setUsuIdEmpleado(pedido.getEmpleadoAsignado().getUsuId());
         }
 
-        // 🔥 Trazabilidad 3: Cliente (Usando la Entidad)
+        // Trazabilidad 3: Cliente
         if (pedido.getCliente() != null) {
             dto.setUsuIdCliente(pedido.getCliente().getUsuId());
         }
@@ -50,8 +57,4 @@ public class PedidoMapper {
 
         return dto;
     }
-
-    // ELIMINAR O COMENTAR: toPedido(PedidoRequestDTO dto)
-    // ELIMINAR O COMENTAR: updatePedidoFromDTO(Pedido pedido, PedidoRequestDTO dto)
-    // Estos métodos serán reemplazados por la lógica explícita en PedidoService
 }

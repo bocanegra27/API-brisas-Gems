@@ -7,11 +7,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer; // Importar AbstractHttpConfigurer
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -28,19 +29,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
-                .csrf(AbstractHttpConfigurer::disable) // Usar el método de referencia para configuración moderna
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
-
                 .authorizeHttpRequests(authorize -> authorize
-
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
+                        // =================================================================
+                        // 🔓 PERMISOS PARA SWAGGER
+                        // =================================================================
+                        .requestMatchers(new AntPathRequestMatcher("/v3/api-docs/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/swagger-ui.html")).permitAll()
 
                         // Endpoints públicos y de Autenticación
                         .requestMatchers("/api/auth/**").permitAll()
@@ -49,15 +48,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/personalizaciones/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contactos/**").permitAll()
 
-                        // Rutas públicas de lectura (imágenes y salud)
+                        // Rutas públicas de lectura
                         .requestMatchers("/assets/**").permitAll()
                         .requestMatchers("/static/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll() // Health Check y Info
-                        .requestMatchers("/uploads/**").permitAll() //imagenes render 3d
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
 
                         // =================================================================
-                        // 🟢 CONFIGURACIÓN PARA PRUEBAS Y CRUD DE PEDIDOS (RESUELVE 401)
-                        // Permite TODAS las operaciones CRUD en /api/pedidos para realizar pruebas
+                        // 👤 CLIENTES (MIS PEDIDOS) - IMPORTANTE: Antes del permitAll general
+                        // =================================================================
+                        .requestMatchers("/api/pedidos/mis-pedidos/**").hasAnyRole("USUARIO", "ADMINISTRADOR", "DISEÑADOR")
+
+                        // =================================================================
+                        // 🟢 CONFIGURACIÓN PARA PRUEBAS (PEDIDOS GENERAL)
+                        // Permite CRUD general (Útil para pruebas, cuidado en producción)
                         .requestMatchers("/api/pedidos/**").permitAll()
 
                         // Permite la lectura de todas las opciones/valores
@@ -68,23 +72,20 @@ public class SecurityConfig {
 
                         // =================================================================
 
-                        // ENDPOINTS RESTRINGIDOS (Ejemplos)
+                        // ENDPOINTS RESTRINGIDOS
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/designer/**").hasRole("DISEÑADOR")
                         .requestMatchers("/api/user/**").hasRole("USUARIO")
                         .requestMatchers("/api/estados-pedido/**").hasRole("ADMINISTRADOR")
                         .requestMatchers(HttpMethod.POST, "/api/pedidos/desde-contacto/**").hasRole("ADMINISTRADOR")
 
-                        // Regla Catch-all: Si no coincide con lo anterior, requiere autenticación
+                        // Regla Catch-all
                         .requestMatchers("/api/**").authenticated()
-
-                        // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated()
                 )
-                // Manejo de excepciones de seguridad
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(authEntryPoint)  // 401
-                        .accessDeniedHandler(accessDenied)         // 403
+                        .authenticationEntryPoint(authEntryPoint)
+                        .accessDeniedHandler(accessDenied)
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

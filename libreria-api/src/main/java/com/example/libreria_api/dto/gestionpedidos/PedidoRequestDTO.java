@@ -1,23 +1,20 @@
 package com.example.libreria_api.dto.gestionpedidos;
 
-// Usamos el mismo nombre que antes (usuId) si se usa en otros DTOs,
-// pero en este contexto, lo redefinimos para ser claro.
-
 public class PedidoRequestDTO {
 
-    // Campos planos que pueden ser actualizados/enviados
+    // Campos planos de texto
     private String pedComentarios;
+    private String pedIdentificadorCliente; // Nombre/Teléfono para no registrados (anónimos)
 
-    // IDs (Foreign Keys) que vienen del cliente/frontend
-    private Integer estId; // Estado al que se quiere cambiar/crear
-    private Integer perId; // ID de Personalizacion
+    // IDs (Foreign Keys) para relaciones
+    private Integer estId;          // Estado del pedido (opcional al crear, default=1)
+    private Integer perId;          // ID de la Personalización asociada
 
-    // Trazabilidad y Asignación
-    private Integer usuIdEmpleado; // ID del diseñador/admin asignado
-    private Integer usuIdCliente;  // ID del cliente registrado
-    private Integer sesionId;      // ID de la Sesión Anónima
-    private Integer conId;         // ID del Contacto Formulario
-    private String pedIdentificadorCliente; // Nombre/Teléfono para no registrados
+    // Trazabilidad y Asignación de Usuarios
+    private Integer usuIdEmpleado;  // ID del diseñador/admin asignado
+    private Integer usuIdCliente;   // ID del cliente registrado (Se llena auto en 'crearMiPedido')
+    private Integer sesionId;       // ID de la Sesión Anónima
+    private Integer conId;          // ID del Contacto (si viene de formulario)
 
     // Constructor vacío
     public PedidoRequestDTO() {}
@@ -28,6 +25,9 @@ public class PedidoRequestDTO {
 
     public String getPedComentarios() { return pedComentarios; }
     public void setPedComentarios(String pedComentarios) { this.pedComentarios = pedComentarios; }
+
+    public String getPedIdentificadorCliente() { return pedIdentificadorCliente; }
+    public void setPedIdentificadorCliente(String pedIdentificadorCliente) { this.pedIdentificadorCliente = pedIdentificadorCliente; }
 
     public Integer getEstId() { return estId; }
     public void setEstId(Integer estId) { this.estId = estId; }
@@ -46,9 +46,4 @@ public class PedidoRequestDTO {
 
     public Integer getConId() { return conId; }
     public void setConId(Integer conId) { this.conId = conId; }
-
-    public String getPedIdentificadorCliente() { return pedIdentificadorCliente; }
-    public void setPedIdentificadorCliente(String pedIdentificadorCliente) { this.pedIdentificadorCliente = pedIdentificadorCliente; }
-
-    // NOTA: Eliminar cualquier getter/setter duplicado o antiguo como getUsuId()
 }
