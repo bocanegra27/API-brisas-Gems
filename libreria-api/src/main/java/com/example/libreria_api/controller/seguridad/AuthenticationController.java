@@ -48,7 +48,7 @@ public class AuthenticationController {
         return ResponseEntity.ok().build();
     }
 
-    // 🔥 NUEVO: Endpoint para restablecer la contraseña
+
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordDTO request) {
         authenticationService.resetPassword(request.getToken(), request.getNewPassword());

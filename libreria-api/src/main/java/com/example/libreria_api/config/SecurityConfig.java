@@ -54,16 +54,6 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
 
-                        // =================================================================
-                        // 👤 CLIENTES (MIS PEDIDOS) - IMPORTANTE: Antes del permitAll general
-                        // =================================================================
-                        .requestMatchers("/api/pedidos/mis-pedidos/**").hasAnyRole("USUARIO", "ADMINISTRADOR", "DISEÑADOR")
-
-                        // =================================================================
-                        // 🟢 CONFIGURACIÓN PARA PRUEBAS (PEDIDOS GENERAL)
-                        // Permite CRUD general (Útil para pruebas, cuidado en producción)
-                        .requestMatchers("/api/pedidos/**").permitAll()
-
                         // Permite la lectura de todas las opciones/valores
                         .requestMatchers(HttpMethod.GET, "/api/opciones/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/valores/**").permitAll()
@@ -81,8 +71,11 @@ public class SecurityConfig {
 
                         // Regla Catch-all
                         .requestMatchers("/api/**").authenticated()
+
+
                         .anyRequest().authenticated()
                 )
+
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authEntryPoint)
                         .accessDeniedHandler(accessDenied)

@@ -16,12 +16,9 @@ public class PedidoRequestDTO {
     private Integer sesionId;       // ID de la Sesión Anónima
     private Integer conId;          // ID del Contacto (si viene de formulario)
 
-    // Constructor vacío
     public PedidoRequestDTO() {}
 
-    // ===================================
-    // Getters y Setters
-    // ===================================
+
 
     public String getPedComentarios() { return pedComentarios; }
     public void setPedComentarios(String pedComentarios) { this.pedComentarios = pedComentarios; }

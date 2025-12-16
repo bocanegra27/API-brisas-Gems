@@ -11,10 +11,10 @@ public class RolUpdateDTO {
     @NotNull(message = "El ID del rol es obligatorio")
     private Integer rolId;
 
-    // Constructor
+
     public RolUpdateDTO() {}
 
-    // Getters y Setters
+
     public Integer getRolId() {
         return rolId;
     }

@@ -11,7 +11,7 @@ public class OpcionPersonalizacionResponseDTO {
         this.nombre = nombre;
     }
 
-    // Getters
+
     public int getId() {
         return id;
     }

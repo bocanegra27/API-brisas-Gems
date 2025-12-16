@@ -26,9 +26,7 @@ public class OpcionPersonalizacionController {
         this.opcionService = opcionService;
     }
 
-    // ==============================
-    // LISTAR (con búsqueda opcional)
-    // ==============================
+
     @GetMapping
     @Operation(summary = "Listar y buscar opciones de personalización",
     description = "Recupera una lista de las categorías de personalización. Permite la búsqueda opcional " +
@@ -37,9 +35,7 @@ public class OpcionPersonalizacionController {
         return opcionService.listar(search);
     }
 
-    // ==============================
-    // OBTENER POR ID
-    // ==============================
+
     @GetMapping("/{id}")
     @Operation(summary = "Obtener opción por ID",
     description = "Busca y devuelve los detalles de una opción de personalización específica" +
@@ -52,9 +48,7 @@ public class OpcionPersonalizacionController {
         }
     }
 
-    // ==============================
-    // CREAR
-    // ==============================
+
     @PostMapping
     @Operation(summary = "Crear una nueva opción de personalización",
     description ="Registra una nueva categoría o tipo de personalización" )
@@ -67,9 +61,8 @@ public class OpcionPersonalizacionController {
         }
     }
 
-    // ==============================
-    // ACTUALIZAR
-    // ==============================
+
+
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar una opción de personalización",
     description = "Modifica los datos de una opción de personalización existente identificada por su ID.")
@@ -84,9 +77,7 @@ public class OpcionPersonalizacionController {
         }
     }
 
-    // ==============================
-    // ELIMINAR
-    // ==============================
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar una opción de personalización",
     description = "Elimina permanentemente una opción del catálogo. " +

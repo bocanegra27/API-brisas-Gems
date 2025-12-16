@@ -13,7 +13,7 @@ public class PedidoMapper {
         dto.setPedFechaCreacion(pedido.getPedFechaCreacion());
         dto.setPedComentarios(pedido.getPedComentarios());
 
-        // Mapeo de Estado
+
         if (pedido.getEstadoPedido() != null) {
             dto.setEstId(pedido.getEstadoPedido().getEst_id());
             dto.setEstadoNombre(pedido.getEstadoPedido().getEstNombre());
@@ -42,7 +42,7 @@ public class PedidoMapper {
             dto.setUsuIdCliente(pedido.getCliente().getUsuId());
         }
 
-        // Trazabilidad 4: Sesión Anónima
+
         if (pedido.getSesion() != null) {
             dto.setSesionId(pedido.getSesion().getSesId());
             String sesToken = pedido.getSesion().getSesToken();
@@ -51,7 +51,7 @@ public class PedidoMapper {
             }
         }
 
-        // Trazabilidad 5: Contacto e Identificador
+
         dto.setConId(pedido.getConId());
         dto.setPedIdentificadorCliente(pedido.getPedIdentificadorCliente());
 

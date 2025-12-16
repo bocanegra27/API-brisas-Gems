@@ -13,7 +13,7 @@ public class DashboardService {
     private final Map<String, String> roleDashboardMap;
 
     public DashboardService() {
-        // Mapeo de roles a URLs de dashboard
+
         roleDashboardMap = new HashMap<>();
         roleDashboardMap.put("ROLE_ADMINISTRADOR", "/admin/dashboard");
         roleDashboardMap.put("ROLE_DISEÑADOR", "/designer/dashboard");
@@ -21,7 +21,7 @@ public class DashboardService {
     }
 
     public String determinarDashboardUrl(UserDetails userDetails) {
-        // Buscar el primer rol que tenga un dashboard configurado
+
         for (GrantedAuthority authority : userDetails.getAuthorities()) {
             String role = authority.getAuthority();
             if (roleDashboardMap.containsKey(role)) {
@@ -29,7 +29,7 @@ public class DashboardService {
             }
         }
 
-        // Dashboard por defecto si no se encuentra un rol específico
+
         return "/com/example/libreria_api/controller/dashboard";
     }
 

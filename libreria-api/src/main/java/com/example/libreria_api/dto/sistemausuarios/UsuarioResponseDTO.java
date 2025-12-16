@@ -19,7 +19,7 @@ public class UsuarioResponseDTO {
     private Integer tipdocId;
     private String tipdocNombre;
 
-    // Constructor vacío
+
     public UsuarioResponseDTO() {
     }
 
@@ -41,7 +41,7 @@ public class UsuarioResponseDTO {
         this.tipdocNombre = tipdocNombre;
     }
 
-    // Getters y Setters
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

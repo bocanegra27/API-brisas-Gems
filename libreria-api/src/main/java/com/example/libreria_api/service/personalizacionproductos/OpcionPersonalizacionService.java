@@ -25,9 +25,7 @@ public class OpcionPersonalizacionService {
         this.opcionRepo = opcionRepo;
     }
 
-    // ==============================
-    // CREAR
-    // ==============================
+
     @Transactional
     public OpcionPersonalizacionResponseDTO crear(OpcionPersonalizacionCreateDTO dto) {
         if (opcionRepo.findByOpcNombre(dto.getNombre()).isPresent()) {
@@ -40,9 +38,7 @@ public class OpcionPersonalizacionService {
         return new OpcionPersonalizacionResponseDTO(guardada.getOpcId(), guardada.getOpcNombre());
     }
 
-    // ==============================
-    // ACTUALIZAR
-    // ==============================
+
     @Transactional
     public OpcionPersonalizacionResponseDTO actualizar(int id, OpcionPersonalizacionUpdateDTO dto) {
         OpcionPersonalizacion opcion = opcionRepo.findById(id)
@@ -59,9 +55,7 @@ public class OpcionPersonalizacionService {
         return new OpcionPersonalizacionResponseDTO(actualizada.getOpcId(), actualizada.getOpcNombre());
     }
 
-    // ==============================
-    // LISTAR (con búsqueda opcional)
-    // ==============================
+
     @Transactional(readOnly = true)
     public List<OpcionPersonalizacionResponseDTO> listar(String filtro) {
         List<OpcionPersonalizacion> entidades;
@@ -77,9 +71,7 @@ public class OpcionPersonalizacionService {
                 .collect(Collectors.toList());
     }
 
-    // ==============================
-    // OBTENER POR ID
-    // ==============================
+
     @Transactional(readOnly = true)
     public OpcionPersonalizacionResponseDTO obtenerPorId(int id) {
         OpcionPersonalizacion opcion = opcionRepo.findById(id)
@@ -88,9 +80,6 @@ public class OpcionPersonalizacionService {
         return new OpcionPersonalizacionResponseDTO(opcion.getOpcId(), opcion.getOpcNombre());
     }
 
-    // ==============================
-    // ELIMINAR
-    // ==============================
     @Transactional
     public void eliminar(int id) {
         OpcionPersonalizacion opcion = opcionRepo.findById(id)

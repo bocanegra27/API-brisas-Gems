@@ -29,7 +29,7 @@ public class AccessDenied implements AccessDeniedHandler {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        // Respuesta estructurada en JSON
+
         String jsonResponse = String.format(
                 "{\"error\":\"Forbidden\"," +
                         "\"message\":\"Acceso denegado. No tienes los permisos necesarios.\"," +

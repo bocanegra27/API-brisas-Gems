@@ -27,7 +27,7 @@ public class PersonalizacionController {
     @Autowired
     private PersonalizacionService personalizacionService;
 
-    // GET con filtros opcionales
+
     @GetMapping
     @Operation(summary = "Listar y filtrar personalizaciones",
     description = "Obtiene una lista de registros de personalización. Permite filtrar por clienteId" +
@@ -44,7 +44,7 @@ public class PersonalizacionController {
         return ResponseEntity.ok(resultado);
     }
 
-    // GET por id
+
     @GetMapping("/{id}")
     @Operation(summary = "Obtener personalización por ID",
     description = "Busca y devuelve los detalles de un registro de personalización específico" +
@@ -57,7 +57,7 @@ public class PersonalizacionController {
         return ResponseEntity.ok(dto);
     }
 
-    // POST crear
+
     @PostMapping
     @Operation(summary = "Crear nuevo registro de personalización",
     description = "Crea un nuevo registro de personalización con los detalles de las opciones " +
@@ -71,7 +71,7 @@ public class PersonalizacionController {
         }
     }
 
-    // PUT actualizar
+
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar registro de personalización",
     description = "Modifica los datos de un registro de personalización " +
@@ -87,7 +87,7 @@ public class PersonalizacionController {
         return ResponseEntity.ok(actualizada);
     }
 
-    // DELETE eliminar
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar registro de personalización",
     description = "Elimina permanentemente un registro de personalización del sistema.")

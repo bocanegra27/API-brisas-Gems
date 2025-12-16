@@ -18,7 +18,7 @@ public class ContactoFormulario {
     @Column(name = "con_nombre", nullable = false, length = 150)
     private String conNombre;
 
-    // Aseguramos que la variable 'conCorreo' esté correctamente mapeada a la columna 'con_correo'
+
     @Column(name = "con_correo", length = 100)
     private String conCorreo;
 
@@ -61,7 +61,7 @@ public class ContactoFormulario {
     @JoinColumn(name = "per_id")
     private Personalizacion personalizacion;
 
-    // Constructores, Getters y Setters
+
 
     public ContactoFormulario() {}
 

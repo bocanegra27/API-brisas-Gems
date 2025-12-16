@@ -46,13 +46,13 @@ public class EmailService {
 
             helper.setText(htmlContent, true); // true indica que es HTML
 
-            // Enviar
+
             mailSender.send(message);
-            System.out.println("✅ Correo enviado exitosamente a: " + destinatario);
+            System.out.println("Correo enviado exitosamente a: " + destinatario);
 
         } catch (MessagingException e) {
-            System.err.println("❌ Error enviando correo: " + e.getMessage());
-            // Opcional: Lanzar excepción si quieres que el controlador se entere
+            System.err.println("Error enviando correo: " + e.getMessage());
+
         }
     }
 }

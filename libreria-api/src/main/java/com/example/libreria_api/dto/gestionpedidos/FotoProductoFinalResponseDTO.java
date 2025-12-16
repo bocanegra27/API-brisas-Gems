@@ -7,9 +7,9 @@ public class FotoProductoFinalResponseDTO {
     private int fot_id;
     private String fotImagenFinal;
     private LocalDate fotFechaSubida;
-    private Integer ped_id; // Solo el ID del pedido
+    private Integer ped_id;
 
-    // Getters y Setters
+
     public int getFot_id() {
         return fot_id;
     }
