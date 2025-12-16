@@ -55,8 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll() // Health Check y Info
                         .requestMatchers("/uploads/**").permitAll() //imagenes render 3d
 
-
-                        // Permite la lectura de todas las opciones
+                        // Permite la lectura de todas las opciones/valores
                         .requestMatchers(HttpMethod.GET, "/api/opciones/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/valores/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/personalizaciones/**").permitAll()
