@@ -7,7 +7,7 @@ public class DetallePersonalizacionUpdateDTO {
     @NotNull(message = "El valId es obligatorio")
     private Integer valId;
 
-    // Getters y Setters
+
     public Integer getValId() {
         return valId;
     }

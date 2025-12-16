@@ -26,9 +26,7 @@ public class ValorPersonalizacionController {
         this.valorService = valorService;
     }
 
-    // ==============================
-    // LISTAR (con filtros opcionales)
-    // ==============================
+
     @GetMapping
     @Operation(summary = "Listar y filtrar valores de personalizacion",
     description = "Recupera una lista de valores de personalización. " +
@@ -39,9 +37,6 @@ public class ValorPersonalizacionController {
         return valorService.listar(opcId, search);
     }
 
-    // ==============================
-    // OBTENER POR ID
-    // ==============================
     @GetMapping("/{id}")
     @Operation(summary = "Obtener valor por ID",
     description = "Busca y devuelve los detalles de un valor de " +
@@ -54,9 +49,7 @@ public class ValorPersonalizacionController {
         }
     }
 
-    // ==============================
-    // CREAR
-    // ==============================
+
     @PostMapping
     @Operation(summary = "Crear un nuevo valor de personalización",
     description = "Registra un nuevo valor que podrá ser seleccionado por el cliente (ej: Metal, Plástico, Cuero).")
@@ -73,9 +66,7 @@ public class ValorPersonalizacionController {
         }
     }
 
-    // ==============================
-    // ACTUALIZAR
-    // ==============================
+
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar un valor de personalización",
     description = "Modifica los datos de un valor de personalización existente identificado por su ID.")
@@ -92,9 +83,7 @@ public class ValorPersonalizacionController {
         }
     }
 
-    // ==============================
-    // ELIMINAR
-    // ==============================
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar un valor de personalización",
     description = "Elimina permanentemente un valor del catálogo.")

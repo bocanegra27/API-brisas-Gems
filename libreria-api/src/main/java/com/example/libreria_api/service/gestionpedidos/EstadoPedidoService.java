@@ -44,7 +44,7 @@ public class EstadoPedidoService {
 
     @Transactional
     public EstadoPedidoResponseDTO guardar(EstadoPedidoRequestDTO requestDTO) {
-        // Validar que no exista un estado con el mismo nombre
+
         if (estadoPedidoRepository.existsByEstNombre(requestDTO.getEstNombre())) {
             throw new IllegalArgumentException("Ya existe un estado con el nombre: " + requestDTO.getEstNombre());
         }
@@ -57,7 +57,7 @@ public class EstadoPedidoService {
     @Transactional
     public EstadoPedidoResponseDTO actualizar(Integer id, EstadoPedidoRequestDTO requestDTO) {
         return estadoPedidoRepository.findById(id).map(estadoExistente -> {
-            // Validar nombre único si cambió
+
             if (!estadoExistente.getEstNombre().equals(requestDTO.getEstNombre()) &&
                     estadoPedidoRepository.existsByEstNombre(requestDTO.getEstNombre())) {
                 throw new IllegalArgumentException("Ya existe un estado con el nombre: " + requestDTO.getEstNombre());
@@ -79,7 +79,7 @@ public class EstadoPedidoService {
             return false;
         }
 
-        // Verificar si hay pedidos usando este estado
+
         Long countPedidos = estadoPedidoRepository.countPedidosByEstadoId(id);
         if (countPedidos > 0) {
             throw new IllegalStateException(

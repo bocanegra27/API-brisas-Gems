@@ -28,7 +28,7 @@ public class SesionAnonima {
     @JoinColumn(name = "usu_id_convertido", referencedColumnName = "usu_id")
     private Usuario usuarioConvertido;
 
-    // Constructores
+
     public SesionAnonima() {
     }
 
@@ -39,7 +39,7 @@ public class SesionAnonima {
         this.sesConvertido = false;
     }
 
-    // Getters y Setters
+
     public Integer getSesId() {
         return sesId;
     }

@@ -63,7 +63,7 @@ public class SecurityConfig {
 
                         // =================================================================
 
-                        // ENDPOINTS RESTRINGIDOS (Ejemplos)
+                        // ENDPOINTS RESTRINGIDOS
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/designer/**").hasRole("DISEÑADOR")
                         .requestMatchers("/api/user/**").hasRole("USUARIO")
@@ -73,10 +73,10 @@ public class SecurityConfig {
                         // Regla Catch-all: Si no coincide con lo anterior, requiere autenticación
                         .requestMatchers("/api/**").authenticated()
 
-                        // Cualquier otra ruta requiere autenticación
+
                         .anyRequest().authenticated()
                 )
-                // Manejo de excepciones de seguridad
+
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authEntryPoint)  // 401
                         .accessDeniedHandler(accessDenied)         // 403

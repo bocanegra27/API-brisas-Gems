@@ -30,7 +30,7 @@ public class ContactoFormularioCreateDTO {
 
     public ContactoFormularioCreateDTO() {}
 
-    // Getters y Setters existentes
+
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
@@ -49,10 +49,10 @@ public class ContactoFormularioCreateDTO {
     public boolean isTerminos() { return terminos; }
     public void setTerminos(boolean terminos) { this.terminos = terminos; }
 
-    // NUEVOS GETTERS Y SETTERS
 
-    public Integer getUsuarioId() { return usuarioId; } // <--- ¡Agregar este Getter!
-    public void setUsuarioId(Integer usuarioId) { this.usuarioId = usuarioId; } // <--- ¡Agregar este Setter!
+
+    public Integer getUsuarioId() { return usuarioId; }
+    public void setUsuarioId(Integer usuarioId) { this.usuarioId = usuarioId; }
 
     public Integer getSesionId() { return sesionId; }
     public void setSesionId(Integer sesionId) { this.sesionId = sesionId; }

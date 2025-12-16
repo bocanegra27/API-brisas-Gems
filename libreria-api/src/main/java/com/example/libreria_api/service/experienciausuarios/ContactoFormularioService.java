@@ -63,26 +63,22 @@ public class ContactoFormularioService {
         entidad.setConFechaEnvio(LocalDateTime.now());
         entidad.setConEstado(EstadoContacto.pendiente);
 
-        // FIX: Mapear la identidad del cliente (Usuario o Sesión Anónima)
-        // La entidad ContactoFormulario usa objetos relacionados, no IDs directos.
+
         if (dto.getUsuarioId() != null && dto.getUsuarioId() > 0) {
-            // Es un usuario registrado
+
             Usuario usuario = new Usuario();
             usuario.setUsuId(dto.getUsuarioId());
-            entidad.setUsuario(usuario); // Mapea al objeto Usuario
-            // Asegurarse de que el campo de sesión sea nulo
+            entidad.setUsuario(usuario);
             entidad.setSesion(null);
         }
         else if (dto.getSesionId() != null && dto.getSesionId() > 0) {
-            // Es un usuario anónimo
             SesionAnonima sesion = new SesionAnonima();
             sesion.setSesId(dto.getSesionId());
-            entidad.setSesion(sesion); // Mapea al objeto Sesion
-            // Asegurarse de que el campo de usuario sea nulo
+            entidad.setSesion(sesion);
             entidad.setUsuario(null);
         }
 
-        // NUEVO: Mapear personalizacion si existe
+
         if (dto.getPersonalizacionId() != null) {
             Personalizacion personalizacion = new Personalizacion();
             personalizacion.setPerId(dto.getPersonalizacionId());
@@ -151,39 +147,39 @@ public class ContactoFormularioService {
         dto.setEstado(entidad.getConEstado().name());
         dto.setNotas(entidad.getConNotas());
 
-        // Mapear usuario registrado
+
         if (entidad.getUsuario() != null) {
             dto.setUsuarioId(entidad.getUsuario().getUsuId());
             dto.setUsuarioNombre(entidad.getUsuario().getUsuNombre());
             dto.setTipoCliente("registrado");
         }
-        // Mapear sesion anonima
+
         else if (entidad.getSesion() != null) {
             dto.setSesionId(entidad.getSesion().getSesId());
 
-            // ✅ CAMBIO: Verificación segura del token
+
             String token = entidad.getSesion().getSesToken();
             if (token != null && token.length() >= 8) {
                 dto.setSesionToken(token.substring(0, 8));
             } else if (token != null) {
                 dto.setSesionToken(token);
             }
-            // Si token es null, simplemente no se setea y queda null en el DTO
+
 
             dto.setTipoCliente("anonimo");
         }
-        // Sin usuario ni sesion
+
         else {
             dto.setTipoCliente("externo");
         }
 
-        // Mapear admin
+
         if (entidad.getUsuarioAdmin() != null) {
             dto.setUsuarioIdAdmin(entidad.getUsuarioAdmin().getUsuId());
             dto.setUsuarioAdminNombre(entidad.getUsuarioAdmin().getUsuNombre());
         }
 
-        // Mapear personalizacion vinculada
+
         if (entidad.getPersonalizacion() != null) {
             dto.setPersonalizacionId(entidad.getPersonalizacion().getPerId());
         }
@@ -203,20 +199,20 @@ public class ContactoFormularioService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> obtenerContactoConPersonalizacion(Integer contactoId) {
-        // Obtener contacto
+
         ContactoFormulario contacto = contactoRepository.findById(contactoId)
                 .orElseThrow(() -> new EntityNotFoundException("Contacto no encontrado"));
 
         Map<String, Object> resultado = new HashMap<>();
 
-        // Datos básicos del contacto
+
         resultado.put("contacto", mapToResponseDTO(contacto));
 
-        // Si tiene personalización vinculada, obtener detalles
+
         if (contacto.getPersonalizacion() != null) {
             Integer perId = contacto.getPersonalizacion().getPerId();
 
-            // Obtener personalización completa
+
             Personalizacion personalizacion = personalizacionRepository.findById(perId)
                     .orElse(null);
 
@@ -225,23 +221,23 @@ public class ContactoFormularioService {
                 datosPersonalizacion.put("id", personalizacion.getPerId());
                 datosPersonalizacion.put("fecha", personalizacion.getPerFecha());
 
-                // Obtener detalles de personalización
+
                 List<DetallePersonalizacion> detalles =
                         detallePersonalizacionRepository.findByPersonalizacion_PerId(perId);
 
-                // Construir resumen legible
+
                 Map<String, String> resumen = new HashMap<>();
                 List<Map<String, Object>> detallesFormateados = new ArrayList<>();
 
                 for (DetallePersonalizacion detalle : detalles) {
-                    // Obtener nombres desde las relaciones
+
                     ValorPersonalizacion valor = detalle.getValorPersonalizacion();
                     OpcionPersonalizacion opcion = valor.getOpcionPersonalizacion();
 
                     String opcionNombre = opcion.getOpcNombre();
                     String valorNombre = valor.getValNombre();
 
-                    // Agregar al resumen
+
                     resumen.put(opcionNombre, valorNombre);
 
                     // Agregar a detalles formateados

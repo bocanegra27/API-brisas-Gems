@@ -27,7 +27,7 @@ public class ContactoFormularioResponseDTO {
 
     public ContactoFormularioResponseDTO() {}
 
-    // Getters y Setters existentes
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -72,7 +72,7 @@ public class ContactoFormularioResponseDTO {
         this.usuarioAdminNombre = usuarioAdminNombre;
     }
 
-    // NUEVOS GETTERS Y SETTERS
+
     public Integer getSesionId() { return sesionId; }
     public void setSesionId(Integer sesionId) { this.sesionId = sesionId; }
 

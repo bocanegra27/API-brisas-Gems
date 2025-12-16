@@ -13,11 +13,11 @@ public class TipoDeDocumento {
     @Column(name = "tipdoc_nombre")
     private String tipdocNombre;
 
-    // Constructor vacío
+
     public TipoDeDocumento() {
     }
 
-    // Getters y Setters
+
     public int getTipdocId() {
         return tipdocId;
     }
