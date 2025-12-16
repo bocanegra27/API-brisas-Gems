@@ -224,14 +224,27 @@ public class PedidoService {
         return enriquecerDTOConNombres(pedido, PedidoMapper.toPedidoResponseDTO(pedido));
     }
 
-    // Método auxiliar para enriquecer el DTO con nombres de cliente
+    // Método auxiliar para enriquecer el DTO con nombres de cliente Y EMPLEADO
     private PedidoResponseDTO enriquecerDTOConNombres(Pedido pedido, PedidoResponseDTO dto) {
+        // PRIORIDAD 1: Cliente Registrado
         if (pedido.getCliente() != null) {
             dto.setNombreCliente(pedido.getCliente().getUsuNombre());
+
+            // PRIORIDAD 2: Cliente Manual/Anónimo
+        } else if (pedido.getPedIdentificadorCliente() != null && !pedido.getPedIdentificadorCliente().isEmpty()) {
+            dto.setNombreCliente(pedido.getPedIdentificadorCliente());
+
+            // PRIORIDAD 3: Cliente desde Contacto
         } else if (pedido.getConId() != null) {
             contactoRepository.findById(pedido.getConId())
                     .ifPresent(c -> dto.setNombreCliente(c.getConNombre()));
         }
+
+        // 🔥 NUEVA LÓGICA: ENRIQUECER NOMBRE DEL EMPLEADO
+        if (pedido.getEmpleadoAsignado() != null) {
+            dto.setNombreEmpleado(pedido.getEmpleadoAsignado().getUsuNombre());
+        }
+
         return dto;
     }
 
@@ -251,19 +264,43 @@ public class PedidoService {
         // Implementación básica si se usa desde admin
         Pedido pedido = new Pedido();
         pedido.setPedFechaCreacion(new Date());
+
+        // Asignación de comentarios
         pedido.setPedComentarios(requestDTO.getPedComentarios());
+
+        // Generación de código
         pedido.setPedCodigo("ADM-" + System.currentTimeMillis());
 
+        // Asignación de estado
         EstadoPedido estado = estadoPedidoRepository.findById(requestDTO.getEstId() != null ? requestDTO.getEstId() : 1)
                 .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
         pedido.setEstadoPedido(estado);
 
+        // LÓGICA DE ASIGNACIÓN DE CLIENTE
         if (requestDTO.getUsuIdCliente() != null) {
+            // Cliente Registrado
             Usuario cliente = usuarioRepository.findById(requestDTO.getUsuIdCliente()).orElse(null);
             pedido.setCliente(cliente);
+        } else if (requestDTO.getPedIdentificadorCliente() != null && !requestDTO.getPedIdentificadorCliente().isEmpty()) {
+            // 🔥 SOLUCIÓN: Cliente Externo/Anónimo. Copiamos el dato del DTO a la Entidad.
+            pedido.setPedIdentificadorCliente(requestDTO.getPedIdentificadorCliente());
         }
 
         Pedido guardado = pedidoRepository.save(pedido);
+
+        // Crear primer historial (Opcional, pero recomendado para trazabilidad)
+        HistorialEstadoPedido historial = new HistorialEstadoPedido();
+        historial.setPedido(guardado);
+        historial.setEstadoPedido(estado);
+        historial.setHisFechaCambio(new Date());
+        historial.setHisComentarios(requestDTO.getPedComentarios() + " (Pedido creado por Admin)");
+
+        // Asumiendo que obtienes el responsable (Admin) del contexto o JWT aquí
+        // Por simplicidad, omitimos la asignación de responsable en este ejemplo,
+        // pero deberías añadirla.
+
+        historialRepository.save(historial);
+
         return PedidoMapper.toPedidoResponseDTO(guardado);
     }
 
@@ -315,7 +352,12 @@ public class PedidoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", usuIdEmpleado));
 
         pedido.setEmpleadoAsignado(empleado);
-        return PedidoMapper.toPedidoResponseDTO(pedidoRepository.save(pedido));
+        Pedido pedidoGuardado = pedidoRepository.save(pedido); // <-- Guardamos la entidad
+
+        // 🔥 CORRECCIÓN CLAVE: Convertimos y ENRIQUECEMOS el DTO antes de devolverlo.
+        // La entidad PedidoGuardado tiene el objeto Empleado asignado,
+        // pero necesitamos copiar el nombre al campo 'nombreEmpleado' del DTO.
+        return convertirADTO(pedidoGuardado);
     }
 
     @Transactional(readOnly = true)
