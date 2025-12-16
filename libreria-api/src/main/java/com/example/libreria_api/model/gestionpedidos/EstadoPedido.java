@@ -16,7 +16,7 @@ public class EstadoPedido {
     @Column(name = "est_descripcion", length = 200)
     private String estDescripcion;
 
-    // Constructores
+
     public EstadoPedido() {
     }
 
@@ -26,7 +26,7 @@ public class EstadoPedido {
         this.estDescripcion = estDescripcion;
     }
 
-    // Getters y Setters
+
     public int getEst_id() {
         return est_id;
     }

@@ -27,9 +27,7 @@ public class DetallePersonalizacionController {
         this.detalleService = detalleService;
     }
 
-    // ==============================
-    // LISTAR DETALLES DE UNA PERSONALIZACIÓN
-    // ==============================
+
     @GetMapping
     @Operation(summary = "Listar detalles de una personalización",
     description = "Recupera todos los detalles de personalización asociados a" +
@@ -38,9 +36,7 @@ public class DetallePersonalizacionController {
         return detalleService.listarPorPersonalizacion(perId);
     }
 
-    // ==============================
-    // OBTENER DETALLE POR ID
-    // ==============================
+
     @GetMapping("/{detId}")
     @Operation(summary = "Obtener detalle específico por ID",
     description = "Busca y devuelve un detalle de personalización por su ID (detId), asegurando que " +
@@ -60,9 +56,6 @@ public class DetallePersonalizacionController {
         }
     }
 
-    // ==============================
-    // CREAR DETALLE
-    // ==============================
     @PostMapping
     @Operation(summary = "Crear nuevo detalle de personalización",
     description = "Añade un nuevo detalle de personalización (opción elegida " +
@@ -79,9 +72,7 @@ public class DetallePersonalizacionController {
         }
     }
 
-    // ==============================
-    // ACTUALIZAR DETALLE
-    // ==============================
+
     @PutMapping("/{detId}")
     @Operation(summary = "Actualizar un detalle de personalización",
     description = "Modifica un detalle de personalización existente (detId), verificando " +
@@ -103,9 +94,7 @@ public class DetallePersonalizacionController {
         }
     }
 
-    // ==============================
-    // ELIMINAR DETALLE
-    // ==============================
+
     @DeleteMapping("/{detId}")
     @Operation(summary = "Eliminar detalle de personalización",
     description = "Elimina un detalle específico (detId) del registro de Personalización padre")

@@ -5,7 +5,7 @@ import com.example.libreria_api.dto.seguridad.LoginResponseDTO;
 import com.example.libreria_api.model.seguridad.Token;
 import com.example.libreria_api.repository.seguridad.TokenRepository;
 import com.example.libreria_api.repository.sistemausuarios.UsuarioRepository;
-import com.example.libreria_api.service.notificaciones.EmailService; // Importación nueva
+import com.example.libreria_api.service.notificaciones.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,11 +27,11 @@ public class AuthenticationService {
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // 🔥 NUEVO: Inyectamos el servicio de correo
+
     private final EmailService emailService;
 
     public LoginResponseDTO login(LoginRequestDTO request) {
-        // ... (Tu código de login sigue igual, no lo toco) ...
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
@@ -70,15 +70,14 @@ public class AuthenticationService {
 
         tokenRepository.save(token);
 
-        // 🔥 REEMPLAZO: En lugar de System.out, llamamos al EmailService
-        // Esto enviará el correo real a través de Gmail
+
         emailService.enviarCorreoRecuperacion(email, usuario.getUsuNombre(), tokenString);
 
         System.out.println(">>> Proceso de recuperación iniciado para: " + email);
     }
 
     public void resetPassword(String tokenString, String newPassword) {
-        // ... (Tu código de resetPassword sigue igual) ...
+
         Token token = tokenRepository.findByToken(tokenString)
                 .orElseThrow(() -> new RuntimeException("Token inválido"));
 

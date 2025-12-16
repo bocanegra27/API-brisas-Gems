@@ -8,7 +8,7 @@ public class DetallePersonalizacionResponseDTO {
     private Integer opcionId;
     private String opcionNombre;
 
-    // Getters y Setters
+
     public Integer getDetId() {
         return detId;
     }

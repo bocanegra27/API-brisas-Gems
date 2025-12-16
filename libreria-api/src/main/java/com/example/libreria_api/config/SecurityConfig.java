@@ -55,12 +55,8 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll() // Health Check y Info
                         .requestMatchers("/uploads/**").permitAll() //imagenes render 3d
 
-                        // =================================================================
-                        // 🟢 CONFIGURACIÓN PARA PRUEBAS Y CRUD DE PEDIDOS (RESUELVE 401)
-                        // Permite TODAS las operaciones CRUD en /api/pedidos para realizar pruebas
-                        .requestMatchers("/api/pedidos/**").permitAll()
 
-                        // Permite la lectura de todas las opciones/valores
+                        // Permite la lectura de todas las opciones
                         .requestMatchers(HttpMethod.GET, "/api/opciones/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/valores/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/personalizaciones/**").permitAll()
@@ -68,7 +64,7 @@ public class SecurityConfig {
 
                         // =================================================================
 
-                        // ENDPOINTS RESTRINGIDOS (Ejemplos)
+                        // ENDPOINTS RESTRINGIDOS
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/designer/**").hasRole("DISEÑADOR")
                         .requestMatchers("/api/user/**").hasRole("USUARIO")
@@ -78,10 +74,10 @@ public class SecurityConfig {
                         // Regla Catch-all: Si no coincide con lo anterior, requiere autenticación
                         .requestMatchers("/api/**").authenticated()
 
-                        // Cualquier otra ruta requiere autenticación
+
                         .anyRequest().authenticated()
                 )
-                // Manejo de excepciones de seguridad
+
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authEntryPoint)  // 401
                         .accessDeniedHandler(accessDenied)         // 403

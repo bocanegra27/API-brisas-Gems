@@ -9,7 +9,7 @@ public class UsuarioRequestDTO {
     private String usuDocnum;
     private Integer tipoDeDocumentoId;
 
-    // Getters y Setters
+
     public String getUsuNombre() {
         return usuNombre;
     }

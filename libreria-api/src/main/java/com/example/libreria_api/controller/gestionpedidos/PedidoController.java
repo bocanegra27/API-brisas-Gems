@@ -121,10 +121,7 @@ public class PedidoController {
 
         return ResponseEntity.ok(Map.of("count", count));
     }
-
-    // ==============================
-// CREAR PEDIDO DESDE CONTACTO
-// ==============================
+//Crear pedido desde Contacto
     @PostMapping("/desde-contacto/{contactoId}")
     @Operation(summary = "Crear pedido a partir de un contacto",
     description = "Genera un nuevo pedido automáticamente utilizando la información " +
@@ -144,20 +141,16 @@ public class PedidoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
     }
 
-    // ==============================
-    // CAMBIAR ESTADO (CON HISTORIAL)
-    // ==============================
     @PatchMapping("/{id}/estado")
     public ResponseEntity<PedidoResponseDTO> cambiarEstado(
             @PathVariable Integer id,
-            @RequestBody Map<String, Object> payload) { // Usamos Map para JSON simple
+            @RequestBody Map<String, Object> payload) {
 
-        // Extracción de datos (asumiendo que Laravel envía {nuevoEstadoId, comentarios, responsableId})
+
         Integer nuevoEstadoId = (Integer) payload.get("nuevoEstadoId");
         String comentarios = (String) payload.get("comentarios");
-        // 🔥 NOTA: El ID del responsable debe venir del JWT del usuario logueado, no del body.
-        // Usaremos un placeholder (usu_id = 2, Pedro Paramo) hasta que se integre la seguridad.
-        Integer responsableId = 2; // <<--- TEMPORAL: Reemplazar con lógica de JWT
+
+        Integer responsableId = 2;
 
         if (nuevoEstadoId == null) {
             return ResponseEntity.badRequest().build();
@@ -176,9 +169,7 @@ public class PedidoController {
         }
     }
 
-    // ==============================
-    // OBTENER HISTORIAL DE PEDIDO
-    // ==============================
+
     /**
      * Devuelve el historial de cambios de estado para un pedido específico.
      * GET /api/pedidos/{id}/historial
@@ -189,7 +180,7 @@ public class PedidoController {
             List<HistorialResponseDTO> historial = pedidoService.obtenerHistorialPorPedido(id);
             return ResponseEntity.ok(historial);
         } catch (Exception e) {
-            // Manejar excepciones de manera controlada (ej: 404 si el pedido no existe)
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -201,8 +192,7 @@ public class PedidoController {
 
         Integer usuIdEmpleado = payload.get("usuIdEmpleado");
 
-        // **NOTA:** El ID del responsable debe venir del JWT del admin logueado.
-        // Usaremos un placeholder (Pedro Paramo=2) por ahora.
+
         Integer responsableId = 2;
 
         if (usuIdEmpleado == null) {
@@ -221,10 +211,7 @@ public class PedidoController {
     @GetMapping("/cliente/{usuIdCliente}")
     @Operation(summary = "Obtener pedidos por ID de Cliente (Dashboard de Usuario)",
             description = "Recupera todos los pedidos creados por el cliente con el ID especificado.")
-// 🔥 Importante: Requiere que tu Spring Security tenga configurado Principal y Roles.
-// Esto permite que el cliente solo acceda a SUS pedidos.
-// Si aún no has configurado el JWT/Principal, puedes empezar con @PreAuthorize("permitAll()")
-// y cambiarlo más tarde, o usar un filtro simple en el Service.
+
     public ResponseEntity<List<PedidoResponseDTO>> obtenerPedidosPorCliente(@PathVariable Integer usuIdCliente) {
         List<PedidoResponseDTO> pedidos = pedidoService.obtenerPedidosPorCliente(usuIdCliente);
         return ResponseEntity.ok(pedidos);
@@ -233,7 +220,7 @@ public class PedidoController {
     @GetMapping("/empleado/{usuIdEmpleado}")
     @Operation(summary = "Obtener pedidos asignados a un Empleado/Diseñador",
             description = "Recupera todos los pedidos que tienen asignado al empleado con el ID especificado.")
-// 🔥 Importante: Similar a arriba, requiere seguridad para que el diseñador solo vea sus asignaciones.
+
     public ResponseEntity<List<PedidoResponseDTO>> obtenerPedidosPorEmpleado(@PathVariable Integer usuIdEmpleado) {
         List<PedidoResponseDTO> pedidos = pedidoService.obtenerPedidosPorEmpleado(usuIdEmpleado);
         return ResponseEntity.ok(pedidos);
