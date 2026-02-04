@@ -221,10 +221,10 @@ public class PedidoController {
     @GetMapping("/cliente/{usuIdCliente}")
     @Operation(summary = "Obtener pedidos por ID de Cliente (Dashboard de Usuario)",
             description = "Recupera todos los pedidos creados por el cliente con el ID especificado.")
-// 🔥 Importante: Requiere que tu Spring Security tenga configurado Principal y Roles.
-// Esto permite que el cliente solo acceda a SUS pedidos.
-// Si aún no has configurado el JWT/Principal, puedes empezar con @PreAuthorize("permitAll()")
-// y cambiarlo más tarde, o usar un filtro simple en el Service.
+    // 🔥 Importante: Requiere que tu Spring Security tenga configurado Principal y Roles.
+    // Esto permite que el cliente solo acceda a SUS pedidos.
+    // Si aún no has configurado el JWT/Principal, puedes empezar con @PreAuthorize("permitAll()")
+    // y cambiarlo más tarde, o usar un filtro simple en el Service.
     public ResponseEntity<List<PedidoResponseDTO>> obtenerPedidosPorCliente(@PathVariable Integer usuIdCliente) {
         List<PedidoResponseDTO> pedidos = pedidoService.obtenerPedidosPorCliente(usuIdCliente);
         return ResponseEntity.ok(pedidos);
@@ -233,12 +233,27 @@ public class PedidoController {
     @GetMapping("/empleado/{usuIdEmpleado}")
     @Operation(summary = "Obtener pedidos asignados a un Empleado/Diseñador",
             description = "Recupera todos los pedidos que tienen asignado al empleado con el ID especificado.")
-// 🔥 Importante: Similar a arriba, requiere seguridad para que el diseñador solo vea sus asignaciones.
+    // 🔥 Importante: Similar a arriba, requiere seguridad para que el diseñador solo vea sus asignaciones.
     public ResponseEntity<List<PedidoResponseDTO>> obtenerPedidosPorEmpleado(@PathVariable Integer usuIdEmpleado) {
         List<PedidoResponseDTO> pedidos = pedidoService.obtenerPedidosPorEmpleado(usuIdEmpleado);
         return ResponseEntity.ok(pedidos);
     }
 
+    @PostMapping(value = "/{id}/estado-con-foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PedidoResponseDTO> actualizarEstadoConFoto(
+            @PathVariable Integer id,
+            @RequestParam("nuevoEstadoId") Integer nuevoEstadoId,
+            @RequestParam("comentarios") String comentarios,
+            @RequestParam(value = "his_imagen", required = false) MultipartFile foto) {
+
+        // El responsableId por ahora es 2 (Pedro Paramo) como en tus otros métodos
+        Integer responsableId = 2;
+
+        PedidoResponseDTO pedido = pedidoService.actualizarEstadoConHistorialYFoto(
+                id, nuevoEstadoId, comentarios, responsableId, foto);
+
+        return ResponseEntity.ok(pedido);
+    }
 
 
 

@@ -38,7 +38,9 @@ import java.util.stream.Collectors;
 @Service
 public class PedidoService {
 
-    private static final String UPLOAD_DIR = "uploads/renders/";
+    private static final String HISTORIAL_DIR = "uploads/historial/";
+    private static final String RENDERS_DIR = "uploads/renders/";
+    private static final String PRODUCTOS_DIR = "uploads/productos/";
 
     private final PedidoRepository pedidoRepository;
     private final UsuarioRepository usuarioRepository;
@@ -68,31 +70,38 @@ public class PedidoService {
         this.sesionAnonimaRepository = sesionAnonimaRepository;
 
         try {
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
+            // Inicializa las tres carpetas de una vez
+            Files.createDirectories(Paths.get(HISTORIAL_DIR));
+            Files.createDirectories(Paths.get(RENDERS_DIR));
+            Files.createDirectories(Paths.get(PRODUCTOS_DIR));
         } catch (IOException e) {
-            throw new RuntimeException("Error al inicializar el directorio de carga.", e);
+            throw new RuntimeException("No se pudieron inicializar las carpetas de almacenamiento", e);
         }
+
     }
 
-    private String guardarArchivo(MultipartFile file) throws IOException {
+    private String guardarArchivo(MultipartFile file, String carpetaDestino) throws IOException {
+        if (file == null || file.isEmpty()) return null;
+
         String originalFilename = file.getOriginalFilename();
         String extension = "";
-        if (originalFilename != null) {
-            int dotIndex = originalFilename.lastIndexOf('.');
-            if (dotIndex > 0) {
-                extension = originalFilename.substring(dotIndex);
-            }
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
 
+        // Generamos un nombre único para evitar que fotos con el mismo nombre se sobreescriban
         String newFilename = UUID.randomUUID().toString() + extension;
-        Path filePath = Paths.get(UPLOAD_DIR, newFilename);
+        Path filePath = Paths.get(carpetaDestino, newFilename);
+
+        // SEGURIDAD: Si la carpeta (historial, renders o productos) no existe, la crea automáticamente
+        if (!Files.exists(filePath.getParent())) {
+            Files.createDirectories(filePath.getParent());
+        }
 
         Files.copy(file.getInputStream(), filePath);
 
-        return UPLOAD_DIR + newFilename;
+        // Retornamos la ruta relativa para guardarla en la base de datos
+        return carpetaDestino + newFilename;
     }
 
 
@@ -274,7 +283,7 @@ public class PedidoService {
 
                 // 4. LÓGICA DE GUARDADO DE NUEVO RENDER (Si aplica)
                 if (render != null && !render.isEmpty()) {
-                    String rutaArchivo = guardarArchivo(render);
+                    String rutaArchivo = guardarArchivo(render, RENDERS_DIR);
                     // Asumo que la lógica para guardar el Render3D en el repositorio está aquí
                     // ...
                 }
@@ -306,6 +315,8 @@ public class PedidoService {
             }
         }).orElse(null);
     }
+
+
     @Transactional
     public boolean eliminarPedido(Integer id) {
         if (pedidoRepository.existsById(id)) {
@@ -584,8 +595,35 @@ public class PedidoService {
         }).collect(Collectors.toList());
     }
 
+    @Transactional
+    public PedidoResponseDTO actualizarEstadoConHistorialYFoto(
+            Integer pedidoId,
+            Integer nuevoEstadoId,
+            String comentarios,
+            Integer responsableId,
+            MultipartFile foto) {
 
+        // 1. Reutilizar tu lógica de actualización de estado
+        PedidoResponseDTO dto = actualizarEstadoConHistorial(pedidoId, nuevoEstadoId, comentarios, responsableId);
 
+        // 2. Si hay foto, guardarla y actualizar el último registro de historial creado
+        if (foto != null && !foto.isEmpty()) {
+            try {
+                String rutaFoto = guardarArchivo(foto, HISTORIAL_DIR);
 
+                // Buscamos el último historial insertado para este pedido
+                List<HistorialEstadoPedido> historialList = historialRepository.findHistorialConDetalles(pedidoId);
+                if (!historialList.isEmpty()) {
+                    HistorialEstadoPedido ultimoHito = historialList.get(0); // El Repo ordena DESC
+                    ultimoHito.setHisImagen(rutaFoto);
+                    historialRepository.save(ultimoHito);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Error al procesar la imagen de evidencia: " + e.getMessage());
+            }
+        }
+
+        return obtenerPedidoPorId(pedidoId);
+    }
 
 }
