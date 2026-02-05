@@ -15,8 +15,8 @@ public class Render3d {
     @Column(name = "ren_imagen", nullable = false, length = 100)
     private String renImagen;
 
-    @Column(name = "ren_fecha_aprobacion")
-    private LocalDate renFechaAprobacion;
+    @Column(name = "ren_fecha_dimension") // Cambiamos el nombre físico de la columna en la DB
+    private LocalDate renFechaDimension;
 
     @ManyToOne
     @JoinColumn(name = "ped_id")
@@ -26,9 +26,9 @@ public class Render3d {
     public Render3d() {
     }
 
-    public Render3d(String renImagen, LocalDate renFechaAprobacion, Pedido pedido) {
+    public Render3d(String renImagen, LocalDate renFechaDimension, Pedido pedido) {
         this.renImagen = renImagen;
-        this.renFechaAprobacion = renFechaAprobacion;
+        this.renFechaDimension = renFechaDimension;
         this.pedido = pedido;
     }
 
@@ -49,13 +49,8 @@ public class Render3d {
         this.renImagen = renImagen;
     }
 
-    public LocalDate getRenFechaAprobacion() {
-        return renFechaAprobacion;
-    }
-
-    public void setRenFechaAprobacion(LocalDate renFechaAprobacion) {
-        this.renFechaAprobacion = renFechaAprobacion;
-    }
+    public LocalDate getRenFechaDimension() { return renFechaDimension; }
+    public void setRenFechaDimension(LocalDate renFechaDimension) { this.renFechaDimension = renFechaDimension; }
 
     public Pedido getPedido() {
         return pedido;

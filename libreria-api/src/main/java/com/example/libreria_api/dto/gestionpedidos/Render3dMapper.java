@@ -9,7 +9,7 @@ public class Render3dMapper {
         Render3dResponseDTO dto = new Render3dResponseDTO();
         dto.setRen_id(render.getRen_id());
         dto.setRenImagen(render.getRenImagen());
-        dto.setRenFechaAprobacion(render.getRenFechaAprobacion());
+        dto.setRenFechaAprobacion(render.getRenFechaDimension());
 
          if (render.getPedido() != null) {
             dto.setPed_id(render.getPedido().getPed_id());
@@ -20,7 +20,7 @@ public class Render3dMapper {
     public static Render3d toEntity(Render3dRequestDTO requestDTO) {
         Render3d render = new Render3d();
         render.setRenImagen(requestDTO.getRenImagen());
-        render.setRenFechaAprobacion(requestDTO.getRenFechaAprobacion());
+        render.setRenFechaDimension(requestDTO.getRenFechaAprobacion());
         return render;
     }
 }

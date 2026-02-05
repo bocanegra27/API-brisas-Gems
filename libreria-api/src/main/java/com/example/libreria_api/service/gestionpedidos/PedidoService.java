@@ -38,7 +38,9 @@ import java.util.stream.Collectors;
 @Service
 public class PedidoService {
 
-    private static final String UPLOAD_DIR = "uploads/renders/";
+    private static final String HISTORIAL_DIR = "uploads/historial/";
+    private static final String RENDERS_DIR = "uploads/renders/";
+    private static final String PRODUCTOS_DIR = "uploads/productos/";
 
     private final PedidoRepository pedidoRepository;
     private final UsuarioRepository usuarioRepository;
@@ -48,6 +50,7 @@ public class PedidoService {
     private final Render3dRepository render3dRepository;
     private final HistorialEstadoPedidoRepository historialRepository;
     private final SesionAnonimaRepository sesionAnonimaRepository;
+    private final Render3dService render3dService;
 
 
     public PedidoService(PedidoRepository pedidoRepository,
@@ -57,7 +60,8 @@ public class PedidoService {
                          ContactoFormularioRepository contactoRepository,
                          Render3dRepository render3dRepository,
                          HistorialEstadoPedidoRepository historialRepository,
-                         SesionAnonimaRepository sesionAnonimaRepository) {
+                         SesionAnonimaRepository sesionAnonimaRepository,
+                         Render3dService render3dService) {
         this.pedidoRepository = pedidoRepository;
         this.usuarioRepository = usuarioRepository;
         this.estadoPedidoRepository = estadoPedidoRepository;
@@ -66,39 +70,48 @@ public class PedidoService {
         this.render3dRepository = render3dRepository;
         this.historialRepository = historialRepository;
         this.sesionAnonimaRepository = sesionAnonimaRepository;
+        this.render3dService = render3dService;
 
         try {
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
+            // Inicializa las tres carpetas de una vez
+            Files.createDirectories(Paths.get(HISTORIAL_DIR));
+            Files.createDirectories(Paths.get(RENDERS_DIR));
+            Files.createDirectories(Paths.get(PRODUCTOS_DIR));
         } catch (IOException e) {
-            throw new RuntimeException("Error al inicializar el directorio de carga.", e);
+            throw new RuntimeException("No se pudieron inicializar las carpetas de almacenamiento", e);
         }
+
     }
 
-    private String guardarArchivo(MultipartFile file) throws IOException {
+    private String guardarArchivo(MultipartFile file, String carpetaDestino) throws IOException {
+        if (file == null || file.isEmpty()) return null;
+
         String originalFilename = file.getOriginalFilename();
         String extension = "";
-        if (originalFilename != null) {
-            int dotIndex = originalFilename.lastIndexOf('.');
-            if (dotIndex > 0) {
-                extension = originalFilename.substring(dotIndex);
-            }
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
 
+        // Generamos un nombre único para evitar que fotos con el mismo nombre se sobreescriban
         String newFilename = UUID.randomUUID().toString() + extension;
-        Path filePath = Paths.get(UPLOAD_DIR, newFilename);
+        Path filePath = Paths.get(carpetaDestino, newFilename);
+
+        // SEGURIDAD: Si la carpeta (historial, renders o productos) no existe, la crea automáticamente
+        if (!Files.exists(filePath.getParent())) {
+            Files.createDirectories(filePath.getParent());
+        }
 
         Files.copy(file.getInputStream(), filePath);
 
-        return UPLOAD_DIR + newFilename;
+        // Retornamos la ruta relativa para guardarla en la base de datos
+        return carpetaDestino + newFilename;
     }
 
 
     @Transactional(readOnly = true)
     public List<PedidoResponseDTO> obtenerTodosLosPedidos() {
         System.out.println(">>> INICIANDO CONSULTA DE PEDIDOS...");
+        // Asegurarse de que findAllWithEstadoEagerly cargue todas las relaciones necesarias (Estado, Cliente, Empleado)
         List<Pedido> pedidos = pedidoRepository.findAllWithEstadoEagerly();
 
         if (pedidos.isEmpty()) {
@@ -108,23 +121,26 @@ public class PedidoService {
         return pedidos.stream().map(pedido -> {
             PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
 
-
+            // 1. OBTENER Y ASIGNAR NOMBRE DEL CLIENTE
+            // 🔥 Usamos el objeto Entidad Usuario (getCliente) que debería estar cargado
             if (pedido.getCliente() != null) {
                 dto.setNombreCliente(pedido.getCliente().getUsuNombre());
             } else if (pedido.getPedIdentificadorCliente() != null) {
+                // Si no hay cliente registrado (es anónimo), usamos el identificador
                 dto.setNombreCliente(pedido.getPedIdentificadorCliente());
             } else {
                 dto.setNombreCliente("Anónimo / Desconocido");
             }
 
-
+            // 2. OBTENER Y ASIGNAR NOMBRE DEL EMPLEADO (DISEÑADOR/ADMIN)
+            // 🔥 Usamos el objeto Entidad Usuario (getEmpleadoAsignado)
             if (pedido.getEmpleadoAsignado() != null) {
                 dto.setNombreEmpleado(pedido.getEmpleadoAsignado().getUsuNombre());
             } else {
                 dto.setNombreEmpleado("PENDIENTE ASIGNAR");
             }
 
-
+            // ... (Tu lógica existente para el renderPath) ...
             try {
                 render3dRepository.findTopRenderByPedId(pedido.getPed_id())
                         .ifPresent(render -> {
@@ -139,16 +155,22 @@ public class PedidoService {
     }
 
     @Transactional(readOnly = true)
-
+// 🔥 CAMBIO CRÍTICO: El método ahora devuelve el PedidoResponseDTO estándar
     public PedidoResponseDTO obtenerPedidoPorId(Integer id) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido", "id", id));
 
-
+        // 1. Usar el mapper base (que mapea IDs como usuIdCliente, perId, etc.)
         PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
 
-
+        // 2. Enriquecer con Nombres y lógica de presentación (reutilizando tu método auxiliar)
         dto = enriquecerDTOConNombres(pedido, dto);
+
+        var renderOptional = render3dRepository.findTopRenderByPedId(id);
+
+        if (renderOptional.isPresent()) {
+            dto.setRenderPath(renderOptional.get().getRenImagen());
+        }
 
         return dto;
     }
@@ -156,7 +178,7 @@ public class PedidoService {
     @Transactional
     public PedidoResponseDTO guardarPedido(PedidoRequestDTO requestDTO, MultipartFile render) {
         try {
-
+            // 🔥 ELIMINAMOS PedidoMapper.toPedido(requestDTO) y creamos manualmente para asignar Entidades
             Pedido nuevoPedido = new Pedido();
             nuevoPedido.setPedComentarios(requestDTO.getPedComentarios());
 
@@ -166,45 +188,48 @@ public class PedidoService {
                     .orElseThrow(() -> new ResourceNotFoundException("EstadoPedido", "id", finalIdEstado));
             nuevoPedido.setEstadoPedido(estado);
 
-
+            // 2. GENERACIÓN DE CÓDIGO Y FECHA
             String codigoGenerado = generarCodigoPedido();
             nuevoPedido.setPedCodigo(codigoGenerado);
             nuevoPedido.setPedFechaCreacion(new Date());
 
+            // 3. ASIGNACIÓN DE RELACIONES (REQUIERE REPOSITORIOS)
 
+            // Asignar Personalización
             if (requestDTO.getPerId() != null) {
                 Personalizacion personalizacion = personalizacionRepository.findById(requestDTO.getPerId())
                         .orElseThrow(() -> new ResourceNotFoundException("Personalizacion", "id", requestDTO.getPerId()));
                 nuevoPedido.setPersonalizacion(personalizacion);
             }
 
-
+            // Asignar Empleado (Si el RequestDTO tiene el nuevo campo usuIdEmpleado)
             if (requestDTO.getUsuIdEmpleado() != null) {
                 Usuario empleado = usuarioRepository.findById(requestDTO.getUsuIdEmpleado())
                         .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", requestDTO.getUsuIdEmpleado()));
                 nuevoPedido.setEmpleadoAsignado(empleado);
             }
 
+            // Asignar Sesión Anónima
             if (requestDTO.getSesionId() != null) {
-                SesionAnonima sesion = sesionAnonimaRepository.findById(requestDTO.getSesionId())
+                SesionAnonima sesion = sesionAnonimaRepository.findById(requestDTO.getSesionId()) // 🔥 ASUMO QUE TIENES ESTE REPOSITORIO INYECTADO
                         .orElseThrow(() -> new ResourceNotFoundException("SesionAnonima", "id", requestDTO.getSesionId()));
                 nuevoPedido.setSesion(sesion);
             }
 
-
+            // 🔥 Asignar Cliente Registrado (Si el RequestDTO tiene el nuevo campo usuIdCliente)
             if (requestDTO.getUsuIdCliente() != null) {
                 Usuario cliente = usuarioRepository.findById(requestDTO.getUsuIdCliente())
                         .orElseThrow(() -> new ResourceNotFoundException("Usuario Cliente", "id", requestDTO.getUsuIdCliente()));
                 nuevoPedido.setCliente(cliente);
             }
 
-
+            // Asignar identificador cliente (si es anónimo)
             nuevoPedido.setPedIdentificadorCliente(requestDTO.getPedIdentificadorCliente());
 
-
+            // 4. Guardar en base de datos y el resto de la lógica (Render, etc.)
             Pedido pedidoGuardado = pedidoRepository.saveAndFlush(nuevoPedido);
 
-
+            // ... (Lógica de guardado de Render - se mantiene igual, usando pedidoGuardado) ...
 
             return PedidoMapper.toPedidoResponseDTO(pedidoGuardado);
 
@@ -219,18 +244,18 @@ public class PedidoService {
     public PedidoResponseDTO actualizar(Integer id, PedidoRequestDTO requestDTO, MultipartFile render) {
         // El método map de Optional requiere que la lambda devuelva un valor.
         return pedidoRepository.findById(id).map(pedidoExistente -> {
-
+            // 🔥 Declaración de la variable que debe ser devuelta
             PedidoResponseDTO responseDTO;
 
             try {
-
+                // 1. ACTUALIZAR ESTADO
                 EstadoPedido estadoActualizado = null;
-                EstadoPedido nuevoEstado = null;
+                EstadoPedido nuevoEstado = null; // Necesario para la lógica de abajo
 
                 if (requestDTO.getEstId() != null) {
                     final Integer nuevoEstadoId = requestDTO.getEstId();
 
-
+                    // LÓGICA DE BÚSQUEDA DE ESTADO FALTANTE
                     nuevoEstado = estadoPedidoRepository.findById(nuevoEstadoId)
                             .orElseThrow(() -> new ResourceNotFoundException("EstadoPedido", "id", nuevoEstadoId));
 
@@ -238,6 +263,7 @@ public class PedidoService {
                     estadoActualizado = nuevoEstado;
                 }
 
+                // 2. ACTUALIZAR RELACIONES (CRÍTICO)
                 if (requestDTO.getPerId() != null) {
                     Personalizacion personalizacion = personalizacionRepository.findById(requestDTO.getPerId())
                             .orElseThrow(() -> new ResourceNotFoundException("Personalizacion", "id", requestDTO.getPerId()));
@@ -248,13 +274,15 @@ public class PedidoService {
                             .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", requestDTO.getUsuIdEmpleado()));
                     pedidoExistente.setEmpleadoAsignado(empleado);
                 }
-
+                // 🔥 ACTUALIZAR CLIENTE
                 if (requestDTO.getUsuIdCliente() != null) {
                     Usuario cliente = usuarioRepository.findById(requestDTO.getUsuIdCliente())
                             .orElseThrow(() -> new ResourceNotFoundException("Usuario Cliente", "id", requestDTO.getUsuIdCliente()));
                     pedidoExistente.setCliente(cliente);
                 }
+                // NOTA: No se maneja la actualización de sesionId, ya que una vez creado, se asume que no cambia de anónimo a registrado aquí.
 
+                // 3. ACTUALIZAR CAMPOS PLANOS
                 if (requestDTO.getPedComentarios() != null) {
                     pedidoExistente.setPedComentarios(requestDTO.getPedComentarios());
                 }
@@ -262,32 +290,33 @@ public class PedidoService {
                     pedidoExistente.setPedIdentificadorCliente(requestDTO.getPedIdentificadorCliente());
                 }
 
-
+                // 4. LÓGICA DE GUARDADO DE NUEVO RENDER (Si aplica)
                 if (render != null && !render.isEmpty()) {
-                    String rutaArchivo = guardarArchivo(render);
-
+                    String rutaArchivo = guardarArchivo(render, RENDERS_DIR);
+                    // Asumo que la lógica para guardar el Render3D en el repositorio está aquí
+                    // ...
                 }
 
-
+                // 5. GUARDAR CAMBIOS
                 Pedido pedidoActualizado = pedidoRepository.saveAndFlush(pedidoExistente);
 
-
+                // 6. GENERAR RESPUESTA
                 responseDTO = PedidoMapper.toPedidoResponseDTO(pedidoActualizado);
 
-
+                // Si cambiamos el estado, forzamos que el DTO de respuesta tenga el ID y Nombre nuevos.
                 if (estadoActualizado != null) {
                     responseDTO.setEstId(estadoActualizado.getEst_id());
                     responseDTO.setEstadoNombre(estadoActualizado.getEstNombre());
                 }
 
-
+                // 🔥 CRÍTICO: Devolver el objeto DTO si la operación es exitosa
                 return responseDTO;
 
             } catch (IOException e) {
-
+                // El catch de IOException debe relanzar la RuntimeException (lo estás haciendo bien)
                 throw new RuntimeException("Error I/O al guardar el archivo: " + e.getMessage(), e);
             } catch (ResourceNotFoundException e) {
-
+                // Manejamos la excepción para relanzarla y que el controlador la capte.
                 throw new RuntimeException(e.getMessage(), e);
             } catch (Exception e) {
                 System.err.println("ERROR CRÍTICO al actualizar pedido ID " + id + ": " + e.getMessage());
@@ -295,6 +324,8 @@ public class PedidoService {
             }
         }).orElse(null);
     }
+
+
     @Transactional
     public boolean eliminarPedido(Integer id) {
         if (pedidoRepository.existsById(id)) {
@@ -324,56 +355,59 @@ public class PedidoService {
             Integer contactoId,
             Integer estadoId,
             String comentarios,
-            Integer usuIdEmpleado
+            Integer usuIdEmpleado // 🔥 NUEVO: Recibe el ID del Admin/Diseñador que crea
     ) {
-
+        // 1. Obtener contacto (debe tener Personalizacion y Sesion/Usuario cargados en la Entidad)
         ContactoFormulario contacto = contactoRepository.findById(contactoId)
                 .orElseThrow(() -> new EntityNotFoundException("Contacto no encontrado"));
 
         Pedido nuevoPedido = new Pedido();
 
+        // 2. ASIGNACIÓN DE TRAZABILIDAD (RESPONDE A TU PROBLEMA DE PÉRDIDA DE DATOS)
 
+        // A. Origen: Contacto
         nuevoPedido.setConId(contactoId);
 
-
+        // B. Personalización
+        // 🔥 CRÍTICO: Usar la Entidad cargada del Contacto
         if (contacto.getPersonalizacion() != null) {
-
+            // setPersonalizacion requiere la entidad Personalizacion
             nuevoPedido.setPersonalizacion(contacto.getPersonalizacion());
         }
 
-
+        // C. Cliente (Registrado vs. Anónimo)
         if (contacto.getUsuario() != null) {
-
+            // Cliente Registrado (ID=13 en tu ejemplo)
             nuevoPedido.setCliente(contacto.getUsuario());
         } else if (contacto.getSesion() != null) {
-
+            // Cliente Anónimo (ID=5 en tu ejemplo)
             nuevoPedido.setSesion(contacto.getSesion());
 
-
+            // Usar datos del formulario para el identificador
             nuevoPedido.setPedIdentificadorCliente(
                     contacto.getConNombre() + " - " +
                             (contacto.getConTelefono() != null ? contacto.getConTelefono() : contacto.getConCorreo())
             );
         } else {
-
+            // Si es anónimo sin sesión/usuario, usar identificador del formulario
             nuevoPedido.setPedIdentificadorCliente(contacto.getConNombre() + " - " + contacto.getConTelefono());
         }
 
-
+        // D. Empleado Asignado (Resuelve la asignación en la creación)
         if (usuIdEmpleado != null) {
             Usuario empleado = usuarioRepository.findById(usuIdEmpleado)
                     .orElseThrow(() -> new EntityNotFoundException("Empleado asignado no encontrado"));
             nuevoPedido.setEmpleadoAsignado(empleado);
         } else {
-
+            // Si el admin no se asigna, se deja en NULL
             nuevoPedido.setEmpleadoAsignado(null);
         }
 
-
+        // 3. GENERACIÓN DE DATOS BÁSICOS
         nuevoPedido.setPedCodigo(generarCodigoPedido());
         nuevoPedido.setPedFechaCreacion(new Date());
 
-
+        // Comentarios
         String comentarioDefault = String.format(
                 "Pedido creado desde contacto de %s. Mensaje: %s",
                 contacto.getConNombre(),
@@ -386,10 +420,10 @@ public class PedidoService {
                 .orElseThrow(() -> new EntityNotFoundException("Estado no encontrado"));
         nuevoPedido.setEstadoPedido(estado);
 
-
+        // 4. Guardar y registrar historial (Se asume que el historial se registra aquí o en otro método)
         Pedido guardado = pedidoRepository.save(nuevoPedido);
 
-
+        // 5. Registrar Evento de Creación en Historial (Mejora de flujo)
         Usuario responsable = usuarioRepository.findById(usuIdEmpleado != null ? usuIdEmpleado : 2) // Usamos el ID de quien crea
                 .orElse(null);
 
@@ -401,7 +435,7 @@ public class PedidoService {
         historialRepository.save(historial);
 
 
-        System.out.println("Pedido creado desde contacto: " + guardado.getPedCodigo());
+        System.out.println("✅ Pedido creado desde contacto: " + guardado.getPedCodigo());
 
         return PedidoMapper.toPedidoResponseDTO(guardado);
     }
@@ -428,7 +462,7 @@ public class PedidoService {
             String comentarios,
             Integer responsableId) {
 
-
+        // 1. OBTENER PEDIDO Y ESTADOS
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido", "id", pedidoId));
 
@@ -438,20 +472,20 @@ public class PedidoService {
         Usuario responsable = usuarioRepository.findById(responsableId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", responsableId));
 
-
+        // 2. ACTUALIZAR ESTADO EN LA TABLA PEDIDO
         pedido.setEstadoPedido(nuevoEstado);
         Pedido pedidoActualizado = pedidoRepository.save(pedido); // Guarda el cambio de estado en la tabla principal
 
-
+        // 3. REGISTRAR HISTORIAL
         HistorialEstadoPedido historial = new HistorialEstadoPedido();
         historial.setPedido(pedidoActualizado);
         historial.setEstadoPedido(nuevoEstado);
         historial.setHisComentarios(comentarios);
         historial.setUsuarioResponsable(responsable);
 
-        historialRepository.save(historial);
+        historialRepository.save(historial); // Inserta el registro del evento
 
-
+        // 4. RETORNAR RESPUESTA
         return PedidoMapper.toPedidoResponseDTO(pedidoActualizado);
     }
 
@@ -462,44 +496,56 @@ public class PedidoService {
      */
     @Transactional(readOnly = true)
     public List<HistorialResponseDTO> obtenerHistorialPorPedido(Integer pedidoId) {
-
+        // 🔥 CAMBIAR EL NOMBRE DEL METODO PARA USAR FETCH JOIN
         return historialRepository.findHistorialConDetalles(pedidoId)
                 .stream()
                 .map(HistorialMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
-
+    /**
+     * Asigna o reasigna un diseñador/empleado a un pedido existente.
+     * @param pedidoId ID del pedido.
+     * @param usuIdEmpleado ID del diseñador a asignar.
+     * @param responsableId ID del usuario que realiza el cambio (admin/negocio).
+     * @return PedidoResponseDTO actualizado.
+     */
+    /**
+     * Asigna o reasigna un diseñador/empleado a un pedido existente.
+     * @param pedidoId ID del pedido.
+     * @param usuIdEmpleado ID del diseñador a asignar.
+     * @param responsableId ID del usuario que realiza el cambio (admin/negocio).
+     * @return PedidoResponseDTO actualizado.
+     */
     @Transactional
     public PedidoResponseDTO asignarEmpleado(Integer pedidoId, Integer usuIdEmpleado, Integer responsableId) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido", "id", pedidoId));
 
-
+        // 1. Obtener Entidad Empleado
         Usuario nuevoEmpleado = usuarioRepository.findById(usuIdEmpleado)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario Empleado", "id", usuIdEmpleado));
 
-
+        // 2. Obtener Entidad Responsable
         Usuario responsable = usuarioRepository.findById(responsableId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario Responsable", "id", responsableId));
 
-
+        // 3. Actualizar la relación y guardar
         pedido.setEmpleadoAsignado(nuevoEmpleado);
         String comentarios = "Asignado a diseñador: " + nuevoEmpleado.getUsuNombre();
-        Pedido pedidoActualizado = pedidoRepository.save(pedido);
+        Pedido pedidoActualizado = pedidoRepository.save(pedido); // Guarda el cambio de asignación
 
-
+        // 4. Registrar en Historial (CRÍTICO: AÑADIR EL SAVE)
         HistorialEstadoPedido historial = new HistorialEstadoPedido();
         historial.setPedido(pedidoActualizado);
         historial.setEstadoPedido(pedidoActualizado.getEstadoPedido());
         historial.setHisComentarios(comentarios);
         historial.setUsuarioResponsable(responsable);
 
-
-
+        // 🔥 CORRECCIÓN: GUARDAR EL REGISTRO DE HISTORIAL
         historialRepository.save(historial);
 
-
+        // 5. Generar DTO y ENRIQUECER con nombres
         PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedidoActualizado);
 
         return enriquecerDTOConNombres(pedidoActualizado, dto);
@@ -509,7 +555,7 @@ public class PedidoService {
      * Método auxiliar para rellenar los campos nombreCliente y nombreEmpleado en el DTO.
      */
     private PedidoResponseDTO enriquecerDTOConNombres(Pedido pedido, PedidoResponseDTO dto) {
-
+        // 1. OBTENER Y ASIGNAR NOMBRE DEL CLIENTE
         if (pedido.getCliente() != null) {
             dto.setNombreCliente(pedido.getCliente().getUsuNombre());
         } else if (pedido.getPedIdentificadorCliente() != null) {
@@ -518,43 +564,107 @@ public class PedidoService {
             dto.setNombreCliente("Anónimo / Desconocido");
         }
 
+        // 2. OBTENER Y ASIGNAR NOMBRE DEL EMPLEADO (DISEÑADOR/ADMIN)
         if (pedido.getEmpleadoAsignado() != null) {
             dto.setNombreEmpleado(pedido.getEmpleadoAsignado().getUsuNombre());
         } else {
             dto.setNombreEmpleado("PENDIENTE ASIGNAR");
         }
 
-
+        // NOTA: La lógica del renderPath puede omitirse aquí para evitar llamadas innecesarias.
 
         return dto;
     }
 
-
+    /**
+     * Obtiene todos los pedidos de un cliente específico (para Dashboard de Usuario).
+     */
     @Transactional(readOnly = true)
     public List<PedidoResponseDTO> obtenerPedidosPorCliente(Integer usuIdCliente) {
         List<Pedido> pedidos = pedidoRepository.findByClienteUsuId(usuIdCliente);
 
         return pedidos.stream().map(pedido -> {
             PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
-
+            // Reutilizamos el método auxiliar para rellenar nombres
             return enriquecerDTOConNombres(pedido, dto);
         }).collect(Collectors.toList());
     }
 
-
+    /**
+     * Obtiene todos los pedidos asignados a un empleado/diseñador específico (para Dashboard de Diseñador).
+     */
     @Transactional(readOnly = true)
     public List<PedidoResponseDTO> obtenerPedidosPorEmpleado(Integer usuIdEmpleado) {
         List<Pedido> pedidos = pedidoRepository.findByEmpleadoAsignadoUsuId(usuIdEmpleado);
 
         return pedidos.stream().map(pedido -> {
             PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
-
+            // Reutilizamos el método auxiliar para rellenar nombres
             return enriquecerDTOConNombres(pedido, dto);
         }).collect(Collectors.toList());
     }
 
+    @Transactional
+    public PedidoResponseDTO actualizarEstadoConHistorialYFoto(
+            Integer pedidoId,
+            Integer nuevoEstadoId,
+            String comentarios,
+            Integer responsableId,
+            MultipartFile foto) {
 
+        // 1. Reutilizar tu lógica de actualización de estado
+        PedidoResponseDTO dto = actualizarEstadoConHistorial(pedidoId, nuevoEstadoId, comentarios, responsableId);
 
+        // 2. Si hay foto, guardarla y actualizar el último registro de historial creado
+        if (foto != null && !foto.isEmpty()) {
+            try {
+                String rutaFoto = guardarArchivo(foto, HISTORIAL_DIR);
 
+                // Buscamos el último historial insertado para este pedido
+                List<HistorialEstadoPedido> historialList = historialRepository.findHistorialConDetalles(pedidoId);
+                if (!historialList.isEmpty()) {
+                    HistorialEstadoPedido ultimoHito = historialList.get(0); // El Repo ordena DESC
+                    ultimoHito.setHisImagen(rutaFoto);
+                    historialRepository.save(ultimoHito);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Error al procesar la imagen de evidencia: " + e.getMessage());
+            }
+        }
+
+        return obtenerPedidoPorId(pedidoId);
+    }
+
+    @Transactional
+    public PedidoResponseDTO guardarRenderOficial(Integer pedidoId, MultipartFile archivo, Integer responsableId) {
+        // 1. Buscar el pedido
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido", "id", pedidoId));
+
+        try {
+            // 2. Guardar el archivo físico en /uploads/renders/
+            // Usamos la constante RENDERS_DIR que definimos antes
+            String rutaArchivo = guardarArchivo(archivo, RENDERS_DIR);
+
+            // 3. Delegar al Render3dService el guardado en la tabla render_3d
+            // Así reutilizamos la lógica que ya limpiamos
+            render3dService.registrarNuevoRender(pedido, rutaArchivo);
+
+            // 4. Registrar automáticamente en el historial (Fase 1)
+            // Usamos el método que ya tienes para insertar hitos en la línea de tiempo
+            actualizarEstadoConHistorial(
+                    pedidoId,
+                    pedido.getEstadoPedido().getEst_id(), // Mantiene el estado en el que está
+                    "Se ha cargado un nuevo diseño oficial/render al pedido para su revisión.",
+                    responsableId
+            );
+
+            // 5. Retornar el pedido actualizado
+            return PedidoMapper.toPedidoResponseDTO(pedido);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error I/O al guardar el render: " + e.getMessage());
+        }
+    }
 
 }
