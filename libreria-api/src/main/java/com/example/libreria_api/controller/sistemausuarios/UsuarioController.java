@@ -96,17 +96,16 @@ public class UsuarioController {
 
     @GetMapping("/empleados")
     public ResponseEntity<List<UsuarioResponseDTO>> obtenerEmpleadosPorRoles() {
-        // Definimos los roles asignables: 2 (administrador) y 3 (diseñador).
+
         List<Integer> rolesAsignables = List.of(2, 3);
 
-        // 🔥 CORRECCIÓN: Usar la variable inyectada 'service'
+
         List<UsuarioResponseDTO> empleados = service.obtenerUsuariosPorRoles(rolesAsignables);
 
         return ResponseEntity.ok(empleados);
     }
 
-    // --- ENDPOINT CORREGIDO ---
-    // El @RequestParam ya estaba bien, pero lo hago más explícito
+
     @GetMapping("/count")
     @Operation(summary = "Contar número de usuarios",
     description = "Devuelve el conteo total de usuarios. Permite contar opcionalmente" +

@@ -12,17 +12,17 @@ public class PasswordUpdateDTO {
     @Size(min = 8)
     private String passwordNueva;
 
-    // Constructor vacío
+
     public PasswordUpdateDTO() {
     }
 
-    // Constructor completo
+
     public PasswordUpdateDTO(String passwordActual, String passwordNueva) {
         this.passwordActual = passwordActual;
         this.passwordNueva = passwordNueva;
     }
 
-    // Getters y Setters
+
     public String getPasswordActual() { return passwordActual; }
     public void setPasswordActual(String passwordActual) { this.passwordActual = passwordActual; }
 

@@ -34,7 +34,7 @@ public class HistorialEstadoPedido {
     @JoinColumn(name = "usu_id_responsable")
     private Usuario usuarioResponsable;
 
-    // Constructor vacío y Getters/Setters
+
 
     public HistorialEstadoPedido() {
         this.hisFechaCambio = new Date();

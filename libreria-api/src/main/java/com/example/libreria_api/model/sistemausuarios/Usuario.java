@@ -42,7 +42,7 @@ public class Usuario implements UserDetails {
     @Column(name = "usu_activo", nullable = false)
     private Boolean usuActivo = false;
 
-    // ===== Relaciones =====
+
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id",
@@ -55,7 +55,7 @@ public class Usuario implements UserDetails {
             foreignKey = @ForeignKey(name = "fk_usuarios_tipodoc"))
     private TipoDeDocumento tipoDocumento;
 
-    // ===== Constructores =====
+
     public Usuario() {
     }
 
@@ -73,7 +73,6 @@ public class Usuario implements UserDetails {
         this.tipoDocumento = tipoDocumento;
     }
 
-    // ===== Getters y Setters =====
     public Integer getUsuId() { return usuId; }
     public void setUsuId(Integer usuId) { this.usuId = usuId; }
 
@@ -104,11 +103,11 @@ public class Usuario implements UserDetails {
     public TipoDeDocumento getTipoDocumento() { return tipoDocumento; }
     public void setTipoDocumento(TipoDeDocumento tipoDocumento) { this.tipoDocumento = tipoDocumento; }
 
-    // ===== MÉTODOS DE USERDETAILS - CORREGIDOS =====
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // CORRECCIÓN: Agregar prefijo "ROLE_" y convertir a mayúsculas
+
         String roleName = rol.getRolNombre().toUpperCase();
         if (!roleName.startsWith("ROLE_")) {
             roleName = "ROLE_" + roleName;

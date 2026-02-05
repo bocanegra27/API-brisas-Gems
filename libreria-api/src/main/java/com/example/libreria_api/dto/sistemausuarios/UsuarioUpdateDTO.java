@@ -18,19 +18,18 @@ public class UsuarioUpdateDTO {
     @Size(max = 20)
     private String docnum;
 
-    private Integer rolId;   // opcional
+    private Integer rolId;
 
-    private Integer tipdocId; // opcional
+    private Integer tipdocId;
 
     private Boolean activo;
 
-    private String origen; // opcional
+    private String origen;
 
-    // Constructor vacío
     public UsuarioUpdateDTO() {
     }
 
-    // Constructor completo
+
     public UsuarioUpdateDTO(String nombre, String correo, String telefono, String docnum,
                             Integer rolId, Integer tipdocId, Boolean activo, String origen) {
         this.nombre = nombre;
@@ -43,7 +42,7 @@ public class UsuarioUpdateDTO {
         this.origen = origen;
     }
 
-    // Getters y Setters
+
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 

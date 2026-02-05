@@ -9,7 +9,7 @@ public class OpcionPersonalizacionCreateDTO {
     @Size(max = 100, message = "El nombre no puede exceder los 100 caracteres")
     private String nombre;
 
-    // Getters y Setters
+
     public String getNombre() {
         return nombre;
     }

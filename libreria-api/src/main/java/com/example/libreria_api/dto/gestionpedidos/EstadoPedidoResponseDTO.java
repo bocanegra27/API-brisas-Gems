@@ -6,7 +6,7 @@ public class EstadoPedidoResponseDTO {
     private String estNombre;
     private String estDescripcion;
 
-    // Constructores
+
     public EstadoPedidoResponseDTO() {
     }
 
@@ -16,7 +16,7 @@ public class EstadoPedidoResponseDTO {
         this.estDescripcion = estDescripcion;
     }
 
-    // Getters y Setters
+
     public int getEst_id() {
         return est_id;
     }

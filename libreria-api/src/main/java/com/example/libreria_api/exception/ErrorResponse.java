@@ -13,18 +13,18 @@ import java.util.Map;
  */
 @Data
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL) // No incluye campos null en el JSON
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
 
-    private String error;           // Nombre del error (ej: "Bad Request")
-    private String message;         // Mensaje descriptivo
+    private String error;
+    private String message;
     private Integer status;         // Código HTTP (400, 404, etc.)
-    private String path;            // Ruta de la petición
+    private String path;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
 
-    private Map<String, String> errors; // Para validaciones (campo → mensaje)
+    private Map<String, String> errors;
 
     public static ErrorResponse of(String error, String message, Integer status, String path) {
         return ErrorResponse.builder()

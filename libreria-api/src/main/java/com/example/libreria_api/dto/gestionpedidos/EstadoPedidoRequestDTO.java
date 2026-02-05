@@ -5,7 +5,7 @@ public class EstadoPedidoRequestDTO {
     private String estNombre;
     private String estDescripcion;
 
-    // Constructores
+
     public EstadoPedidoRequestDTO() {
     }
 
@@ -14,7 +14,7 @@ public class EstadoPedidoRequestDTO {
         this.estDescripcion = estDescripcion;
     }
 
-    // Getters y Setters
+
     public String getEstNombre() {
         return estNombre;
     }

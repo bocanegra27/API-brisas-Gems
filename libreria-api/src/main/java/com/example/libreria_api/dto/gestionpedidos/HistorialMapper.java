@@ -13,13 +13,13 @@ public class HistorialMapper {
         dto.setHisComentarios(historial.getHisComentarios());
         dto.setHisImagen(historial.getHisImagen());
 
-        // Mapear Estado
+
         if (historial.getEstadoPedido() != null) {
             dto.setEstId(historial.getEstadoPedido().getEst_id());
             dto.setEstadoNombre(historial.getEstadoPedido().getEstNombre());
         }
 
-        // Mapear Responsable
+
         if (historial.getUsuarioResponsable() != null) {
             dto.setResponsableId(historial.getUsuarioResponsable().getUsuId());
             dto.setResponsableNombre(historial.getUsuarioResponsable().getUsuNombre());

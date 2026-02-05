@@ -33,7 +33,7 @@ public class Personalizacion {
     @OrderBy("detId ASC")
     private List<DetallePersonalizacion> detalles;
 
-    // Constructores
+
     public Personalizacion() {
     }
 
@@ -41,7 +41,7 @@ public class Personalizacion {
         this.perId = perId;
     }
 
-    // Getters y Setters
+
     public Integer getPerId() {
         return perId;
     }

@@ -27,9 +27,7 @@ public class ContactoFormularioController {
         this.contactoService = contactoService;
     }
 
-    // ==============================
-    // CREAR (público)
-    // ==============================
+
     @PostMapping
     @Operation(summary = "Enviar nuevo formulario de contacto",
     description = "Permite a un usuario público registrar un nuevo" +
@@ -40,9 +38,7 @@ public class ContactoFormularioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
-    // ==============================
-    // LISTAR (admin, con filtros)
-    // ==============================
+
     @GetMapping
     @Operation(summary = "Listar y filtrar contactos",
     description = "Recupera una lista de contactos. Permite filtrar por via," +
@@ -63,9 +59,7 @@ public class ContactoFormularioController {
         return ResponseEntity.ok(contactos);
     }
 
-    // ==============================
-    // OBTENER POR ID (admin)
-    // ==============================
+
     @GetMapping("/{id}")
     @Operation(summary = "Obtener contacto por ID",
     description = "Recupera los detalles completos de un registro de contacto específico utilizando" +
@@ -75,9 +69,7 @@ public class ContactoFormularioController {
         return ResponseEntity.ok(contacto);
     }
 
-    // ==============================
-    // ACTUALIZAR (admin)
-    // ==============================
+
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar un contacto",
     description = "Modifica los detalles de un contacto existente " +
@@ -89,9 +81,7 @@ public class ContactoFormularioController {
         return ResponseEntity.ok(actualizado);
     }
 
-    // ==============================
-    // ELIMINAR (admin)
-    // ==============================
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar un contacto",
     description = "Elimina permanentemente un registro de contacto del sistema.")

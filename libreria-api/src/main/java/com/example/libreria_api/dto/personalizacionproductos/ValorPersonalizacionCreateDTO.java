@@ -16,7 +16,7 @@ public class ValorPersonalizacionCreateDTO {
     @NotNull(message = "El ID de la opción es obligatorio")
     private Integer opcId;
 
-    // Getters y Setters
+
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
