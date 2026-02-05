@@ -260,6 +260,17 @@ public class PedidoController {
             @PathVariable Integer id,
             @RequestParam("archivo") MultipartFile archivo) {
 
+        String filename = archivo.getOriginalFilename();
+        if (filename == null ||
+                (!filename.endsWith(".glb") &&
+                        !filename.endsWith(".gltf") &&
+                        !filename.endsWith(".png") &&
+                        !filename.endsWith(".jpg") &&
+                        !filename.endsWith(".jpeg"))) {
+            return ResponseEntity.badRequest()
+                    .body(null); // O un DTO con mensaje de error
+        }
+
         // ID del técnico/admin responsable (Pedro Páramo por ahora)
         Integer responsableId = 2;
 
