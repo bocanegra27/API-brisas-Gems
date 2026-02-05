@@ -50,6 +50,7 @@ public class PedidoService {
     private final Render3dRepository render3dRepository;
     private final HistorialEstadoPedidoRepository historialRepository;
     private final SesionAnonimaRepository sesionAnonimaRepository;
+    private final Render3dService render3dService;
 
 
     public PedidoService(PedidoRepository pedidoRepository,
@@ -59,7 +60,8 @@ public class PedidoService {
                          ContactoFormularioRepository contactoRepository,
                          Render3dRepository render3dRepository,
                          HistorialEstadoPedidoRepository historialRepository,
-                         SesionAnonimaRepository sesionAnonimaRepository) {
+                         SesionAnonimaRepository sesionAnonimaRepository,
+                         Render3dService render3dService) {
         this.pedidoRepository = pedidoRepository;
         this.usuarioRepository = usuarioRepository;
         this.estadoPedidoRepository = estadoPedidoRepository;
@@ -68,6 +70,7 @@ public class PedidoService {
         this.render3dRepository = render3dRepository;
         this.historialRepository = historialRepository;
         this.sesionAnonimaRepository = sesionAnonimaRepository;
+        this.render3dService = render3dService;
 
         try {
             // Inicializa las tres carpetas de una vez
@@ -162,6 +165,12 @@ public class PedidoService {
 
         // 2. Enriquecer con Nombres y lógica de presentación (reutilizando tu método auxiliar)
         dto = enriquecerDTOConNombres(pedido, dto);
+
+        var renderOptional = render3dRepository.findTopRenderByPedId(id);
+
+        if (renderOptional.isPresent()) {
+            dto.setRenderPath(renderOptional.get().getRenImagen());
+        }
 
         return dto;
     }
@@ -624,6 +633,38 @@ public class PedidoService {
         }
 
         return obtenerPedidoPorId(pedidoId);
+    }
+
+    @Transactional
+    public PedidoResponseDTO guardarRenderOficial(Integer pedidoId, MultipartFile archivo, Integer responsableId) {
+        // 1. Buscar el pedido
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido", "id", pedidoId));
+
+        try {
+            // 2. Guardar el archivo físico en /uploads/renders/
+            // Usamos la constante RENDERS_DIR que definimos antes
+            String rutaArchivo = guardarArchivo(archivo, RENDERS_DIR);
+
+            // 3. Delegar al Render3dService el guardado en la tabla render_3d
+            // Así reutilizamos la lógica que ya limpiamos
+            render3dService.registrarNuevoRender(pedido, rutaArchivo);
+
+            // 4. Registrar automáticamente en el historial (Fase 1)
+            // Usamos el método que ya tienes para insertar hitos en la línea de tiempo
+            actualizarEstadoConHistorial(
+                    pedidoId,
+                    pedido.getEstadoPedido().getEst_id(), // Mantiene el estado en el que está
+                    "Se ha cargado un nuevo diseño oficial/render al pedido para su revisión.",
+                    responsableId
+            );
+
+            // 5. Retornar el pedido actualizado
+            return PedidoMapper.toPedidoResponseDTO(pedido);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error I/O al guardar el render: " + e.getMessage());
+        }
     }
 
 }

@@ -255,6 +255,18 @@ public class PedidoController {
         return ResponseEntity.ok(pedido);
     }
 
+    @PostMapping(value = "/{id}/subir-render-oficial", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PedidoResponseDTO> subirRenderOficial(
+            @PathVariable Integer id,
+            @RequestParam("archivo") MultipartFile archivo) {
+
+        // ID del técnico/admin responsable (Pedro Páramo por ahora)
+        Integer responsableId = 2;
+
+        PedidoResponseDTO pedido = pedidoService.guardarRenderOficial(id, archivo, responsableId);
+        return ResponseEntity.ok(pedido);
+    }
+
 
 
 
