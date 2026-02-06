@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
@@ -97,6 +98,7 @@ public class PedidoController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar un pedido",
     description = "Elimina permanentemente un pedido del sistema.")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<Void> eliminarPedido(@PathVariable Integer id) {
         if (pedidoService.eliminarPedido(id)) {
             return ResponseEntity.noContent().build();
@@ -126,6 +128,7 @@ public class PedidoController {
 // CREAR PEDIDO DESDE CONTACTO
 // ==============================
     @PostMapping("/desde-contacto/{contactoId}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DISEÑADOR')")
     @Operation(summary = "Crear pedido a partir de un contacto",
     description = "Genera un nuevo pedido automáticamente utilizando la información " +
             "de un contacto existente. Permite definir el estado y comentarios iniciales.")
@@ -148,6 +151,7 @@ public class PedidoController {
     // CAMBIAR ESTADO (CON HISTORIAL)
     // ==============================
     @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DISEÑADOR')")
     public ResponseEntity<PedidoResponseDTO> cambiarEstado(
             @PathVariable Integer id,
             @RequestBody Map<String, Object> payload) { // Usamos Map para JSON simple
@@ -195,6 +199,7 @@ public class PedidoController {
     }
 
     @PatchMapping("/{id}/asignar")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DISEÑADOR')")
     public ResponseEntity<PedidoResponseDTO> asignarDisenador(
             @PathVariable Integer id,
             @RequestBody Map<String, Integer> payload) { // Recibe {usuIdEmpleado: X}
@@ -240,6 +245,7 @@ public class PedidoController {
     }
 
     @PostMapping(value = "/{id}/estado-con-foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DISEÑADOR')")
     public ResponseEntity<PedidoResponseDTO> actualizarEstadoConFoto(
             @PathVariable Integer id,
             @RequestParam("nuevoEstadoId") Integer nuevoEstadoId,
@@ -256,6 +262,7 @@ public class PedidoController {
     }
 
     @PostMapping(value = "/{id}/subir-render-oficial", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DISEÑADOR')")
     public ResponseEntity<PedidoResponseDTO> subirRenderOficial(
             @PathVariable Integer id,
             @RequestParam("archivo") MultipartFile archivo) {

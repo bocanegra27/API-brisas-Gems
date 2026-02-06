@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -43,12 +45,16 @@ public class FotoProductoFinalController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    @Operation(summary = "Crear registro de una nueva foto",
-    description = "Sube o registra una referencia a una nueva foto de producto final, asociándola a un pedido o producto.")
-    public ResponseEntity<FotoProductoFinalResponseDTO> crearFoto(@RequestBody FotoProductoFinalRequestDTO requestDTO) {
-        FotoProductoFinalResponseDTO nuevaFoto = fotoProductoFinalService.guardarFoto(requestDTO);
-        return new ResponseEntity<>(nuevaFoto, HttpStatus.CREATED);
+    @PostMapping("/subir/{pedidoId}")
+    public ResponseEntity<FotoProductoFinalResponseDTO> crearFoto(
+            @PathVariable Integer pedidoId,
+            @RequestParam("archivo") MultipartFile archivo) {
+        try {
+            FotoProductoFinalResponseDTO nuevaFoto = fotoProductoFinalService.guardarFoto(pedidoId, archivo);
+            return new ResponseEntity<>(nuevaFoto, HttpStatus.CREATED);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/{id}")
