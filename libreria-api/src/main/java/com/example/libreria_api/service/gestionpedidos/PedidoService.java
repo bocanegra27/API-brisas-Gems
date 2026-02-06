@@ -3,18 +3,12 @@ package com.example.libreria_api.service.gestionpedidos;
 import com.example.libreria_api.dto.gestionpedidos.*;
 import com.example.libreria_api.exception.ResourceNotFoundException;
 import com.example.libreria_api.model.experienciausuarios.ContactoFormulario;
-import com.example.libreria_api.model.gestionpedidos.EstadoPedido;
-import com.example.libreria_api.model.gestionpedidos.HistorialEstadoPedido;
-import com.example.libreria_api.model.gestionpedidos.Pedido;
-import com.example.libreria_api.model.gestionpedidos.Render3d;
+import com.example.libreria_api.model.gestionpedidos.*;
 import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
 import com.example.libreria_api.model.sistemausuarios.SesionAnonima;
 import com.example.libreria_api.model.sistemausuarios.Usuario;
 import com.example.libreria_api.repository.experienciausuarios.ContactoFormularioRepository;
-import com.example.libreria_api.repository.gestionpedidos.EstadoPedidoRepository;
-import com.example.libreria_api.repository.gestionpedidos.HistorialEstadoPedidoRepository;
-import com.example.libreria_api.repository.gestionpedidos.PedidoRepository;
-import com.example.libreria_api.repository.gestionpedidos.Render3dRepository;
+import com.example.libreria_api.repository.gestionpedidos.*;
 import com.example.libreria_api.repository.personalizacionproductos.PersonalizacionRepository;
 import com.example.libreria_api.repository.sistemausuarios.UsuarioRepository;
 import com.example.libreria_api.repository.sistemausuarios.SesionAnonimaRepository;
@@ -51,6 +45,7 @@ public class PedidoService {
     private final HistorialEstadoPedidoRepository historialRepository;
     private final SesionAnonimaRepository sesionAnonimaRepository;
     private final Render3dService render3dService;
+    private final FotoProductoFinalRepository fotoProductoFinalRepository;
 
 
     public PedidoService(PedidoRepository pedidoRepository,
@@ -61,7 +56,9 @@ public class PedidoService {
                          Render3dRepository render3dRepository,
                          HistorialEstadoPedidoRepository historialRepository,
                          SesionAnonimaRepository sesionAnonimaRepository,
-                         Render3dService render3dService) {
+                         Render3dService render3dService,
+                         FotoProductoFinalRepository fotoProductoFinalRepository
+    ) {
         this.pedidoRepository = pedidoRepository;
         this.usuarioRepository = usuarioRepository;
         this.estadoPedidoRepository = estadoPedidoRepository;
@@ -71,6 +68,7 @@ public class PedidoService {
         this.historialRepository = historialRepository;
         this.sesionAnonimaRepository = sesionAnonimaRepository;
         this.render3dService = render3dService;
+        this.fotoProductoFinalRepository = fotoProductoFinalRepository;
 
         try {
             // Inicializa las tres carpetas de una vez
@@ -171,6 +169,11 @@ public class PedidoService {
         if (renderOptional.isPresent()) {
             dto.setRenderPath(renderOptional.get().getRenImagen());
         }
+
+        List<FotoProductoFinal> fotos = fotoProductoFinalRepository.buscarPorPedidoId(id);
+        dto.setFotosFinales(fotos.stream()
+                .map(FotoProductoFinalMapper::toResponseDTO)
+                .collect(Collectors.toList()));
 
         return dto;
     }

@@ -1,6 +1,7 @@
 package com.example.libreria_api.dto.gestionpedidos;
 
 import java.util.Date;
+import java.util.List;
 
 public class PedidoResponseDTO {
 
@@ -11,6 +12,7 @@ public class PedidoResponseDTO {
     private Integer estId;
     private String estadoNombre;
     private String renderPath;
+    private List<FotoProductoFinalResponseDTO> fotosFinales;
     private Integer perId;
 
 
@@ -86,5 +88,15 @@ public class PedidoResponseDTO {
 
     public void setNombreEmpleado(String nombreEmpleado) {
         this.nombreEmpleado = nombreEmpleado;
+    }
+
+
+    public List<FotoProductoFinalResponseDTO> getFotosFinales() {
+        return fotosFinales;
+    }
+
+    // 3. Setter (Este es el que te falta para que deje de estar en rojo)
+    public void setFotosFinales(List<FotoProductoFinalResponseDTO> fotosFinales) {
+        this.fotosFinales = fotosFinales;
     }
 }
