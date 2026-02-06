@@ -24,15 +24,15 @@ public class UsuarioCreateDTO {
     private String docnum;
 
     @NotNull
-    private Integer rolId;   // obligatorio
+    private Integer rolId;
 
-    private Integer tipdocId; // opcional
+    private Integer tipdocId;
 
-    private String origen; // "registro", "formulario", "admin"
+    private String origen;
 
     private Boolean activo;
 
-    // Constructor vacío
+
     public UsuarioCreateDTO() {
     }
 
@@ -51,7 +51,7 @@ public class UsuarioCreateDTO {
         this.activo = activo;
     }
 
-    // Getters y Setters
+
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 

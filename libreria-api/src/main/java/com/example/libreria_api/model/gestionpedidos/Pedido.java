@@ -23,23 +23,23 @@ public class Pedido {
     @Column(name = "ped_comentarios")
     private String pedComentarios;
 
-    // Relaciones de FK (Entidades)
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "est_id")
     private EstadoPedido estadoPedido;
 
-    // 🔥 1. RELACIÓN con Personalización (antes era un Integer)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "per_id")
     private Personalizacion personalizacion;
 
-    // 🔥 2. RELACIÓN con Usuario Empleado/Diseñador (antes era un Integer)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usu_id_empleado")
     private Usuario empleadoAsignado;
 
-    // 🔥 3. NUEVO: RELACIÓN con Usuario Cliente (para trazabilidad de clientes registrados)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usu_id_cliente")
     private Usuario cliente;
@@ -48,9 +48,7 @@ public class Pedido {
     @JoinColumn(name = "ses_id")
     private SesionAnonima sesion;
 
-    // Relación de ID (IDs planos)
 
-    // El con_id es mejor dejarlo como Integer, ya que no vamos a cargar el Contacto
     @Column(name = "con_id")
     private Integer conId;
 
@@ -60,7 +58,7 @@ public class Pedido {
     public Pedido() {
     }
 
-    // 🔥 Getters y Setters ACTUALIZADOS para usar las Entidades
+
 
     public int getPed_id() { return ped_id; }
     public void setPed_id(int ped_id) { this.ped_id = ped_id; }

@@ -29,9 +29,7 @@ public class ValorPersonalizacionService {
         this.opcionRepo = opcionRepo;
     }
 
-    // ==============================
-    // LISTAR / FILTRAR
-    // ==============================
+
     @Transactional(readOnly = true)
     public List<ValorPersonalizacionResponseDTO> listar(Integer opcId, String search) {
         List<ValorPersonalizacion> entidades;
@@ -51,9 +49,7 @@ public class ValorPersonalizacionService {
                 .collect(Collectors.toList());
     }
 
-    // ==============================
-    // OBTENER POR ID
-    // ==============================
+
     @Transactional(readOnly = true)
     public ValorPersonalizacionResponseDTO obtenerPorId(Integer id) {
         ValorPersonalizacion valor = valorRepo.findById(id)
@@ -62,9 +58,7 @@ public class ValorPersonalizacionService {
         return mapToResponseDTO(valor);
     }
 
-    // ==============================
-    // CREAR
-    // ==============================
+
     @Transactional
     public ValorPersonalizacionResponseDTO crear(ValorPersonalizacionCreateDTO dto) {
         // Validar existencia de la opción
@@ -87,9 +81,6 @@ public class ValorPersonalizacionService {
         return mapToResponseDTO(guardada);
     }
 
-    // ==============================
-    // ACTUALIZAR
-    // ==============================
     @Transactional
     public ValorPersonalizacionResponseDTO actualizar(Integer id, ValorPersonalizacionUpdateDTO dto) {
         ValorPersonalizacion valor = valorRepo.findById(id)
@@ -111,9 +102,7 @@ public class ValorPersonalizacionService {
         return mapToResponseDTO(actualizada);
     }
 
-    // ==============================
-    // ELIMINAR
-    // ==============================
+
     @Transactional
     public void eliminar(Integer id) {
         ValorPersonalizacion valor = valorRepo.findById(id)
@@ -122,9 +111,7 @@ public class ValorPersonalizacionService {
         valorRepo.delete(valor);
     }
 
-    // ==============================
-    // MAPPER (Entity → DTO)
-    // ==============================
+
     private ValorPersonalizacionResponseDTO mapToResponseDTO(ValorPersonalizacion v) {
         ValorPersonalizacionResponseDTO dto = new ValorPersonalizacionResponseDTO();
         dto.setId(v.getValId());

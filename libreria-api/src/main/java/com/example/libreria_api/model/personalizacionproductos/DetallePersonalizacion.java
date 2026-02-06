@@ -12,13 +12,13 @@ public class DetallePersonalizacion {
     @Column(name = "det_id")
     private int detId;
 
-    // Relación con Personalizacion
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "per_id", referencedColumnName = "per_id", nullable = false)
     @JsonBackReference
     private Personalizacion personalizacion;
 
-    // Relación con ValorPersonalizacion
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "val_id", referencedColumnName = "val_id", nullable = false)
     private ValorPersonalizacion valorPersonalizacion;

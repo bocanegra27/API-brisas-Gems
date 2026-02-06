@@ -3,9 +3,9 @@ package com.example.libreria_api.dto.gestionpedidos;
 public class FotoProductoFinalRequestDTO {
 
     private String fotImagenFinal;
-    private Integer ped_id; // El ID del pedido para asociarlo
+    private Integer ped_id;
 
-    // Getters y Setters
+
     public String getFotImagenFinal() {
         return fotImagenFinal;
     }

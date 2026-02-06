@@ -142,7 +142,7 @@ public class PersonalizacionService {
         } else if (p.getSesion() != null) {
             dto.setSesionId(p.getSesion().getSesId());
 
-            // ✅ CAMBIO: Verificación segura del token
+
             String token = p.getSesion().getSesToken();
             if (token != null && token.length() >= 8) {
                 dto.setSesionToken(token.substring(0, 8));

@@ -21,55 +21,52 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ========== ORÍGENES PERMITIDOS ==========
-        // En desarrollo: permitir localhost en diferentes puertos
+
+
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",      // React (Create React App)
-                "http://localhost:3001",      // React (alternativo)
-                "http://localhost:4200",      // Angular
-                "http://localhost:5173",      // Vite (React/Vue)
-                "http://localhost:8081",      // Otro backend
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://localhost:4200",
+                "http://localhost:5173",
+                "http://localhost:8081",
                 "http://127.0.0.1:3000"       // localhost alternativo
         ));
 
-        // PRODUCCIÓN: Especificar el dominio real
-        // configuration.setAllowedOrigins(Arrays.asList("https://miapp.com"));
 
-        // DESARROLLO: Permitir TODOS los orígenes (NO usar en producción)
+
+
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
 
-        // ========== MÉTODOS HTTP PERMITIDOS ==========
+        //Metodos HTTP
         configuration.setAllowedMethods(Arrays.asList(
-                "GET",      // Leer recursos
-                "POST",     // Crear recursos
-                "PUT",      // Actualizar recursos completos
-                "PATCH",    // Actualizar recursos parciales
-                "DELETE",   // Eliminar recursos
-                "OPTIONS"   // Peticiones preflight
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
         ));
 
         // ========== HEADERS PERMITIDOS ==========
         configuration.setAllowedHeaders(Arrays.asList(
-                "Authorization",    // Para JWT
-                "Content-Type",     // Para JSON
-                "Accept",           // Tipo de respuesta aceptada
+                "Authorization",
+                "Content-Type",
+                "Accept",
                 "X-Requested-With", // Para AJAX
-                "Cache-Control"     // Control de caché
+                "Cache-Control"
         ));
 
-        // ========== HEADERS EXPUESTOS ==========
-        // Headers que el frontend puede leer en la respuesta
+
         configuration.setExposedHeaders(Arrays.asList(
                 "Authorization",
-                "Content-Disposition"  // Para descargas de archivos
+                "Content-Disposition"
         ));
 
-        // ========== CREDENCIALES ==========
+
         // Permite enviar cookies y headers de autenticación
         configuration.setAllowCredentials(true);
 
-        // ========== CACHÉ ==========
-        // Cuánto tiempo el navegador puede cachear la respuesta preflight (en segundos)
+
         configuration.setMaxAge(3600L); // 1 hora
 
         // Aplicar la configuración a todas las rutas

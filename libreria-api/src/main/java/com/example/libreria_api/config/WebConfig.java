@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Obtenemos la ruta absoluta de la carpeta uploads
+
         Path uploadDir = Paths.get("./uploads");
         String uploadPath = uploadDir.toFile().getAbsolutePath();
 
