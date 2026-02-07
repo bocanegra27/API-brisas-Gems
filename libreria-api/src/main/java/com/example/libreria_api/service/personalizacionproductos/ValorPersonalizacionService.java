@@ -148,4 +148,29 @@ public class ValorPersonalizacionService {
         }
         return dto;
     }
+
+    @Transactional
+    public String subirVista(Integer id, String tipo, MultipartFile archivo) throws java.io.IOException {
+        ValorPersonalizacion valor = valorRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Valor no encontrado"));
+
+        // Ruta base (misma lógica que ya tenías)
+        CategoriaProducto categoria = valor.getOpcionPersonalizacion().getCategoria();
+        String catSlug = categoria.getCatSlug();
+        String folderPath = "src/main/resources/static/assets/img/personalizacion/"
+                + catSlug + "/opciones/" + valor.getOpcionPersonalizacion().getOpcId() + "/";
+
+        File directory = new File(folderPath);
+        if (!directory.exists()) directory.mkdirs();
+
+        // NOMBRE INTELIGENTE: ID_tipo.extensión (Ej: 17_frontal.png)
+        // Usamos el ID del valor para que sea único
+        String extension = "png"; // Forzamos png o extraemos la original
+        String fileName = id + "_" + tipo.toLowerCase() + "." + extension;
+
+        Path path = Paths.get(folderPath + fileName);
+        Files.copy(archivo.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+        return fileName;
+    }
 }
