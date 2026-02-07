@@ -28,11 +28,13 @@ public class OpcionPersonalizacionController {
 
 
     @GetMapping
-    @Operation(summary = "Listar y buscar opciones de personalización",
-    description = "Recupera una lista de las categorías de personalización. Permite la búsqueda opcional " +
-            "por nombre o descripción")
-    public List<OpcionPersonalizacionResponseDTO> listarOpciones(@RequestParam(required = false) String search) {
-        return opcionService.listar(search);
+    @Operation(summary = "Listar y buscar opciones", description = "Filtra por texto o por categoría")
+    public List<OpcionPersonalizacionResponseDTO> listarOpciones(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer catId) { // NUEVO PARÁMETRO
+
+        // Pasamos ambos parámetros al servicio (ojo con el orden según como lo definiste en el service)
+        return opcionService.listar(search, catId);
     }
 
 

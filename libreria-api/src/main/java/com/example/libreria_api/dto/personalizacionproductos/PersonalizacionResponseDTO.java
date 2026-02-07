@@ -12,6 +12,8 @@ public class PersonalizacionResponseDTO {
     private String sesionToken;
     private String tipoCliente;
     private List<DetalleDTO> detalles;
+    private Integer catId;
+    private String catNombre;
 
     public static class DetalleDTO {
         private Integer detId;
@@ -48,4 +50,8 @@ public class PersonalizacionResponseDTO {
     public void setTipoCliente(String tipoCliente) { this.tipoCliente = tipoCliente; }
     public List<DetalleDTO> getDetalles() { return detalles; }
     public void setDetalles(List<DetalleDTO> detalles) { this.detalles = detalles; }
+    public Integer getCatId() { return catId; }
+    public void setCatId(Integer catId) { this.catId = catId; }
+    public String getCatNombre() { return catNombre; }
+    public void setCatNombre(String catNombre) { this.catNombre = catNombre; }
 }
