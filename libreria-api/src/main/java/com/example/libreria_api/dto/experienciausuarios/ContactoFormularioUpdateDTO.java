@@ -4,8 +4,8 @@ import jakarta.validation.constraints.*;
 
 public class ContactoFormularioUpdateDTO {
 
-    private Integer usuarioId;      // Cliente asociado
-    private Integer usuarioIdAdmin; // Admin que atiende
+    private Integer usuarioId;
+    private Integer usuarioIdAdmin;
 
     @Pattern(regexp = "formulario|whatsapp")
     private String via;
@@ -16,7 +16,7 @@ public class ContactoFormularioUpdateDTO {
     @Size(max = 500)
     private String notas;
 
-    // ===== Constructores =====
+
     public ContactoFormularioUpdateDTO() {}
 
     public ContactoFormularioUpdateDTO(Integer usuarioId, Integer usuarioIdAdmin, String via, String estado, String notas) {
@@ -27,7 +27,7 @@ public class ContactoFormularioUpdateDTO {
         this.notas = notas;
     }
 
-    // ===== Getters y Setters =====
+
     public Integer getUsuarioId() { return usuarioId; }
     public void setUsuarioId(Integer usuarioId) { this.usuarioId = usuarioId; }
 

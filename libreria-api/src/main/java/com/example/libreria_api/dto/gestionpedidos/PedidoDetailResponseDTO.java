@@ -15,17 +15,17 @@ public class PedidoDetailResponseDTO {
     private Integer perId;
     private Integer usuId;
 
-    // NUEVOS CAMPOS para sesiones anónimas
+
     private Integer sesionId;
     private String sesionToken;
     private Integer conId;
     private String pedIdentificadorCliente;
 
-    // Constructor vacío
+
     public PedidoDetailResponseDTO() {
     }
 
-    // Getters y Setters existentes
+
     public int getPed_id() {
         return ped_id;
     }
@@ -106,7 +106,7 @@ public class PedidoDetailResponseDTO {
         this.usuId = usuId;
     }
 
-    // NUEVOS GETTERS Y SETTERS
+
     public Integer getSesionId() {
         return sesionId;
     }

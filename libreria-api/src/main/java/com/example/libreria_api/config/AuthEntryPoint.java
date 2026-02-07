@@ -30,7 +30,7 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        // Respuesta estructurada en JSON
+
         String jsonResponse = String.format(
                 "{\"error\":\"Unauthorized\"," +
                         "\"message\":\"%s\"," +

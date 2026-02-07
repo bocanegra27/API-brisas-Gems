@@ -12,24 +12,23 @@ import java.util.List;
 
 public interface ContactoFormularioRepository extends JpaRepository<ContactoFormulario, Integer> {
 
-    // Buscar por vía (formulario o whatsapp)
+
     List<ContactoFormulario> findByConVia(ViaContacto via);
 
-    // Buscar por estado (pendiente, atendido, archivado)
+
     List<ContactoFormulario> findByConEstado(EstadoContacto estado);
 
-    // Buscar entre fechas de envío
+
     List<ContactoFormulario> findByConFechaEnvioBetween(LocalDateTime desde, LocalDateTime hasta);
 
-    // Buscar por usuario cliente asociado
+
     List<ContactoFormulario> findByUsuario_UsuId(Integer usuarioId);
 
-    // Buscar por admin que atendió
     List<ContactoFormulario> findByUsuarioAdmin_UsuId(Integer usuarioAdminId);
 
     long countByConEstado(EstadoContacto estado);
 
-    // Buscar combinando filtros: vía + fechas + usuario
+
     @Query("SELECT c FROM ContactoFormulario c " +
             "WHERE (:via IS NULL OR c.conVia = :via) " +
             "AND (:estado IS NULL OR c.conEstado = :estado) " +

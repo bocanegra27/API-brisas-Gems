@@ -67,7 +67,7 @@ public class UsuarioService {
 
     @Transactional(readOnly = true)
     public UsuarioResponseDTO obtenerPorId(Integer id) {
-        //  CAMBIO: ResourceNotFoundException
+
         Usuario u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
         return toResponse(u);
@@ -75,23 +75,22 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO crear(UsuarioCreateDTO dto) {
-        //  CAMBIO: DuplicateResourceException para email
         if (usuarioRepository.existsByUsuCorreo(dto.getCorreo())) {
             throw new DuplicateResourceException("Usuario", "correo", dto.getCorreo());
         }
 
-        //  CAMBIO: DuplicateResourceException para documento
+
         if (dto.getDocnum() != null && usuarioRepository.existsByUsuDocnum(dto.getDocnum())) {
             throw new DuplicateResourceException("Usuario", "documento", dto.getDocnum());
         }
 
-        //  CAMBIO: ResourceNotFoundException para rol
+
         Rol rol = rolRepository.findById(dto.getRolId())
                 .orElseThrow(() -> new ResourceNotFoundException("Rol", "id", dto.getRolId()));
 
         TipoDeDocumento tip = null;
         if (dto.getTipdocId() != null) {
-            //  CAMBIO: ResourceNotFoundException para tipo documento
+
             tip = tipoDocumentoRepository.findById(dto.getTipdocId())
                     .orElseThrow(() -> new ResourceNotFoundException("TipoDeDocumento", "id", dto.getTipdocId()));
         }
@@ -112,11 +111,11 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO actualizar(Integer id, UsuarioUpdateDTO dto) {
-        //  CAMBIO: ResourceNotFoundException
+
         Usuario u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
 
-        //  CAMBIO: DuplicateResourceException para correo
+
         if (dto.getCorreo() != null && !dto.getCorreo().equalsIgnoreCase(u.getUsuCorreo())) {
             if (usuarioRepository.existsByUsuCorreo(dto.getCorreo())) {
                 throw new DuplicateResourceException("Usuario", "correo", dto.getCorreo());
@@ -124,7 +123,7 @@ public class UsuarioService {
             u.setUsuCorreo(dto.getCorreo());
         }
 
-        // ✅ CAMBIO: DuplicateResourceException para documento
+
         if (dto.getDocnum() != null && !dto.getDocnum().equals(u.getUsuDocnum())) {
             if (usuarioRepository.existsByUsuDocnum(dto.getDocnum())) {
                 throw new DuplicateResourceException("Usuario", "documento", dto.getDocnum());
@@ -145,7 +144,7 @@ public class UsuarioService {
         }
 
         if (dto.getTipdocId() != null) {
-            // ✅ CAMBIO: ResourceNotFoundException
+
             TipoDeDocumento tip = tipoDocumentoRepository.findById(dto.getTipdocId())
                     .orElseThrow(() -> new ResourceNotFoundException("TipoDeDocumento", "id", dto.getTipdocId()));
             u.setTipoDocumento(tip);
@@ -161,19 +160,18 @@ public class UsuarioService {
             throw new ResourceNotFoundException("Usuario", "id", id);
         }
 
-        // CAMBIO CLAVE: Usa deleteById para eliminar el registro de la base de datos
+
         usuarioRepository.deleteById(id);
 
-        // Nota: El método deleteById no lanza ResourceNotFoundException si el ID no existe
-        // por eso es mejor comprobar antes con existsById o findById.
+
     }
     @Transactional
     public void actualizarPassword(Integer id, PasswordUpdateDTO dto) {
-        // CAMBIO: ResourceNotFoundException
+
         Usuario u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
 
-        // CAMBIO: BadRequestException para contraseña incorrecta
+
         if (!passwordEncoder.matches(dto.getPasswordActual(), u.getUsuPassword())) {
             throw new BadRequestException("La contraseña actual no es correcta");
         }
@@ -184,11 +182,11 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDTO actualizarRol(Integer id, Integer nuevoRolId) {
-        // CAMBIO: ResourceNotFoundException
+
         Usuario u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
 
-        // CAMBIO: ResourceNotFoundException para rol
+
         Rol nuevoRol = rolRepository.findById(nuevoRolId)
                 .orElseThrow(() -> new ResourceNotFoundException("Rol", "id", nuevoRolId));
 
@@ -217,24 +215,17 @@ public class UsuarioService {
         return usuarioRepository.countByUsuActivo(activo);
     }
 
-    /**
-     * Obtiene una lista de usuarios activos que tienen los roles asignables.
-     * @param rolIds Lista de IDs de roles (ej: [2, 3] para Admin y Diseñador).
-     * @return Lista de UsuarioResponseDTO de empleados activos.
-     */
+
     @Transactional(readOnly = true)
     public List<UsuarioResponseDTO> obtenerUsuariosPorRoles(List<Integer> rolIds) {
-        // 🔥 Usamos el método robusto, forzando que solo sean usuarios ACTIVOS (true)
+
         return usuarioRepository.findByRol_RolIdInAndUsuActivo(rolIds, true)
                 .stream()
                 .map(this::toResponse) // Reutiliza tu método de mapeo existente
                 .collect(java.util.stream.Collectors.toList());
     }
-    /**
-     * Crea un Usuario y marca la Sesión Anónima correspondiente como convertida.
-     * Esto dispara el Trigger de la BD que actualiza Personalizaciones y Contactos.
-     */
-    @Transactional // 🔥 Debe ser transaccional para actualizar ambas entidades
+
+    @Transactional
     public UsuarioResponseDTO crearYConvertir(UsuarioCreateDTO dto, String sesionToken) {
         // 1. Validaciones base (correo, documento)
         if (usuarioRepository.existsByUsuCorreo(dto.getCorreo())) {
@@ -265,19 +256,18 @@ public class UsuarioService {
         nuevoUsuario.setUsuTelefono(dto.getTelefono());
         nuevoUsuario.setUsuPassword(passwordEncoder.encode(dto.getPassword()));
         nuevoUsuario.setUsuDocnum(dto.getDocnum());
-        nuevoUsuario.setUsuOrigen(OrigenUsuario.registro); // 🔥 Marcar el origen como registro
-        nuevoUsuario.setUsuActivo(true); // Asumimos que el usuario registrado está activo
+        nuevoUsuario.setUsuOrigen(OrigenUsuario.registro);
+        nuevoUsuario.setUsuActivo(true);
         nuevoUsuario.setRol(rol);
         nuevoUsuario.setTipoDocumento(tip);
 
         Usuario usuarioGuardado = usuarioRepository.save(nuevoUsuario);
 
-        // 4. Actualizar Sesión Anónima (Esto dispara tu TRIGGER en la BD)
         sesion.setSesConvertido(true);
         sesion.setUsuarioConvertido(usuarioGuardado); // Vínculo con el nuevo usuario
         sesionAnonimaRepository.save(sesion);
 
-        // 5. Devolver DTO
+
         return toResponse(usuarioGuardado);
     }
 

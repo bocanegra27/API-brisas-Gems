@@ -22,15 +22,14 @@ public class OpcionPersonalizacion {
     @OrderBy("valNombre ASC")
     private List<ValorPersonalizacion> valores;
 
-    // Constructor vacío
     public OpcionPersonalizacion() {}
 
-    // Constructor útil
+
     public OpcionPersonalizacion(String opcNombre) {
         this.opcNombre = opcNombre;
     }
 
-    // Getters y Setters
+
     public int getOpcId() {
         return opcId;
     }

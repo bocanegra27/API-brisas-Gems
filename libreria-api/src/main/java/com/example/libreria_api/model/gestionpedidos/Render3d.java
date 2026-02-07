@@ -22,7 +22,7 @@ public class Render3d {
     @JoinColumn(name = "ped_id")
     private Pedido pedido;
 
-    // --- Constructores ---
+
     public Render3d() {
     }
 
@@ -32,7 +32,7 @@ public class Render3d {
         this.pedido = pedido;
     }
 
-    // --- Getters y Setters ---
+
     public int getRen_id() {
         return ren_id;
     }

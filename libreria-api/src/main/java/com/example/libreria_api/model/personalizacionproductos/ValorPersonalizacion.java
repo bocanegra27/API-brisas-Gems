@@ -19,13 +19,13 @@ public class ValorPersonalizacion {
     @Column(name = "val_imagen", length = 250)
     private String valImagen;
 
-    // Relación con opcion_personalizacion
-    @ManyToOne(fetch = FetchType.LAZY, optional = false) // Mejor poner obligatorio
-    @JoinColumn(name = "opc_id", nullable = false)       // reflejamos la FK como NOT NULL
-    @JsonBackReference  // evita bucle en JSON (opción -> valores -> opción -> ...)
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "opc_id", nullable = false)
+    @JsonBackReference
     private OpcionPersonalizacion opcionPersonalizacion;
 
-    // --- Constructores ---
+
     public ValorPersonalizacion() {
     }
 
@@ -35,7 +35,7 @@ public class ValorPersonalizacion {
         this.opcionPersonalizacion = opcionPersonalizacion;
     }
 
-    // --- Getters y Setters ---
+
     public Integer getValId() {
         return valId;
     }

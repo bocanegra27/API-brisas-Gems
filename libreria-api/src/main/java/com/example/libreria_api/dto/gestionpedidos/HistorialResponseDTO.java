@@ -9,17 +9,17 @@ public class HistorialResponseDTO {
     private String hisComentarios;
     private String hisImagen;
 
-    // Información del Estado
+
     private Integer estId;
     private String estadoNombre;
 
-    // Información del Responsable
+
     private Integer responsableId;
     private String responsableNombre;
 
     public HistorialResponseDTO() {}
 
-    // Getters
+
     public Integer getHisId() {
         return hisId;
     }
@@ -52,7 +52,7 @@ public class HistorialResponseDTO {
         return responsableNombre;
     }
 
-    // Setters
+
     public void setHisId(Integer hisId) {
         this.hisId = hisId;
     }

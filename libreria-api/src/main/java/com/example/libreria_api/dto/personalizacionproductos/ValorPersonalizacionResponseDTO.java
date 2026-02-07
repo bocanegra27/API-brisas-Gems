@@ -6,9 +6,9 @@ public class ValorPersonalizacionResponseDTO {
     private String nombre;
     private String imagen;
     private Integer opcId;
-    private String opcionNombre; // opcional, para enriquecer la respuesta
+    private String opcionNombre;
 
-    // Getters y Setters
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

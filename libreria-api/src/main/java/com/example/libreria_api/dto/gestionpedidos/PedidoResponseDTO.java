@@ -15,11 +15,11 @@ public class PedidoResponseDTO {
     private List<FotoProductoFinalResponseDTO> fotosFinales;
     private Integer perId;
 
-    // 🔥 CAMBIO CRÍTICO: Reemplazar el ambiguo 'usuId' por los campos específicos
+
     private Integer usuIdCliente;
     private Integer usuIdEmpleado;
 
-    // NUEVOS CAMPOS para sesiones anónimas (ya existían)
+
     private Integer sesionId;
     private String sesionToken;
     private Integer conId;
@@ -28,7 +28,7 @@ public class PedidoResponseDTO {
     private String nombreCliente;
     private String nombreEmpleado;
 
-    // Getters y Setters
+
     public Integer getPedId() { return pedId; }
     public void setPedId(Integer pedId) { this.pedId = pedId; }
 
@@ -53,7 +53,7 @@ public class PedidoResponseDTO {
     public Integer getPerId() { return perId; }
     public void setPerId(Integer perId) { this.perId = perId; }
 
-    // 🔥 NUEVOS GETTERS Y SETTERS ESPECÍFICOS:
+
 
     public Integer getUsuIdCliente() { return usuIdCliente; }
     public void setUsuIdCliente(Integer usuIdCliente) { this.usuIdCliente = usuIdCliente; }
@@ -61,9 +61,7 @@ public class PedidoResponseDTO {
     public Integer getUsuIdEmpleado() { return usuIdEmpleado; }
     public void setUsuIdEmpleado(Integer usuIdEmpleado) { this.usuIdEmpleado = usuIdEmpleado; }
 
-    // El antiguo getUsuId()/setUsuId() fue eliminado/reemplazado.
 
-    // Getters y Setters de Trazabilidad (Sesión, Contacto, Identificador)
     public Integer getSesionId() { return sesionId; }
     public void setSesionId(Integer sesionId) { this.sesionId = sesionId; }
 

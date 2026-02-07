@@ -20,11 +20,11 @@ public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
     @Query("SELECT p FROM Pedido p WHERE p.sesion.sesId = :sesionId")
     List<Pedido> findBySesionId(@Param("sesionId") Integer sesionId);
 
-    // Para Dashboard de Cliente
+
     @Query("SELECT p FROM Pedido p JOIN FETCH p.estadoPedido WHERE p.cliente.usuId = :usuIdCliente ORDER BY p.ped_id DESC")
     List<Pedido> findByClienteUsuId(@Param("usuIdCliente") Integer usuIdCliente);
 
-    // Para Dashboard de Empleado/Diseñador
+
     @Query("SELECT p FROM Pedido p JOIN FETCH p.estadoPedido WHERE p.empleadoAsignado.usuId = :usuIdEmpleado ORDER BY p.ped_id DESC")
     List<Pedido> findByEmpleadoAsignadoUsuId(@Param("usuIdEmpleado") Integer usuIdEmpleado);
 }

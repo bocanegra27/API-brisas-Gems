@@ -18,7 +18,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    // ✅ MEJORA: Secret key desde variables de entorno
+
     @Value("${jwt.secret}")
     private String secretKey;
 
@@ -67,7 +67,7 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey); // ✅ Ahora usa la variable inyectada
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

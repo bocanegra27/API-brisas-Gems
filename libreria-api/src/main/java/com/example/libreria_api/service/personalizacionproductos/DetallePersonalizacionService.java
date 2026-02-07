@@ -34,9 +34,7 @@ public class DetallePersonalizacionService {
         this.valorRepo = valorRepo;
     }
 
-    // ==============================
-    // CREAR
-    // ==============================
+
     @Transactional
     public DetallePersonalizacionResponseDTO crear(int perId, DetallePersonalizacionCreateDTO dto) {
         Personalizacion personalizacion = personalizacionRepo.findById(perId)
@@ -58,9 +56,7 @@ public class DetallePersonalizacionService {
         return mapToDTO(guardado);
     }
 
-    // ==============================
-    // ACTUALIZAR
-    // ==============================
+
     @Transactional
     public DetallePersonalizacionResponseDTO actualizar(int detId, DetallePersonalizacionUpdateDTO dto) {
         DetallePersonalizacion detalle = detalleRepo.findById(detId)
@@ -75,18 +71,15 @@ public class DetallePersonalizacionService {
         return mapToDTO(actualizado);
     }
 
-    // ==============================
-    // LISTAR POR PERSONALIZACION
-    // ==============================
+
+
     @Transactional(readOnly = true)
     public List<DetallePersonalizacionResponseDTO> listarPorPersonalizacion(int perId) {
         return detalleRepo.findByPersonalizacion_PerId(perId)
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
-    // ==============================
-    // OBTENER POR ID
-    // ==============================
+
     @Transactional(readOnly = true)
     public DetallePersonalizacionResponseDTO obtenerPorId(int detId) {
         DetallePersonalizacion detalle = detalleRepo.findById(detId)
@@ -94,9 +87,7 @@ public class DetallePersonalizacionService {
         return mapToDTO(detalle);
     }
 
-    // ==============================
-    // ELIMINAR
-    // ==============================
+
     @Transactional
     public void eliminar(int detId) {
         DetallePersonalizacion detalle = detalleRepo.findById(detId)
@@ -104,9 +95,7 @@ public class DetallePersonalizacionService {
         detalleRepo.delete(detalle);
     }
 
-    // ==============================
-    // MAPEO A DTO
-    // ==============================
+
     private DetallePersonalizacionResponseDTO mapToDTO(DetallePersonalizacion det) {
         DetallePersonalizacionResponseDTO dto = new DetallePersonalizacionResponseDTO();
         dto.setDetId(det.getDetId());
