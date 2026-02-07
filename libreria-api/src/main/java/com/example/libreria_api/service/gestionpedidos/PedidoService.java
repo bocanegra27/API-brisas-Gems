@@ -670,4 +670,27 @@ public class PedidoService {
         }
     }
 
+    @Transactional
+    public FotoProductoFinalResponseDTO guardarFotoProductoFinal(Integer pedidoId, MultipartFile archivo) throws IOException {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido", "id", pedidoId));
+
+        // 1. Guardar archivo físico en la carpeta de PRODUCTOS
+        String rutaArchivo = guardarArchivo(archivo, PRODUCTOS_DIR);
+
+        // 2. Guardar en la tabla específica de la Fase 3 (Galería)
+        FotoProductoFinal foto = new FotoProductoFinal();
+        foto.setFotImagenFinal(rutaArchivo);
+        foto.setFotFechaSubida(LocalDate.now());
+        foto.setPedido(pedido);
+
+        FotoProductoFinal guardada = fotoProductoFinalRepository.save(foto);
+
+        // 3. (Opcional) Registrar un hito sencillo en el historial sin la foto (para no duplicar)
+        actualizarEstadoConHistorial(pedidoId, pedido.getEstadoPedido().getEst_id(),
+                "Nueva foto del producto real añadida a la galería.", 2); // 2 = ID del admin
+
+        return FotoProductoFinalMapper.toResponseDTO(guardada);
+    }
+
 }
