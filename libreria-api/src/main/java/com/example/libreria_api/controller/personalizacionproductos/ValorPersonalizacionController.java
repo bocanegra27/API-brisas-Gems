@@ -50,19 +50,17 @@ public class ValorPersonalizacionController {
     }
 
 
-    @PostMapping
-    @Operation(summary = "Crear un nuevo valor de personalización",
-    description = "Registra un nuevo valor que podrá ser seleccionado por el cliente (ej: Metal, Plástico, Cuero).")
-    public ResponseEntity<?> crearValor(@RequestBody ValorPersonalizacionCreateDTO dto) {
+    @PostMapping(consumes = {"multipart/form-data"})
+    @Operation(summary = "Crear valor (Texto)", description = "Crea un valor. La imagen es opcional.")
+    public ResponseEntity<?> crearValor(
+            @ModelAttribute ValorPersonalizacionCreateDTO dto,
+            // CAMBIO CLAVE: required = false
+            @RequestParam(value = "archivo", required = false) org.springframework.web.multipart.MultipartFile archivo) {
         try {
-            ValorPersonalizacionResponseDTO creado = valorService.crear(dto);
+            ValorPersonalizacionResponseDTO creado = valorService.crear(dto, archivo);
             return ResponseEntity.status(HttpStatus.CREATED).body(creado);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
 

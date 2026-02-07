@@ -4,6 +4,7 @@ import com.example.libreria_api.dto.personalizacionproductos.ValorPersonalizacio
 import com.example.libreria_api.dto.personalizacionproductos.ValorPersonalizacionResponseDTO;
 import com.example.libreria_api.dto.personalizacionproductos.ValorPersonalizacionUpdateDTO;
 
+import com.example.libreria_api.model.personalizacionproductos.CategoriaProducto;
 import com.example.libreria_api.model.personalizacionproductos.OpcionPersonalizacion;
 import com.example.libreria_api.model.personalizacionproductos.ValorPersonalizacion;
 
@@ -13,7 +14,13 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,25 +67,43 @@ public class ValorPersonalizacionService {
 
 
     @Transactional
-    public ValorPersonalizacionResponseDTO crear(ValorPersonalizacionCreateDTO dto) {
-        // Validar existencia de la opción
-        OpcionPersonalizacion opcion = opcionRepo.findById(dto.getOpcId())
-                .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con id: " + dto.getOpcId()));
+    public ValorPersonalizacionResponseDTO crear(ValorPersonalizacionCreateDTO dto, MultipartFile archivo) {
+        try {
+            OpcionPersonalizacion opcion = opcionRepo.findById(dto.getOpcId())
+                    .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada"));
 
-        // Validar duplicado
-        List<ValorPersonalizacion> duplicados = valorRepo
-                .findByOpcionPersonalizacion_OpcIdAndValNombreContainingIgnoreCase(dto.getOpcId(), dto.getNombre());
-        if (!duplicados.isEmpty()) {
-            throw new DataIntegrityViolationException("Ya existe un valor con ese nombre en la misma opción");
+            ValorPersonalizacion valor = new ValorPersonalizacion();
+            valor.setValNombre(dto.getNombre());
+            valor.setOpcionPersonalizacion(opcion);
+
+            // LOGICA SIMPLIFICADA: Solo guardamos imagen si REALMENTE viene un archivo
+            if (archivo != null && !archivo.isEmpty()) {
+                CategoriaProducto categoria = opcion.getCategoria();
+                String catSlug = categoria.getCatSlug();
+
+                // ... (Lógica de crear carpetas igual que antes) ...
+                String folderPath = "src/main/resources/static/assets/img/personalizacion/"
+                        + catSlug + "/opciones/" + opcion.getOpcId() + "/";
+
+                File directory = new File(folderPath);
+                if (!directory.exists()) directory.mkdirs();
+
+                String fileName = archivo.getOriginalFilename();
+                Path path = Paths.get(folderPath + fileName);
+                Files.copy(archivo.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+                valor.setValImagen(fileName);
+            } else {
+                // SI ES TEXTO PURO (Tu caso actual)
+                valor.setValImagen(null);
+            }
+
+            ValorPersonalizacion guardada = valorRepo.save(valor);
+            return mapToResponseDTO(guardada);
+
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Error de archivo: " + e.getMessage());
         }
-
-        ValorPersonalizacion nueva = new ValorPersonalizacion();
-        nueva.setValNombre(dto.getNombre());
-        nueva.setValImagen(dto.getImagen());
-        nueva.setOpcionPersonalizacion(opcion);
-
-        ValorPersonalizacion guardada = valorRepo.save(nueva);
-        return mapToResponseDTO(guardada);
     }
 
     @Transactional
@@ -112,17 +137,15 @@ public class ValorPersonalizacionService {
     }
 
 
-    private ValorPersonalizacionResponseDTO mapToResponseDTO(ValorPersonalizacion v) {
+    private ValorPersonalizacionResponseDTO mapToResponseDTO(ValorPersonalizacion valor) {
         ValorPersonalizacionResponseDTO dto = new ValorPersonalizacionResponseDTO();
-        dto.setId(v.getValId());
-        dto.setNombre(v.getValNombre());
-        dto.setImagen(v.getValImagen());
-
-        if (v.getOpcionPersonalizacion() != null) {
-            dto.setOpcId(v.getOpcionPersonalizacion().getOpcId());
-            dto.setOpcionNombre(v.getOpcionPersonalizacion().getOpcNombre());
+        dto.setId(valor.getValId());
+        dto.setNombre(valor.getValNombre());
+        dto.setImagen(valor.getValImagen());
+        if (valor.getOpcionPersonalizacion() != null) {
+            dto.setOpcId(valor.getOpcionPersonalizacion().getOpcId());
+            dto.setOpcionNombre(valor.getOpcionPersonalizacion().getOpcNombre());
         }
-
         return dto;
     }
 }

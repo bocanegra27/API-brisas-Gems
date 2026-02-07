@@ -21,9 +21,10 @@ public class CategoriaProducto {
 
     // Relación inversa (Una categoría tiene muchas opciones)
     // Usamos JsonIgnore para que al pedir la categoría no traiga recursivamente todo el árbol infinito
-    @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<OpcionPersonalizacion> opciones;
+
 
     public CategoriaProducto() {}
 
