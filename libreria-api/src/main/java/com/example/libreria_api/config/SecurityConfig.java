@@ -54,10 +54,11 @@ public class SecurityConfig {
                         // Rutas públicas de lectura (imágenes y salud)
                         .requestMatchers("/assets/**").permitAll()
                         .requestMatchers("/static/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll() // Health Check y Info
-                        .requestMatchers("/uploads/**").permitAll() //imagenes render 3d
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
 
                         // Permite la lectura de todas las opciones/valores
+                        .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/opciones/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/valores/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/personalizaciones/**").permitAll()

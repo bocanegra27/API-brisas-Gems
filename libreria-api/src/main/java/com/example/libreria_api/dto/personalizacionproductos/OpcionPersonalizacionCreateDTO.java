@@ -9,6 +9,9 @@ public class OpcionPersonalizacionCreateDTO {
     @Size(max = 100, message = "El nombre no puede exceder los 100 caracteres")
     private String nombre;
 
+    @jakarta.validation.constraints.NotNull(message = "La categoría es obligatoria")
+    private Integer catId; //
+
 
     public String getNombre() {
         return nombre;
@@ -17,4 +20,7 @@ public class OpcionPersonalizacionCreateDTO {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
+    public Integer getCatId() { return catId; }
+    public void setCatId(Integer catId) { this.catId = catId; }
 }

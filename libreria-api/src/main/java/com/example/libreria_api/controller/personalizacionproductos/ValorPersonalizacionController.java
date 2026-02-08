@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -50,19 +51,17 @@ public class ValorPersonalizacionController {
     }
 
 
-    @PostMapping
-    @Operation(summary = "Crear un nuevo valor de personalización",
-    description = "Registra un nuevo valor que podrá ser seleccionado por el cliente (ej: Metal, Plástico, Cuero).")
-    public ResponseEntity<?> crearValor(@RequestBody ValorPersonalizacionCreateDTO dto) {
+    @PostMapping(consumes = {"multipart/form-data"})
+    @Operation(summary = "Crear valor (Texto)", description = "Crea un valor. La imagen es opcional.")
+    public ResponseEntity<?> crearValor(
+            @ModelAttribute ValorPersonalizacionCreateDTO dto,
+            // CAMBIO CLAVE: required = false
+            @RequestParam(value = "archivo", required = false) org.springframework.web.multipart.MultipartFile archivo) {
         try {
-            ValorPersonalizacionResponseDTO creado = valorService.crear(dto);
+            ValorPersonalizacionResponseDTO creado = valorService.crear(dto, archivo);
             return ResponseEntity.status(HttpStatus.CREATED).body(creado);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
 
@@ -95,4 +94,22 @@ public class ValorPersonalizacionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    @PostMapping(value = "/{id}/vistas", consumes = {"multipart/form-data"})
+    @Operation(summary = "Subir una vista específica (Frontal, Superior, Perfil)")
+    public ResponseEntity<?> subirVista(
+            @PathVariable Integer id,
+            @RequestParam("tipo") String tipo, // Ej: "frontal", "superior", "perfil"
+            @RequestParam("archivo") MultipartFile archivo) {
+        try {
+            // Delegamos al servicio (necesitarás crear este método en el service)
+            String fileName = valorService.subirVista(id, tipo, archivo);
+            return ResponseEntity.ok(java.util.Collections.singletonMap("archivo", fileName));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
+
+
+
 }

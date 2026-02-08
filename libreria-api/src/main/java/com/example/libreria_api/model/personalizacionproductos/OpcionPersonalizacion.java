@@ -1,5 +1,6 @@
 package com.example.libreria_api.model.personalizacionproductos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
@@ -21,6 +22,11 @@ public class OpcionPersonalizacion {
     @JsonManagedReference
     @OrderBy("valNombre ASC")
     private List<ValorPersonalizacion> valores;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "cat_id", nullable = false)
+    @JsonIgnore // Evita que al serializar la opción se intente serializar la categoría completa
+    private CategoriaProducto categoria;
 
     public OpcionPersonalizacion() {}
 
@@ -53,4 +59,8 @@ public class OpcionPersonalizacion {
     public void setValores(List<ValorPersonalizacion> valores) {
         this.valores = valores;
     }
+
+    public CategoriaProducto getCategoria() { return categoria; }
+
+    public void setCategoria(CategoriaProducto categoria) { this.categoria = categoria; }
 }

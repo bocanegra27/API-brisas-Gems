@@ -33,6 +33,10 @@ public class Personalizacion {
     @OrderBy("detId ASC")
     private List<DetallePersonalizacion> detalles;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cat_id", nullable = false)
+    private CategoriaProducto categoria;
+
 
     public Personalizacion() {
     }
@@ -81,6 +85,9 @@ public class Personalizacion {
     public void setDetalles(List<DetallePersonalizacion> detalles) {
         this.detalles = detalles;
     }
+
+    public CategoriaProducto getCategoria() { return categoria; }
+    public void setCategoria(CategoriaProducto categoria) { this.categoria = categoria; }
 
     // Metodo helper
     public boolean esAnonima() {

@@ -3,21 +3,18 @@ package com.example.libreria_api.service.personalizacionproductos;
 import com.example.libreria_api.dto.personalizacionproductos.PersonalizacionCreateDTO;
 import com.example.libreria_api.dto.personalizacionproductos.PersonalizacionResponseDTO;
 import com.example.libreria_api.dto.personalizacionproductos.PersonalizacionUpdateDTO;
-import com.example.libreria_api.model.personalizacionproductos.DetallePersonalizacion;
-import com.example.libreria_api.model.personalizacionproductos.OpcionPersonalizacion;
-import com.example.libreria_api.model.personalizacionproductos.Personalizacion;
-import com.example.libreria_api.model.personalizacionproductos.ValorPersonalizacion;
+import com.example.libreria_api.model.personalizacionproductos.*;
 import com.example.libreria_api.model.sistemausuarios.Usuario;
 import com.example.libreria_api.model.sistemausuarios.SesionAnonima;
+import com.example.libreria_api.repository.personalizacionproductos.CategoriaProductoRepository;
 import com.example.libreria_api.repository.personalizacionproductos.DetallePersonalizacionRepository;
 import com.example.libreria_api.repository.personalizacionproductos.PersonalizacionRepository;
 import com.example.libreria_api.repository.personalizacionproductos.ValorPersonalizacionRepository;
 import com.example.libreria_api.repository.sistemausuarios.SesionAnonimaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,21 +25,32 @@ import java.util.stream.Collectors;
 @Service
 public class PersonalizacionService {
 
-    @Autowired
-    private PersonalizacionRepository personalizacionRepository;
+    // Declaramos todos como final para asegurar inmutabilidad e inyección correcta
+    private final PersonalizacionRepository personalizacionRepository;
+    private final DetallePersonalizacionRepository detallePersonalizacionRepository;
+    private final ValorPersonalizacionRepository valorPersonalizacionRepository;
+    private final SesionAnonimaRepository sesionAnonimaRepository;
+    private final CategoriaProductoRepository categoriaRepo;
 
-    @Autowired
-    private DetallePersonalizacionRepository detallePersonalizacionRepository;
-
-    @Autowired
-    private ValorPersonalizacionRepository valorPersonalizacionRepository;
-
-    @Autowired
-    private SesionAnonimaRepository sesionAnonimaRepository;
+    // INYECCIÓN POR CONSTRUCTOR (La forma recomendada)
+    public PersonalizacionService(PersonalizacionRepository personalizacionRepository,
+                                  DetallePersonalizacionRepository detallePersonalizacionRepository,
+                                  ValorPersonalizacionRepository valorPersonalizacionRepository,
+                                  SesionAnonimaRepository sesionAnonimaRepository,
+                                  CategoriaProductoRepository categoriaRepo) {
+        this.personalizacionRepository = personalizacionRepository;
+        this.detallePersonalizacionRepository = detallePersonalizacionRepository;
+        this.valorPersonalizacionRepository = valorPersonalizacionRepository;
+        this.sesionAnonimaRepository = sesionAnonimaRepository;
+        this.categoriaRepo = categoriaRepo;
+    }
 
     @Transactional(readOnly = true)
     public List<PersonalizacionResponseDTO> filtrarPersonalizaciones(Integer clienteId, LocalDateTime desde, LocalDateTime hasta) {
+        // Nota: findAll() y luego filtrar en memoria no es lo más eficiente para millones de registros,
+        // pero para este proyecto está bien. Lo ideal sería usar Specifications o Query Methods.
         List<Personalizacion> entidades = personalizacionRepository.findAll();
+
         return entidades.stream()
                 .filter(p -> clienteId == null || (p.getUsuario() != null && p.getUsuario().getUsuId().equals(clienteId)))
                 .filter(p -> desde == null || !p.getPerFecha().isBefore(desde))
@@ -59,7 +67,7 @@ public class PersonalizacionService {
 
     @Transactional
     public PersonalizacionResponseDTO crear(PersonalizacionCreateDTO dto) {
-        // Validar que tenga usuario O sesion (no ambos, no ninguno)
+        // 1. Validaciones de Usuario vs Sesión
         if (dto.getUsuarioClienteId() != null && dto.getSesionId() != null) {
             throw new IllegalArgumentException("No puede especificar usuario y sesion simultaneamente");
         }
@@ -67,10 +75,21 @@ public class PersonalizacionService {
             throw new IllegalArgumentException("Debe especificar usuario o sesion");
         }
 
-        Personalizacion nueva = new Personalizacion();
-        nueva.setPerFecha(dto.getFecha());
+        // 2. NUEVO: Buscar la categoría (Obligatorio)
+        if (dto.getCatId() == null) {
+            throw new IllegalArgumentException("El ID de la categoría es obligatorio");
+        }
+        CategoriaProducto categoria = categoriaRepo.findById(dto.getCatId())
+                .orElseThrow(() -> new EntityNotFoundException("Categoría no encontrada con ID: " + dto.getCatId()));
 
+        // 3. Crear entidad Personalizacion
+        Personalizacion nueva = new Personalizacion();
+        nueva.setPerFecha(dto.getFecha() != null ? dto.getFecha() : LocalDateTime.now());
+        nueva.setCategoria(categoria); // <--- ASIGNAMOS LA CATEGORÍA
+
+        // 4. Asignar Usuario o Sesión
         if (dto.getUsuarioClienteId() != null) {
+            // Creamos referencia (hibernate se encarga del link si el ID existe)
             Usuario usuario = new Usuario();
             usuario.setUsuId(dto.getUsuarioClienteId());
             nueva.setUsuario(usuario);
@@ -82,8 +101,10 @@ public class PersonalizacionService {
             nueva.setSesion(sesion);
         }
 
+        // 5. Guardar la cabecera (Personalizacion)
         Personalizacion guardada = personalizacionRepository.save(nueva);
 
+        // 6. Guardar los detalles (Valores seleccionados)
         if (dto.getValoresSeleccionados() != null && !dto.getValoresSeleccionados().isEmpty()) {
             List<DetallePersonalizacion> detalles = new ArrayList<>();
 
@@ -111,11 +132,17 @@ public class PersonalizacionService {
             if (dto.getFecha() != null) {
                 p.setPerFecha(dto.getFecha());
             }
+            // Normalmente no permitimos cambiar el usuario o la categoría en un update simple,
+            // pero si necesitas cambiar usuario, aquí iría.
             if (dto.getUsuarioClienteId() != null) {
                 Usuario usuario = new Usuario();
                 usuario.setUsuId(dto.getUsuarioClienteId());
                 p.setUsuario(usuario);
             }
+
+            // Si necesitaras actualizar los valores seleccionados, tendrías que borrar los viejos
+            // y crear los nuevos aquí. Por ahora mantenemos la lógica simple.
+
             Personalizacion guardada = personalizacionRepository.save(p);
             return mapToResponseDTO(guardada);
         }).orElse(null);
@@ -130,11 +157,19 @@ public class PersonalizacionService {
         return true;
     }
 
+    // Método helper para convertir Entidad a DTO
     private PersonalizacionResponseDTO mapToResponseDTO(Personalizacion p) {
         PersonalizacionResponseDTO dto = new PersonalizacionResponseDTO();
         dto.setId(p.getPerId());
         dto.setFecha(p.getPerFecha());
 
+        // Mapear Categoría (NUEVO)
+        if (p.getCategoria() != null) {
+            dto.setCatId(p.getCategoria().getCatId());
+            dto.setCatNombre(p.getCategoria().getCatNombre());
+        }
+
+        // Mapear Usuario o Sesión
         if (p.getUsuario() != null) {
             dto.setUsuarioClienteId(p.getUsuario().getUsuId());
             dto.setUsuarioNombre(p.getUsuario().getUsuNombre());
@@ -142,22 +177,24 @@ public class PersonalizacionService {
         } else if (p.getSesion() != null) {
             dto.setSesionId(p.getSesion().getSesId());
 
-
             String token = p.getSesion().getSesToken();
             if (token != null && token.length() >= 8) {
                 dto.setSesionToken(token.substring(0, 8));
             } else if (token != null) {
                 dto.setSesionToken(token);
             }
-
             dto.setTipoCliente("anonimo");
         }
 
+        // Mapear Detalles
         if (p.getDetalles() != null && !p.getDetalles().isEmpty()) {
             List<PersonalizacionResponseDTO.DetalleDTO> detallesDTO = p.getDetalles().stream()
                     .map(detalle -> {
                         PersonalizacionResponseDTO.DetalleDTO detDTO = new PersonalizacionResponseDTO.DetalleDTO();
                         detDTO.setDetId(detalle.getDetId());
+
+                        // --- LÍNEA ELIMINADA: detDTO.setPerId(...) ---
+                        // No es necesaria y causaba el error
 
                         ValorPersonalizacion valor = detalle.getValorPersonalizacion();
                         if (valor != null) {

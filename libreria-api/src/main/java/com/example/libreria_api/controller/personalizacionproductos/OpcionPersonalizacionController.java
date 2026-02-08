@@ -28,11 +28,13 @@ public class OpcionPersonalizacionController {
 
 
     @GetMapping
-    @Operation(summary = "Listar y buscar opciones de personalización",
-    description = "Recupera una lista de las categorías de personalización. Permite la búsqueda opcional " +
-            "por nombre o descripción")
-    public List<OpcionPersonalizacionResponseDTO> listarOpciones(@RequestParam(required = false) String search) {
-        return opcionService.listar(search);
+    @Operation(summary = "Listar y buscar opciones", description = "Filtra por texto o por categoría")
+    public List<OpcionPersonalizacionResponseDTO> listarOpciones(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer catId) { // NUEVO PARÁMETRO
+
+        // Pasamos ambos parámetros al servicio (ojo con el orden según como lo definiste en el service)
+        return opcionService.listar(search, catId);
     }
 
 
@@ -80,12 +82,12 @@ public class OpcionPersonalizacionController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar una opción de personalización",
-    description = "Elimina permanentemente una opción del catálogo. " +
-            "Nota: La eliminación puede fallar si existen valores de personalización asociados.")
+            description = "Elimina permanentemente una opción del catálogo.")
     public ResponseEntity<?> eliminarOpcion(@PathVariable int id) {
         try {
             opcionService.eliminar(id);
-            return ResponseEntity.noContent().build();
+            // CORRECCIÓN: Devolvemos un JSON real para que Laravel detecte el éxito
+            return ResponseEntity.ok(java.util.Collections.singletonMap("mensaje", "Opción eliminada correctamente"));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (DataIntegrityViolationException e) {
