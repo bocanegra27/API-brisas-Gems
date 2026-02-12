@@ -14,34 +14,30 @@ public class WebConfig implements WebMvcConfigurer {
         // Detectamos la ruta donde se está ejecutando el servidor
         String projectPath = Paths.get("").toAbsolutePath().normalize().toString().replace("\\", "/");
 
-        // Determinamos la ruta del módulo para llegar a los recursos de personalización
-        String modulePath = projectPath.endsWith("libreria-api") ? projectPath : projectPath + "/libreria-api";
-
-        // Determinamos la ruta raíz (donde vive la carpeta /uploads de pedidos)
+        // Determinamos la ruta raíz (donde está la carpeta /uploads)
         String rootPath = projectPath.endsWith("libreria-api") ?
                 Paths.get(projectPath).getParent().toString().replace("\\", "/") :
                 projectPath;
 
-        // -----------------------------------------------------------
-        // 1. CONFIGURACIÓN PARA PEDIDOS (./uploads) - NO SE TOCA LA LÓGICA
-        // -----------------------------------------------------------
+        // Definimos la ruta absoluta hacia la carpeta uploads externa
         String finalUploadPath = "file:///" + rootPath + "/uploads/";
 
+        // -----------------------------------------------------------
+        // 1. CONFIGURACIÓN ÚNICA PARA /uploads
+        // -----------------------------------------------------------
+        // Esto servirá tanto para pedidos como para personalización manual
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(finalUploadPath);
 
-        System.out.println("📂 [Pedidos] Manteniendo carpeta uploads en: " + finalUploadPath);
-
+        System.out.println("📂 [Servidor] Carpeta global de archivos activa en: " + finalUploadPath);
 
         // -----------------------------------------------------------
-        // 2. CONFIGURACIÓN PARA PERSONALIZACIÓN (Internal Assets)
+        // 2. MANTENER OTROS ASSETS (Opcional)
         // -----------------------------------------------------------
-        // Apuntamos a la carpeta assets dentro del módulo real
-        String assetsPath = "file:///" + modulePath + "/src/main/resources/static/assets/";
-
+        // Si aún tienes CSS o JS internos, mantenemos esta línea,
+        // pero ya NO para las imágenes de las joyas.
+        String internalAssetsPath = "file:///" + projectPath + "/src/main/resources/static/assets/";
         registry.addResourceHandler("/assets/**")
-                .addResourceLocations(assetsPath);
-
-        System.out.println("💎 [Personalización] Assets mapeados en: " + assetsPath);
+                .addResourceLocations(internalAssetsPath);
     }
 }

@@ -106,14 +106,11 @@ public class ValorPersonalizacionController {
             @RequestParam("tipo") String tipo, // Ej: "frontal", "superior", "perfil"
             @RequestParam("archivo") MultipartFile archivo) {
         try {
-            // Delegamos al servicio (necesitarás crear este método en el service)
+            // Delegamos al servicio (necesitarás crear este méodo en el service)
             String fileName = valorService.subirVista(id, tipo, archivo);
             return ResponseEntity.ok(java.util.Collections.singletonMap("archivo", fileName));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
-
-
-
 }

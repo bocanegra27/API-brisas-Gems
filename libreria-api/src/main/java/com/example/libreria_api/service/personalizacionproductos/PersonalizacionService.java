@@ -157,54 +157,47 @@ public class PersonalizacionService {
         return true;
     }
 
-    // Método helper para convertir Entidad a DTO
+    // Métdo helper para convertir Entidad a DTO
     private PersonalizacionResponseDTO mapToResponseDTO(Personalizacion p) {
         PersonalizacionResponseDTO dto = new PersonalizacionResponseDTO();
         dto.setId(p.getPerId());
         dto.setFecha(p.getPerFecha());
 
-        // Mapear Categoría (NUEVO)
+        // 1. Mapear Categoría (CRÍTICO: Enviamos el nombre para el título del resumen)
         if (p.getCategoria() != null) {
             dto.setCatId(p.getCategoria().getCatId());
-            dto.setCatNombre(p.getCategoria().getCatNombre());
+            dto.setCatNombre(p.getCategoria().getCatNombre()); // Ej: "Anillos"
         }
 
-        // Mapear Usuario o Sesión
+        // 2. Mapear Usuario o Sesión
         if (p.getUsuario() != null) {
             dto.setUsuarioClienteId(p.getUsuario().getUsuId());
             dto.setUsuarioNombre(p.getUsuario().getUsuNombre());
             dto.setTipoCliente("registrado");
         } else if (p.getSesion() != null) {
             dto.setSesionId(p.getSesion().getSesId());
-
+            // Lógica del token...
             String token = p.getSesion().getSesToken();
-            if (token != null && token.length() >= 8) {
-                dto.setSesionToken(token.substring(0, 8));
-            } else if (token != null) {
-                dto.setSesionToken(token);
-            }
+            dto.setSesionToken((token != null && token.length() >= 8) ? token.substring(0, 8) : token);
             dto.setTipoCliente("anonimo");
         }
 
-        // Mapear Detalles
+        // 3. Mapear Detalles (Opciones y Valores)
         if (p.getDetalles() != null && !p.getDetalles().isEmpty()) {
             List<PersonalizacionResponseDTO.DetalleDTO> detallesDTO = p.getDetalles().stream()
                     .map(detalle -> {
                         PersonalizacionResponseDTO.DetalleDTO detDTO = new PersonalizacionResponseDTO.DetalleDTO();
                         detDTO.setDetId(detalle.getDetId());
 
-                        // --- LÍNEA ELIMINADA: detDTO.setPerId(...) ---
-                        // No es necesaria y causaba el error
-
                         ValorPersonalizacion valor = detalle.getValorPersonalizacion();
                         if (valor != null) {
                             detDTO.setValId(valor.getValId());
-                            detDTO.setValNombre(valor.getValNombre());
+                            detDTO.setValNombre(valor.getValNombre()); // Ej: "Oro 18k"
 
                             OpcionPersonalizacion opcion = valor.getOpcionPersonalizacion();
                             if (opcion != null) {
                                 detDTO.setOpcionId(opcion.getOpcId());
-                                detDTO.setOpcionNombre(opcion.getOpcNombre());
+                                detDTO.setOpcionNombre(opcion.getOpcNombre()); // Ej: "Material"
                             }
                         }
                         return detDTO;
