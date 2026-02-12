@@ -81,13 +81,14 @@ public class OpcionPersonalizacionController {
 
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar una opción de personalización",
-            description = "Elimina permanentemente una opción del catálogo.")
+    @Operation(summary = "Eliminar una opción de personalización", description = "Elimina permanentemente una opción y sus valores asociados.")
     public ResponseEntity<?> eliminarOpcion(@PathVariable int id) {
         try {
             opcionService.eliminar(id);
-            // CORRECCIÓN: Devolvemos un JSON real para que Laravel detecte el éxito
-            return ResponseEntity.ok(java.util.Collections.singletonMap("mensaje", "Opción eliminada correctamente"));
+
+            // Devolvemos JSON para que Laravel sepa que fue exitoso
+            return ResponseEntity.ok(java.util.Collections.singletonMap("mensaje", "Opción y sus valores eliminados correctamente"));
+
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (DataIntegrityViolationException e) {

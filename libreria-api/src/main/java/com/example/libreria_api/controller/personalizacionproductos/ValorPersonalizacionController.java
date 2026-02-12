@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -84,12 +85,15 @@ public class ValorPersonalizacionController {
 
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar un valor de personalización",
-    description = "Elimina permanentemente un valor del catálogo.")
+    @Operation(summary = "Eliminar un valor de personalización", description = "Elimina permanentemente un valor del catálogo.")
     public ResponseEntity<?> eliminarValor(@PathVariable int id) {
         try {
             valorService.eliminar(id);
-            return ResponseEntity.noContent().build();
+
+            // 🔥 CORRECCIÓN: Devolvemos un JSON real (200 OK) en lugar de vacío (204)
+            // Esto hace que Laravel detecte la respuesta como "True"
+            return ResponseEntity.ok(Collections.singletonMap("mensaje", "Valor eliminado correctamente"));
+
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
