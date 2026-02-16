@@ -119,11 +119,7 @@ public class OpcionPersonalizacionService {
         OpcionPersonalizacion opcion = opcionRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con id: " + id));
 
-        List<ValorPersonalizacion> valores = opcion.getValores();
-        if (valores != null && !valores.isEmpty()) {
-            throw new DataIntegrityViolationException("No se puede eliminar: tiene valores asociados");
-        }
-
+        // Al borrar la opción, Hibernate borrará automáticamente sus valores (cascade)
         opcionRepo.delete(opcion);
     }
 }
