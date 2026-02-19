@@ -1,12 +1,12 @@
 package com.example.libreria_api.controller.gestionpedidos;
 
-import com.example.libreria_api.dto.gestionpedidos.HistorialResponseDTO;
-import com.example.libreria_api.dto.gestionpedidos.PedidoRequestDTO;
-import com.example.libreria_api.dto.gestionpedidos.PedidoResponseDTO;
+import com.example.libreria_api.dto.gestionpedidos.*;
 import com.example.libreria_api.exception.ResourceNotFoundException;
+import com.example.libreria_api.model.gestionpedidos.Render3d;
 import com.example.libreria_api.service.gestionpedidos.PedidoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +14,21 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
+import com.example.libreria_api.model.gestionpedidos.FotoProductoFinal;
+import com.example.libreria_api.repository.gestionpedidos.FotoProductoFinalRepository;
+import com.example.libreria_api.dto.gestionpedidos.Render3dResponseDTO;
+import com.example.libreria_api.dto.gestionpedidos.FotoProductoFinalResponseDTO;
+import com.example.libreria_api.model.gestionpedidos.Render3d;
+import com.example.libreria_api.model.gestionpedidos.FotoProductoFinal;
+import com.example.libreria_api.repository.gestionpedidos.Render3dRepository;
+import com.example.libreria_api.repository.gestionpedidos.FotoProductoFinalRepository;
+import com.example.libreria_api.dto.gestionpedidos.Render3dMapper;
+import com.example.libreria_api.dto.gestionpedidos.FotoProductoFinalMapper;
+
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.Map;
@@ -236,6 +251,7 @@ public class PedidoController {
     }
 
     @GetMapping("/empleado/{usuIdEmpleado}")
+    @PreAuthorize("hasRole('DISEÑADOR')")
     @Operation(summary = "Obtener pedidos asignados a un Empleado/Diseñador",
             description = "Recupera todos los pedidos que tienen asignado al empleado con el ID especificado.")
     // 🔥 Importante: Similar a arriba, requiere seguridad para que el diseñador solo vea sus asignaciones.
@@ -283,6 +299,43 @@ public class PedidoController {
 
         PedidoResponseDTO pedido = pedidoService.guardarRenderOficial(id, archivo, responsableId);
         return ResponseEntity.ok(pedido);
+    }
+    // Inyecciones en la clase
+    @Autowired
+    private Render3dRepository render3dRepository;
+
+    @Autowired
+    private FotoProductoFinalRepository fotoProductoFinalRepository;
+
+    // Ambos endpoints
+    @GetMapping("/{id}/render3d")
+    @Operation(summary = "Obtener render 3D del pedido",
+            description = "Recupera el render oficial del pedido específico")
+    public ResponseEntity<List<Render3dResponseDTO>> obtenerRender3d(@PathVariable Integer id) {
+        try {
+            Optional<Render3d> renderOpt = render3dRepository.findTopRenderByPedId(id);
+            List<Render3dResponseDTO> dtos = renderOpt
+                    .map(render -> List.of(Render3dMapper.toResponseDTO(render)))
+                    .orElse(List.of());
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{id}/fotos-producto-final")
+    @Operation(summary = "Obtener fotos finales del producto",
+            description = "Recupera todas las fotos del producto final del pedido")
+    public ResponseEntity<List<FotoProductoFinalResponseDTO>> obtenerFotosProductoFinal(@PathVariable Integer id) {
+        try {
+            List<FotoProductoFinal> fotos = fotoProductoFinalRepository.buscarPorPedidoId(id);
+            List<FotoProductoFinalResponseDTO> dtos = fotos.stream()
+                    .map(FotoProductoFinalMapper::toResponseDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 
