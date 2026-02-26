@@ -28,13 +28,21 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     @Operation(summary = "Iniciar sesión y obtener token JWT",
-    description = "Permite a un usuario autenticarse con credenciales (usuario/email y contraseña) para recibir un " +
-            "token de acceso (JWT) que deberá usar en futuras solicitudes protegidas.")
-    public ResponseEntity<LoginResponseDTO> login(
-            @Valid @RequestBody LoginRequestDTO request
-    ) {
-        LoginResponseDTO response = authenticationService.login(request);
-        return ResponseEntity.ok(response);
+            description = "Permite a un usuario autenticarse con credenciales (usuario/email y contraseña) para recibir un " +
+                    "token de acceso (JWT) que deberá usar en futuras solicitudes protegidas.")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO request) {
+        try {
+            LoginResponseDTO response = authenticationService.login(request);
+            return ResponseEntity.ok(response);
+        } catch (org.springframework.security.authentication.BadCredentialsException e) {
+            return ResponseEntity.status(401)
+                    .body(Map.of(
+                            "error", "Unauthorized",
+                            "message", "Credenciales incorrectas",
+                            "status", 401,
+                            "path", "/api/auth/login"
+                    ));
+        }
     }
 
     @PostMapping("/forgot-password")
