@@ -39,3 +39,7 @@ src/main/resources/application.properties
 
 .gitignore3.
 
+# Ignorar renders y archivos de historial (no necesarios en el repo)
+uploads/renders/
+uploads/historial/
+uploads/productos/
