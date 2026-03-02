@@ -238,6 +238,22 @@ public class PedidoController {
         return ResponseEntity.ok(pedido);
     }
 
+    @PatchMapping("/{id}/asignar-cliente")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<PedidoResponseDTO> asignarCliente(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Integer> payload) {
+
+        Integer usuIdCliente = payload.get("usuIdCliente");
+
+        if (usuIdCliente == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        PedidoResponseDTO pedido = pedidoService.asignarCliente(id, usuIdCliente);
+        return ResponseEntity.ok(pedido);
+    }
+
     @GetMapping("/cliente/{usuIdCliente}")
     @Operation(summary = "Obtener pedidos por ID de Cliente (Dashboard de Usuario)",
             description = "Recupera todos los pedidos creados por el cliente con el ID especificado.")
