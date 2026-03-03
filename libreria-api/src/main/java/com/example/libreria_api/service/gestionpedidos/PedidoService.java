@@ -554,6 +554,32 @@ public class PedidoService {
         return enriquecerDTOConNombres(pedidoActualizado, dto);
     }
 
+    @Transactional
+    public PedidoResponseDTO asignarCliente(Integer pedidoId, Integer usuIdCliente) {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido", "id", pedidoId));
+
+        Usuario nuevoCliente = usuarioRepository.findById(usuIdCliente)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario Cliente", "id", usuIdCliente));
+
+        Usuario responsable = usuarioRepository.findById(2)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario Responsable", "id", 2));
+
+        pedido.setCliente(nuevoCliente);
+        String comentarios = "Cliente asignado: " + nuevoCliente.getUsuNombre();
+        Pedido pedidoActualizado = pedidoRepository.save(pedido);
+
+        HistorialEstadoPedido historial = new HistorialEstadoPedido();
+        historial.setPedido(pedidoActualizado);
+        historial.setEstadoPedido(pedidoActualizado.getEstadoPedido());
+        historial.setHisComentarios(comentarios);
+        historial.setUsuarioResponsable(responsable);
+        historialRepository.save(historial);
+
+        PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedidoActualizado);
+        return enriquecerDTOConNombres(pedidoActualizado, dto);
+    }
+
     /**
      * Método auxiliar para rellenar los campos nombreCliente y nombreEmpleado en el DTO.
      */

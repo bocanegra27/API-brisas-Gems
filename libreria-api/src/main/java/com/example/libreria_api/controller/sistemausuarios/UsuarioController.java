@@ -98,11 +98,16 @@ public class UsuarioController {
     public ResponseEntity<List<UsuarioResponseDTO>> obtenerEmpleadosPorRoles() {
 
         List<Integer> rolesAsignables = List.of(2, 3);
-
-
         List<UsuarioResponseDTO> empleados = service.obtenerUsuariosPorRoles(rolesAsignables);
 
         return ResponseEntity.ok(empleados);
+    }
+
+    @GetMapping("/clientes")
+    public ResponseEntity<List<UsuarioResponseDTO>> obtenerClientes() {
+        List<Integer> rolesCliente = List.of(1); // rol_id = 1 es 'usuario'
+        List<UsuarioResponseDTO> clientes = service.obtenerUsuariosPorRoles(rolesCliente);
+        return ResponseEntity.ok(clientes);
     }
 
 
