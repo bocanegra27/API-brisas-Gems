@@ -17,4 +17,6 @@ public interface OpcionPersonalizacionRepository extends JpaRepository<OpcionPer
     List<OpcionPersonalizacion> findByOpcNombreContainingIgnoreCase(String nombre);
 
     List<OpcionPersonalizacion> findByCategoria_CatId(Integer catId);
+
+    Optional<OpcionPersonalizacion> findByOpcNombreAndCategoria_CatId(String nombre, Integer catId);
 }

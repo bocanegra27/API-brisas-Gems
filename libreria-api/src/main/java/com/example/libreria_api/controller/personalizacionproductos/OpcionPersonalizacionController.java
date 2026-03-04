@@ -53,13 +53,15 @@ public class OpcionPersonalizacionController {
 
     @PostMapping
     @Operation(summary = "Crear una nueva opción de personalización",
-    description ="Registra una nueva categoría o tipo de personalización" )
+            description ="Registra una nueva categoría o tipo de personalización" )
     public ResponseEntity<?> crearOpcion(@RequestBody OpcionPersonalizacionCreateDTO dto) {
         try {
             OpcionPersonalizacionResponseDTO creada = opcionService.crear(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(creada);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            // CORRECCIÓN: Devolver como JSON
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(java.util.Collections.singletonMap("error", e.getMessage()));
         }
     }
 
