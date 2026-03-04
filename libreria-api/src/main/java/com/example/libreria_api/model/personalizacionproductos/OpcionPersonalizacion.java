@@ -14,7 +14,7 @@ public class OpcionPersonalizacion {
     @Column(name = "opc_id")
     private int opcId;
 
-    @Column(name = "opc_nombre", nullable = false, unique = true, length = 100)
+    @Column(name = "opc_nombre", nullable = false, length = 100)
     private String opcNombre;
 
     // Relación con valor_personalizacion

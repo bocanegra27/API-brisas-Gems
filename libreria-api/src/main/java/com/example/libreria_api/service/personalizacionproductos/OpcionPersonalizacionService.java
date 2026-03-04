@@ -32,9 +32,9 @@ public class OpcionPersonalizacionService {
 
     @Transactional
     public OpcionPersonalizacionResponseDTO crear(OpcionPersonalizacionCreateDTO dto) {
-        // 1. Validar nombre único
-        if (opcionRepo.findByOpcNombre(dto.getNombre()).isPresent()) {
-            throw new DataIntegrityViolationException("Ya existe una opción con ese nombre");
+        // 1. Validar nombre único PERO SOLO DENTRO DE LA MISMA CATEGORÍA
+        if (opcionRepo.findByOpcNombreAndCategoria_CatId(dto.getNombre(), dto.getCatId()).isPresent()) {
+            throw new DataIntegrityViolationException("Ya existe una opción con ese nombre para esta categoría");
         }
 
         // 2. Buscar la categoría obligatoria
@@ -44,15 +44,14 @@ public class OpcionPersonalizacionService {
         // 3. Crear y vincular
         OpcionPersonalizacion nueva = new OpcionPersonalizacion();
         nueva.setOpcNombre(dto.getNombre());
-        nueva.setCategoria(categoria); // <--- VINCULACIÓN CRÍTICA
+        nueva.setCategoria(categoria);
 
         OpcionPersonalizacion guardada = opcionRepo.save(nueva);
 
-        // 4. Retornar DTO con los 3 datos
         return new OpcionPersonalizacionResponseDTO(
                 guardada.getOpcId(),
                 guardada.getOpcNombre(),
-                guardada.getCategoria().getCatId() // <--- TERCER PARÁMETRO
+                guardada.getCategoria().getCatId()
         );
     }
 
@@ -61,14 +60,14 @@ public class OpcionPersonalizacionService {
         OpcionPersonalizacion opcion = opcionRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada con id: " + id));
 
-        // Validar nombre duplicado
-        Optional<OpcionPersonalizacion> existente = opcionRepo.findByOpcNombre(dto.getNombre());
+        // Validar nombre duplicado EN LA MISMA CATEGORÍA
+        Optional<OpcionPersonalizacion> existente = opcionRepo.findByOpcNombreAndCategoria_CatId(dto.getNombre(), opcion.getCategoria().getCatId());
+
         if (existente.isPresent() && existente.get().getOpcId() != id) {
-            throw new DataIntegrityViolationException("Ya existe otra opción con ese nombre");
+            throw new DataIntegrityViolationException("Ya existe otra opción con ese nombre en esta categoría");
         }
 
         opcion.setOpcNombre(dto.getNombre());
-        // Nota: Por ahora no actualizamos la categoría en el update, pero se podría agregar si quisieras.
 
         OpcionPersonalizacion actualizada = opcionRepo.save(opcion);
 

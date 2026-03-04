@@ -6,10 +6,12 @@ import com.example.libreria_api.service.personalizacionproductos.CategoriaProduc
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -37,9 +39,13 @@ public class CategoriaProductoController {
         try {
             CategoriaProductoResponseDTO creada = categoriaService.crear(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(creada);
+        } catch (DataIntegrityViolationException e) {
+            // CORRECCIÓN: Devolvemos un JSON estructurado para evitar que el front explote
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Collections.singletonMap("error", e.getMessage()));
         } catch (Exception e) {
-            // Captura errores como nombres duplicados
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al crear categoría: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("error", "Error interno al crear categoría: " + e.getMessage()));
         }
     }
 
