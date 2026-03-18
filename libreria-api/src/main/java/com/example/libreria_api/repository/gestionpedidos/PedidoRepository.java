@@ -27,5 +27,21 @@ public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
 
     @Query("SELECT p FROM Pedido p JOIN FETCH p.estadoPedido WHERE p.empleadoAsignado.usuId = :usuIdEmpleado ORDER BY p.ped_id DESC")
     List<Pedido> findByEmpleadoAsignadoUsuId(@Param("usuIdEmpleado") Integer usuIdEmpleado);
+
+    @Query("SELECT p FROM Pedido p " +
+            "JOIN FETCH p.estadoPedido " +
+            "LEFT JOIN FETCH p.cliente " +
+            "LEFT JOIN FETCH p.empleadoAsignado " +
+            "WHERE (:estadoId IS NULL OR p.estadoPedido.est_id = :estadoId) " +
+            "AND (:codigo IS NULL OR LOWER(p.pedCodigo) LIKE LOWER(CONCAT('%', :codigo, '%'))) " +
+            "AND (:usuIdCliente IS NULL OR p.cliente.usuId = :usuIdCliente) " +
+            "AND (:usuIdEmpleado IS NULL OR p.empleadoAsignado.usuId = :usuIdEmpleado) " +
+            "ORDER BY p.ped_id DESC")
+    List<Pedido> findAllFiltrados(
+            @Param("estadoId") Integer estadoId,
+            @Param("codigo") String codigo,
+            @Param("usuIdCliente") Integer usuIdCliente,
+            @Param("usuIdEmpleado") Integer usuIdEmpleado
+    );
 }
 
