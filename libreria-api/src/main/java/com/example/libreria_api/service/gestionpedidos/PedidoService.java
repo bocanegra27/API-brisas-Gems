@@ -719,4 +719,22 @@ public class PedidoService {
         return FotoProductoFinalMapper.toResponseDTO(guardada);
     }
 
+    @Transactional(readOnly = true)
+    public List<PedidoResponseDTO> obtenerPedidosFiltrados(
+            Integer estadoId,
+            String codigo,
+            Integer usuIdCliente,
+            Integer usuIdEmpleado) {
+
+        List<Pedido> pedidos = pedidoRepository.findAllFiltrados(estadoId, codigo, usuIdCliente, usuIdEmpleado);
+
+        if (pedidos.isEmpty()) return List.of();
+
+        return pedidos.stream().map(pedido -> {
+            PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
+            return enriquecerDTOConNombres(pedido, dto);
+
+        }).collect(Collectors.toList());
+    }
+
 }

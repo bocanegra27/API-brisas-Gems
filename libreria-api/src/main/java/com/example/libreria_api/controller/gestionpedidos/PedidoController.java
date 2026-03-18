@@ -47,9 +47,14 @@ public class PedidoController {
 
     @GetMapping
     @Operation(summary = "Obtener lista de todos los pedidos",
-    description = "Recupera una lista concisa de todos los pedidos registrados en el sistema.")
-    public ResponseEntity<List<PedidoResponseDTO>> obtenerTodosLosPedidos() {
-        List<PedidoResponseDTO> pedidos = pedidoService.obtenerTodosLosPedidos();
+            description = "Recupera pedidos con filtros opcionales por estado, codigo y cliente.")
+    public ResponseEntity<List<PedidoResponseDTO>> obtenerTodosLosPedidos(
+            @RequestParam(required = false) Integer estadoId,
+            @RequestParam(required = false) String codigo,
+            @RequestParam(required = false) Integer usuIdCliente,
+            @RequestParam(required = false) Integer usuIdEmpleado) {
+
+        List<PedidoResponseDTO> pedidos = pedidoService.obtenerPedidosFiltrados(estadoId, codigo, usuIdCliente, usuIdEmpleado);
         return ResponseEntity.ok(pedidos);
     }
 
