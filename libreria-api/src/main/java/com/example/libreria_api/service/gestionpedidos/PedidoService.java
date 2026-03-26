@@ -737,4 +737,29 @@ public class PedidoService {
         }).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<ReporteEstadoDTO> obtenerResumenPorEstado() {
+        return pedidoRepository.findResumenPorEstado();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReporteDiseñadorDTO> obtenerResumenPorDiseñador() {
+        return pedidoRepository.findResumenPorDiseñador();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PedidoResponseDTO> obtenerPedidosSinRender() {
+        List<Pedido> pedidos = pedidoRepository.findPedidosSinRender();
+        if (pedidos.isEmpty()) return List.of();
+        return pedidos.stream().map(pedido -> {
+            PedidoResponseDTO dto = PedidoMapper.toPedidoResponseDTO(pedido);
+            return enriquecerDTOConNombres(pedido, dto);
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Long obtenerContactosPendientesSinPedido() {
+        return contactoRepository.countContactosPendientesSinPedido();
+    }
+
 }

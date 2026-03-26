@@ -47,4 +47,10 @@ public interface ContactoFormularioRepository extends JpaRepository<ContactoForm
 
     @Query("SELECT c FROM ContactoFormulario c WHERE c.personalizacion.perId = :personalizacionId")
     List<ContactoFormulario> findByPersonalizacionId(@Param("personalizacionId") Integer personalizacionId);
+
+    // Reportes: contactos pendientes que no han sido convertidos a pedido
+    @Query("SELECT COUNT(c) FROM ContactoFormulario c " +
+            "WHERE c.conEstado = 'pendiente' " +
+            "AND c.conId NOT IN (SELECT p.conId FROM Pedido p WHERE p.conId IS NOT NULL)")
+    Long countContactosPendientesSinPedido();
 }
